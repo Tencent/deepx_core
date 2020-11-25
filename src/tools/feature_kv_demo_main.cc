@@ -26,10 +26,7 @@
 /************************************************************************/
 /* MockFeatureKVClientConfig */
 /************************************************************************/
-class MockFeatureKVClientConfig {
- public:
-  int SetFileIfUnset(const char* /*file*/) noexcept { return 0; }
-};
+class MockFeatureKVClientConfig {};
 
 /************************************************************************/
 /* MockFeatureKVClient */
@@ -41,17 +38,16 @@ class MockFeatureKVClient {
  public:
   MockFeatureKVClient() = default;
 
-  explicit MockFeatureKVClient(const std::vector<std::string>& keys,
-                               const std::vector<std::string>& values) {
+ public:
+  void InitMock(const std::vector<std::string>& keys,
+                const std::vector<std::string>& values) {
+    kv_map_.clear();
     for (std::size_t i = 0; i < keys.size(); ++i) {
       kv_map_.emplace(keys[i], values[i]);
     }
   }
 
  public:
-  void SetConfig(MockFeatureKVClientConfig* /*config*/,
-                 int /*timeout*/ = 0) noexcept {}
-
   int Get(uint32_t /*table_id*/, const std::string& key, std::string* value,
           uint32_t* /*version*/ = nullptr, uint32_t /*route_key*/ = 0,
           uint32_t /*cli_version*/ = 0) {
@@ -60,7 +56,7 @@ class MockFeatureKVClient {
       *value = it->second;
       return 0;
     }
-    return -1;
+    return 1;
   }
 
   int BatchGet(uint32_t /*table_id*/, const std::vector<std::string>& keys,
@@ -157,17 +153,11 @@ class MockModelContext {
 /************************************************************************/
 class FeatureKVClientContext {
  private:
-  const char* config_file_ = nullptr;
-  int timeout_ = 0;
   int default_table_id_ = 0;
   std::unique_ptr<::FeaturekvClientConfig> config_;
-  std::unique_ptr<::FeaturekvClient> client_;
+  ::FeaturekvClient client_;
 
  public:
-  void set_config_file(const char* config_file) noexcept {
-    config_file_ = config_file;
-  }
-  void set_timeout(int timeout) noexcept { timeout_ = timeout; }
   void set_default_table_id(int default_table_id) noexcept {
     default_table_id_ = default_table_id;
   }
@@ -175,11 +165,6 @@ class FeatureKVClientContext {
  public:
 #if HAVE_WXG_FEATURE_KV_CLIENT == 0
   void Init(const std::vector<int_t>& ids) {
-    DXINFO("Initializing mock feature kv config...");
-    config_.reset(new ::FeaturekvClientConfig);
-    DXCHECK_THROW(config_->SetFileIfUnset(config_file_) == 0);
-    DXINFO("Done.");
-
     MockModelContext mock;
     mock.InitGraph();
     mock.InitModel(ids);
@@ -187,41 +172,45 @@ class FeatureKVClientContext {
     mock.GetKeyValues(&keys, &values);
 
     DXINFO("Initializing mock feature kv client...");
-    client_.reset(new ::FeaturekvClient(keys, values));
-    client_->SetConfig(config_.get(), timeout_);
+    client_.InitMock(keys, values);
     DXINFO("Done.");
   }
 #else
-  void Init() {
+  void InitFromConfig(const std::string& config, int timeout = 0) {
     DXINFO("Initializing feature kv config...");
     config_.reset(new ::FeaturekvClientConfig);
-    DXCHECK_THROW(config_->SetFileIfUnset(config_file_) == 0);
+    DXCHECK_THROW(config_->SetFileIfUnset(config.c_str()) == 0);
     DXINFO("Done.");
 
-    DXINFO("Initializing feature kv client...");
-    client_.reset(new ::FeaturekvClient);
-    client_->SetConfig(config_.get(), timeout_);
+    DXINFO("Initializing feature kv client from config...");
+    client_.SetConfig(config_.get(), timeout);
+    DXINFO("Done.");
+  }
+
+  void InitFromKey(const std::string& key, int timeout = 0) {
+    DXINFO("Initializing feature kv client from key...");
+    client_ = ::FeaturekvClient::GetClient(key, timeout);
     DXINFO("Done.");
   }
 #endif
 
   bool Get(const std::string& key, std::string* value) {
-    return client_->Get((uint32_t)default_table_id_, key, value) == 0;
+    return client_.Get((uint32_t)default_table_id_, key, value) == 0;
   }
 
   bool BatchGet(const std::vector<std::string>& keys,
                 std::vector<int16_t>* codes, std::vector<std::string>* values) {
-    return client_->BatchGet((uint32_t)default_table_id_, keys, codes,
-                             values) == 0;
+    return client_.BatchGet((uint32_t)default_table_id_, keys, codes, values) ==
+           0;
   }
 
   bool Get(int table_id, const std::string& key, std::string* value) {
-    return client_->Get((uint32_t)table_id, key, value) == 0;
+    return client_.Get((uint32_t)table_id, key, value) == 0;
   }
 
   bool BatchGet(int table_id, const std::vector<std::string>& keys,
                 std::vector<int16_t>* codes, std::vector<std::string>* values) {
-    return client_->BatchGet((uint32_t)table_id, keys, codes, values) == 0;
+    return client_.BatchGet((uint32_t)table_id, keys, codes, values) == 0;
   }
 };
 
@@ -377,12 +366,9 @@ class LocalModelContext {
   }
 };
 
-#if HAVE_WXG_FEATURE_KV_CLIENT == 0
-std::string FLAGS_config;
-int FLAGS_timeout = 0;
-int FLAGS_table_id = 0;
-#else
+#if HAVE_WXG_FEATURE_KV_CLIENT == 1
 DEFINE_string(config, "", "feature kv client config file");
+DEFINE_string(key, "", "feature kv client key");
 DEFINE_int32(timeout, 0, "feature kv client timeout in ms");
 DEFINE_int32(table_id, 0, "feature kv table id");
 #endif
@@ -392,7 +378,7 @@ std::vector<int_t> ids;
 
 void CheckFlags() {
 #if HAVE_WXG_FEATURE_KV_CLIENT == 1
-  DXCHECK_THROW(!FLAGS_config.empty());
+  DXCHECK_THROW(!FLAGS_config.empty() || !FLAGS_key.empty());
   DXCHECK_THROW(FLAGS_table_id > 0);
 #endif
   if (!FLAGS_ids.empty()) {
@@ -412,13 +398,15 @@ int main(int argc, char** argv) {
   CheckFlags();
 
   FeatureKVClientContext client;
-  client.set_config_file(FLAGS_config.c_str());
-  client.set_timeout(FLAGS_timeout);
-  client.set_default_table_id(FLAGS_table_id);
 #if HAVE_WXG_FEATURE_KV_CLIENT == 0
   client.Init(ids);
 #else
-  client.Init();
+  client.set_default_table_id(FLAGS_table_id);
+  if (!FLAGS_config.empty()) {
+    client.InitFromConfig(FLAGS_config, FLAGS_timeout);
+  } else {
+    client.InitFromKey(FLAGS_key, FLAGS_timeout);
+  }
 #endif
 
   ModelContext model_context;
