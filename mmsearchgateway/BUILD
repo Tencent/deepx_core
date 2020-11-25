@@ -14,11 +14,9 @@ cc_library(
             'src/**/*_main.cc',
         ],
     ),
-    hdrs=glob(
-        [
-            'include/**/*.h',
-        ],
-    ),
+    hdrs=glob([
+        'include/**/*.h',
+    ],),
     includes=[
         'include',
     ],
@@ -50,6 +48,37 @@ cc_library(
     ],
 )
 
+cc_library(
+    name='example_rank_model_server',
+    alwayslink=1,
+    srcs=[
+        'example/rank/model_server.cc',
+    ],
+    hdrs=[
+        'example/rank/model_server.h',
+    ],
+    deps=[
+        ':deepx_core',
+    ],
+    copts=[
+        '-std=c++11',
+        '-Wall',
+        '-Wextra',
+        '-Werror',
+        '-pedantic',
+        '-DOS_LINUX=1',
+        '-DOS_POSIX=1',
+        '-DNDEBUG',
+        '-DHAVE_SAGE2=1',
+        '-DHAVE_SAGE2_SGEMM=1',
+        # '-DHAVE_SAGE2_SGEMM_JIT=1',
+        '-DHAVE_WXG_LOG=1',
+    ],
+    visibility=[
+        '//visibility:public',
+    ],
+)
+
 cc_binary(
     name='feature_kv_demo',
     srcs=[
@@ -66,6 +95,13 @@ cc_binary(
         '-Wextra',
         '-Werror',
         '-pedantic',
+        '-DOS_LINUX=1',
+        '-DOS_POSIX=1',
+        '-DNDEBUG',
+        '-DHAVE_SAGE2=1',
+        '-DHAVE_SAGE2_SGEMM=1',
+        # '-DHAVE_SAGE2_SGEMM_JIT=1',
+        # '-DHAVE_WXG_LOG=1',
         '-DHAVE_WXG_FEATURE_KV_CLIENT=1',
     ],
     visibility=[
