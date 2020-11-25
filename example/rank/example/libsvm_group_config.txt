@@ -1,0 +1,14 @@
+# 3 fields:
+# group id
+# row of embedding lookup matrix
+# col of embedding lookup matrix
+1 10000 16
+2 10000 16
+3 10000 16
+4 10000 16
+5 10000 16
+6 10000 16
+7 10000 16
+8 10000 16
+9 10000 16
+10 10000 16

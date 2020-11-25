@@ -1,0 +1,5 @@
+# 3 fields:
+# group id
+# row of embedding lookup matrix(it will be ignored)
+# col of embedding lookup matrix(it will be ignored)
+1 1 1
