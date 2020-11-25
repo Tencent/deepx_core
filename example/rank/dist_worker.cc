@@ -215,6 +215,7 @@ void TrainerDist::Init() {
     context_.set_freq_filter_threshold(
         (FreqStore::freq_t)FLAGS_freq_filter_threshold);
   }
+  // Check out graph target conventions.
   context_.set_target_name(graph_.target(FLAGS_is_train ? 0 : 1).name());
   context_.Init(&local_model_shard_);
 }

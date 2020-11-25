@@ -136,6 +136,7 @@ void PredictorNoShard::Init() {
     context->set_instance_reader_config(FLAGS_instance_reader_config);
     context->set_batch(FLAGS_batch);
     context->set_verbose(FLAGS_verbose);
+    // Check out graph target conventions.
     context->set_target_name(graph_.target(1).name());
     context->Init(&model_shard_);
     contexts_tls_[i] = std::move(context);
@@ -174,6 +175,7 @@ void PredictorShard::Init() {
     context->set_instance_reader_config(FLAGS_instance_reader_config);
     context->set_batch(FLAGS_batch);
     context->set_verbose(FLAGS_verbose);
+    // Check out graph target conventions.
     context->set_target_name(graph_.target(1).name());
     context->Init(&model_shards_, &model_shards_tls_[i]);
     contexts_tls_[i] = std::move(context);

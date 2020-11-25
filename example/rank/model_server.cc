@@ -47,10 +47,11 @@ bool ModelServer::Load(const std::string& file) {
   if (!graph_->Read(is)) {
     return false;
   }
-  // target specification:
-  // offline train: target 0
-  // offline predict: target 1
-  // online infer: target 2 if exists, otherwise target 1
+
+  // Graph target conventions.
+  // Offline train, target 0.
+  // Offline predict, target 1.
+  // Online infer, target 2 if exists, otherwise target 1.
   if (graph_->target_size() >= 3) {
     target_name_ = graph_->target(2).name();
   } else {
@@ -73,6 +74,8 @@ bool ModelServer::LoadGraph(const std::string& file) {
   if (!graph_->Load(file)) {
     return false;
   }
+
+  // Check out graph target conventions.
   if (graph_->target_size() >= 3) {
     target_name_ = graph_->target(2).name();
   } else {

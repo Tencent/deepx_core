@@ -19,7 +19,7 @@ class LLMath {
   using cptr_t = const float_t*;
 
  public:
-  // Naming convention
+  // Naming conventions.
   // 1. alpha, beta are scalars.
   // 2. x, y, z are vectors.
   // 3. X, Y, Z are matrices or tensors.

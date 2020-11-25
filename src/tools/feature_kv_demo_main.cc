@@ -293,6 +293,7 @@ class LocalModelContext {
     DXCHECK_THROW(local_model_.InitParamPlaceholder());
     local_param_ = local_model_.mutable_param();
 
+    // Check out graph target conventions.
     if (graph_->target_size() >= 3) {
       target_name_ = graph_->target(2).name();
     } else {
