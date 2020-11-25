@@ -1,0 +1,147 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\include\deepx_core\dx_gtest.h" />
+    <ClInclude Include="..\src\common\class_factory_test.h" />
+    <ClInclude Include="..\src\graph\op\op_test.h" />
+    <ClInclude Include="..\src\graph\simp\simp_test.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\src\common\any_map_test.cc" />
+    <ClCompile Include="..\src\common\any_test.cc" />
+    <ClCompile Include="..\src\common\array_view_test.cc" />
+    <ClCompile Include="..\src\common\blocking_queue_test.cc" />
+    <ClCompile Include="..\src\common\class_factory_test.cc" />
+    <ClCompile Include="..\src\common\class_factory_test_a.cc" />
+    <ClCompile Include="..\src\common\class_factory_test_b.cc" />
+    <ClCompile Include="..\src\common\class_factory_test_c.cc" />
+    <ClCompile Include="..\src\common\class_factory_test_d.cc" />
+    <ClCompile Include="..\src\common\compress_test.cc" />
+    <ClCompile Include="..\src\common\fast_strtox_test.cc" />
+    <ClCompile Include="..\src\common\group_config_test.cc" />
+    <ClCompile Include="..\src\common\hash_map_test.cc" />
+    <ClCompile Include="..\src\common\hash_test.cc" />
+    <ClCompile Include="..\src\common\misc_test.cc" />
+    <ClCompile Include="..\src\common\stream_test.cc" />
+    <ClCompile Include="..\src\common\str_util_test.cc" />
+    <ClCompile Include="..\src\common\thread_pool_test.cc" />
+    <ClCompile Include="..\src\common\vector_test.cc" />
+    <ClCompile Include="..\src\graph\feature_kv_util_test.cc" />
+    <ClCompile Include="..\src\graph\graph_module_creator_test.cc" />
+    <ClCompile Include="..\src\graph\graph_test.cc" />
+    <ClCompile Include="..\src\graph\instance_reader\libsvm_ex_instance_reader_test.cc" />
+    <ClCompile Include="..\src\graph\instance_reader\libsvm_instance_reader_test.cc" />
+    <ClCompile Include="..\src\graph\instance_reader\uch_instance_reader_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\add_n_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\batch_cos_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\batch_dot_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\binary_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\broadcast_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\concat_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\constant_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\conv_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\embedding_lookup_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\fm_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\for_axis_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\fully_connect_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\gemm_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\group_embedding_lookup_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\inner_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\layer_norm_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\loss_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\matmul_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\outer_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\pool_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\reduce_axis_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\reshape_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\sequence_mask_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\stop_grad_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\subscript_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\subscript_range_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\tensor_dot_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\tf_embedding_lookup_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\tile_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\transpose_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\unary_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\where_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\op_test.cc" />
+    <ClCompile Include="..\src\graph\simp\arithmetic_impl_test.cc" />
+    <ClCompile Include="..\src\graph\simp\cf_impl_test.cc" />
+    <ClCompile Include="..\src\graph\simp\cse_test.cc" />
+    <ClCompile Include="..\src\graph\simp\simp_item_test.cc" />
+    <ClCompile Include="..\src\graph\simp\simp_test.cc" />
+    <ClCompile Include="..\src\graph\tensor_map_test.cc" />
+    <ClCompile Include="..\src\graph\variable_scope_test.cc" />
+    <ClCompile Include="..\src\instance\libsvm_ex_test.cc" />
+    <ClCompile Include="..\src\instance\libsvm_test.cc" />
+    <ClCompile Include="..\src\instance\uch_test.cc" />
+    <ClCompile Include="..\src\ps\dist_message_test.cc" />
+    <ClCompile Include="..\src\ps\file_dispatcher_test.cc" />
+    <ClCompile Include="..\src\ps\tcp_connection_test.cc" />
+    <ClCompile Include="..\src\tensor\csr_matrix_test.cc" />
+    <ClCompile Include="..\src\tensor\ll_math_test.cc" />
+    <ClCompile Include="..\src\tensor\ll_tensor_test.cc" />
+    <ClCompile Include="..\src\tensor\shape_test.cc" />
+    <ClCompile Include="..\src\tensor\sparse_row_grad_test.cc" />
+    <ClCompile Include="..\src\tensor\sparse_row_matrix_test.cc" />
+    <ClCompile Include="..\src\tensor\sparse_row_param_test.cc" />
+    <ClCompile Include="..\src\tensor\sparse_vector_grad_test.cc" />
+    <ClCompile Include="..\src\tensor\sparse_vector_param_test.cc" />
+    <ClCompile Include="..\src\tensor\tensor_test.cc" />
+  </ItemGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <BuildLog>
+      <Path>$(IntDir)\$(MSBuildProjectName).log</Path>
+    </BuildLog>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <BuildLog>
+      <Path>$(IntDir)\$(MSBuildProjectName).log</Path>
+    </BuildLog>
+  </ItemDefinitionGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{520096B8-48C7-45BF-8AD0-21B03959E6D5}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>libdeepx_core</RootNamespace>
+    <ProjectName>unit_test</ProjectName>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>NotSet</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="debug.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="release.props" />
+  </ImportGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

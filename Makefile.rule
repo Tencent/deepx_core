@@ -1,0 +1,109 @@
+# Copyright 2019 the deepx authors.
+# Author: Yafei Zhang (kimmyzhang@tencent.com)
+#
+
+SOURCE_ROOT  := $(shell pwd)
+BUILD_ROOT   := $(shell pwd)
+CC           ?= gcc
+CXX          ?= g++
+AR           ?= ar
+CPPFLAGS     += -I$(SOURCE_ROOT)/include -I$(SOURCE_ROOT)/thirdparty
+CFLAGS       += -pthread -std=c11 -g -Wall -Wextra -Werror -pedantic
+CXXFLAGS     += -pthread -std=c++11 -g -Wall -Wextra -Werror -pedantic
+LDFLAGS      += -pthread
+MACHINE      := $(shell $(CXX) $(CPPFLAGS) $(CXXFLAGS) -dumpmachine)
+BUILD_DIR    := build_$(MACHINE)
+BUILD_DIR_ABS = $(BUILD_ROOT)/$(BUILD_DIR)
+PREFIX       := /usr/local
+
+OS_DARWIN    := 0
+OS_LINUX     := 0
+OS_POSIX     := 0
+OS_WIN       := 0
+OS_MINGW     := 0
+
+ifeq ($(findstring darwin,$(MACHINE)),darwin)
+OS_DARWIN    := 1
+OS_POSIX     := 1
+CPPFLAGS     += -DOS_DARWIN=1 -DOS_POSIX=1
+endif
+
+ifeq ($(findstring linux,$(MACHINE)),linux)
+OS_LINUX     := 1
+OS_POSIX     := 1
+CPPFLAGS     += -DOS_LINUX=1 -DOS_POSIX=1
+LDFLAGS      += -ldl
+endif
+
+ifeq ($(findstring mingw,$(MACHINE)),mingw)
+OS_WIN       := 1
+OS_MINGW     := 1
+CPPFLAGS     += -DOS_WIN=1 -DOS_MINGW=1
+CPPFLAGS     += -D_WIN32_WINNT=0x0501
+LDFLAGS      += -lws2_32 -lmswsock -static
+endif
+
+ifneq ($(DEBUG),1)
+CPPFLAGS     += -DNDEBUG
+CFLAGS       += -O3
+CXXFLAGS     += -O3
+BUILD_DIR    := $(BUILD_DIR)_r
+else
+CFLAGS       += -O0
+CXXFLAGS     += -O0 -Og
+BUILD_DIR    := $(BUILD_DIR)_d
+endif
+
+SIMD         ?= 0
+ifeq ($(SIMD),1)
+# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=59800
+CFLAGS       := $(filter-out -Werror,$(CFLAGS))
+CXXFLAGS     := $(filter-out -Werror,$(CXXFLAGS))
+CFLAGS       += -ftree-vectorize -ffast-math -mavx -mfma -mavx2
+CXXFLAGS     += -ftree-vectorize -ffast-math -mavx -mfma -mavx2
+endif
+
+SAGE2        ?= 0
+ifeq ($(SAGE2),1)
+CPPFLAGS     += -DHAVE_SAGE2=1 -I$(BUILD_ROOT)/sage2/include
+LDFLAGS      += $(BUILD_ROOT)/sage2/$(BUILD_DIR)/libsage2.a
+endif
+
+SAGE2_SGEMM  ?= 0
+ifeq ($(SAGE2_SGEMM),1)
+CPPFLAGS     += -DHAVE_SAGE2_SGEMM=1 -I$(BUILD_ROOT)/sage2/include
+LDFLAGS      += $(BUILD_ROOT)/sage2/$(BUILD_DIR)/libsage2.a
+endif
+
+SAGE2_SGEMM_JIT ?= 0
+ifeq ($(SAGE2_SGEMM_JIT),1)
+CPPFLAGS     += -DHAVE_SAGE2_SGEMM_JIT=1 -I$(BUILD_ROOT)/sage2/include
+LDFLAGS      += $(BUILD_ROOT)/sage2/$(BUILD_DIR)/libsage2.a
+endif
+
+3RD_CPPFLAGS := $(CPPFLAGS)
+3RD_CFLAGS   := $(filter-out -Wall -Wextra -Werror -pedantic,$(CFLAGS))
+3RD_CXXFLAGS := $(filter-out -Wall -Wextra -Werror -pedantic,$(CXXFLAGS))
+
+# export for subdir
+export SOURCE_ROOT
+export BUILD_ROOT
+export CC
+export CXX
+export AR
+export CPPFLAGS
+export CFLAGS
+export CXXFLAGS
+export 3RD_CPPFLAGS
+export 3RD_CFLAGS
+export 3RD_CXXFLAGS
+export LDFLAGS
+export MACHINE
+export BUILD_DIR
+export BUILD_DIR_ABS
+export PREFIX
+export OS_DARWIN
+export OS_LINUX
+export OS_POSIX
+export OS_WIN
+export OS_MINGW

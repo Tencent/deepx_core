@@ -1,0 +1,93 @@
+# Copyright 2019 the deepx authors.
+# Author: Yafei Zhang (kimmyzhang@tencent.com)
+#
+
+ifeq ($(BUILD_DIR_ABS),)
+include Makefile.rule
+endif
+
+LIBFEATURE_SOURCES := $(wildcard thirdparty/feature/*.c)
+LIBFEATURE_OBJECTS := $(addprefix $(BUILD_DIR_ABS)/,$(LIBFEATURE_SOURCES))
+LIBFEATURE_OBJECTS := $(LIBFEATURE_OBJECTS:.c=.o)
+
+LIBGFLAGS_SOURCES := \
+thirdparty/gflags-2.1.2/gflags_reporting.cc \
+thirdparty/gflags-2.1.2/gflags_completions.cc \
+thirdparty/gflags-2.1.2/gflags.cc
+LIBGFLAGS_OBJECTS := $(addprefix $(BUILD_DIR_ABS)/,$(LIBGFLAGS_SOURCES))
+LIBGFLAGS_OBJECTS := $(LIBGFLAGS_OBJECTS:.cc=.o)
+
+LIBGTEST_SOURCES  := \
+thirdparty/gtest-1.8.0/gtest-all.cc \
+thirdparty/gtest-1.8.0/gtest_main.cc
+LIBGTEST_OBJECTS  := $(addprefix $(BUILD_DIR_ABS)/,$(LIBGTEST_SOURCES))
+LIBGTEST_OBJECTS  := $(LIBGTEST_OBJECTS:.cc=.o)
+
+LIBLZ4_SOURCES    := $(wildcard thirdparty/lz4-1.9.2/*.c)
+LIBLZ4_OBJECTS    := $(addprefix $(BUILD_DIR_ABS)/,$(LIBLZ4_SOURCES))
+LIBLZ4_OBJECTS    := $(LIBLZ4_OBJECTS:.c=.o)
+
+LIBZ_SOURCES      := $(wildcard thirdparty/zlib-1.2.11/*.c)
+LIBZ_OBJECTS      := $(addprefix $(BUILD_DIR_ABS)/,$(LIBZ_SOURCES))
+LIBZ_OBJECTS      := $(LIBZ_OBJECTS:.c=.o)
+
+3RD_LIBS          := \
+$(BUILD_DIR_ABS)/libdeepx_feature.a \
+$(BUILD_DIR_ABS)/libdeepx_gflags.a \
+$(BUILD_DIR_ABS)/libdeepx_gtest.a \
+$(BUILD_DIR_ABS)/libdeepx_lz4.a \
+$(BUILD_DIR_ABS)/libdeepx_z.a
+
+################################################################
+
+lib: $(3RD_LIBS)
+.PHONY: lib
+
+################################################################
+
+$(BUILD_DIR_ABS)/thirdparty/gflags-2.1.2/%.o: thirdparty/gflags-2.1.2/%.cc
+	@echo Compiling $<
+	@mkdir -p $(@D)
+	@$(CXX) $(3RD_CPPFLAGS) -Ithirdparty/gflags $(3RD_CXXFLAGS) -c -o $@ $<
+
+$(BUILD_DIR_ABS)/thirdparty/zlib-1.2.11/%.o: thirdparty/zlib-1.2.11/%.c
+	@echo Compiling $<
+	@mkdir -p $(@D)
+	@$(CC) $(3RD_CPPFLAGS) -DZ_HAVE_UNISTD_H=1 $(3RD_CFLAGS) -c -o $@ $<
+
+$(BUILD_DIR_ABS)/thirdparty/%.o: thirdparty/%.c
+	@echo Compiling $<
+	@mkdir -p $(@D)
+	@$(CC) $(3RD_CPPFLAGS) $(3RD_CFLAGS) -c -o $@ $<
+
+$(BUILD_DIR_ABS)/thirdparty/%.o: thirdparty/%.cc
+	@echo Compiling $<
+	@mkdir -p $(@D)
+	@$(CXX) $(3RD_CPPFLAGS) $(3RD_CXXFLAGS) -c -o $@ $<
+
+################################################################
+
+$(BUILD_DIR_ABS)/libdeepx_feature.a: $(LIBFEATURE_OBJECTS)
+	@echo Archiving $@
+	@mkdir -p $(@D)
+	@$(AR) rcs $@ $^
+
+$(BUILD_DIR_ABS)/libdeepx_gflags.a: $(LIBGFLAGS_OBJECTS)
+	@echo Archiving $@
+	@mkdir -p $(@D)
+	@$(AR) rcs $@ $^
+
+$(BUILD_DIR_ABS)/libdeepx_gtest.a: $(LIBGTEST_OBJECTS)
+	@echo Archiving $@
+	@mkdir -p $(@D)
+	@$(AR) rcs $@ $^
+
+$(BUILD_DIR_ABS)/libdeepx_lz4.a: $(LIBLZ4_OBJECTS)
+	@echo Archiving $@
+	@mkdir -p $(@D)
+	@$(AR) rcs $@ $^
+
+$(BUILD_DIR_ABS)/libdeepx_z.a: $(LIBZ_OBJECTS)
+	@echo Archiving $@
+	@mkdir -p $(@D)
+	@$(AR) rcs $@ $^
