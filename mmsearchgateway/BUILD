@@ -1,0 +1,74 @@
+# Copyright 2020 the deepx authors.
+# Author: Yafei Zhang (kimmyzhang@tencent.com)
+#
+
+cc_library(
+    name='deepx_core',
+    alwayslink=1,
+    srcs=glob(
+        [
+            'src/**/*.cc',
+        ],
+        exclude=[
+            'src/**/*_test*.cc',
+            'src/**/*_main.cc',
+        ],
+    ),
+    hdrs=glob(
+        [
+            'include/**/*.h',
+        ],
+    ),
+    includes=[
+        'include',
+    ],
+    deps=[
+        '//comm2/core:core',
+        '//mm3rd/lz4-1.8.2:lz4',
+        '//mm3rd/zlib-1.2.3:z',
+        '//mmsearchgateway/sage2:sage2',
+    ],
+    copts=[
+        '-Immsearchgateway/deepx_core/thirdparty',
+        '-std=c++11',
+        '-Wall',
+        '-Wextra',
+        '-Werror',
+        '-pedantic',
+        '-Wno-array-bounds',
+        '-Wno-float-equal',
+        '-DOS_LINUX=1',
+        '-DOS_POSIX=1',
+        '-DNDEBUG',
+        '-DHAVE_SAGE2=1',
+        '-DHAVE_SAGE2_SGEMM=1',
+        # '-DHAVE_SAGE2_SGEMM_JIT=1',
+        '-DHAVE_WXG_LOG=1',
+    ],
+    visibility=[
+        '//visibility:public',
+    ],
+)
+
+cc_binary(
+    name='feature_kv_demo',
+    srcs=[
+        'src/tools/feature_kv_demo_main.cc',
+    ],
+    deps=[
+        ':deepx_core',
+        '//mm3rd/gflags:gflags',
+        '//platform/kvsvr_feature/new/kvsvr:featurekvclient',
+    ],
+    copts=[
+        '-std=c++11',
+        '-Wall',
+        '-Wextra',
+        '-Werror',
+        '-pedantic',
+        '-DHAVE_WXG_FEATURE_KV_CLIENT=1',
+    ],
+    visibility=[
+        '//visibility:public',
+    ],
+)
