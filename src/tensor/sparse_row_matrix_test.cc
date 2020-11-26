@@ -4,7 +4,6 @@
 
 #include <deepx_core/common/stream.h>
 #include <deepx_core/tensor/data_type.h>
-#include <deepx_core/tensor/sparse_row_matrix.h>
 #include <gtest/gtest.h>
 #include <random>
 #include <utility>
@@ -399,6 +398,78 @@ TEST_F(SparseRowMatrixTest, WriteReadView) {
   ASSERT_TRUE(is);
 
   EXPECT_EQ(X, read_X);
+}
+
+TEST_F(SparseRowMatrixTest, ReadSRP) {
+  srp_t X{{1, 2, 3}, {{1, 11}, {2, 22}, {3, 33}}};
+  srm_t read_X;
+  srm_t expected_X{{1, 2, 3}, {{1, 11}, {2, 22}, {3, 33}}};
+
+  OutputStringStream os;
+  InputStringStream is;
+
+  os << X;
+  ASSERT_TRUE(os);
+
+  is.SetView(os.GetBuf());
+  ReadSRP(is, read_X);
+  ASSERT_TRUE(is);
+
+  EXPECT_EQ(read_X, expected_X);
+}
+
+TEST_F(SparseRowMatrixTest, ReadSRPView) {
+  srp_t X{{1, 2, 3}, {{1, 11}, {2, 22}, {3, 33}}};
+  srm_t read_X;
+  srm_t expected_X{{1, 2, 3}, {{1, 11}, {2, 22}, {3, 33}}};
+
+  OutputStringStream os;
+  InputStringStream is;
+
+  os << X;
+  ASSERT_TRUE(os);
+
+  is.SetView(os.GetBuf());
+  ReadSRPView(is, read_X);
+  ASSERT_TRUE(is);
+
+  EXPECT_EQ(read_X, expected_X);
+}
+
+TEST_F(SparseRowMatrixTest, ReadSVP) {
+  svp_t X{{{1, 11}, {2, 22}, {3, 33}}};
+  srm_t read_X;
+  srm_t expected_X{{1, 2, 3}, {{11}, {22}, {33}}};
+
+  OutputStringStream os;
+  InputStringStream is;
+
+  os << X;
+  ASSERT_TRUE(os);
+
+  is.SetView(os.GetBuf());
+  ReadSVP(is, read_X);
+  ASSERT_TRUE(is);
+
+  EXPECT_EQ(read_X, expected_X);
+}
+
+TEST_F(SparseRowMatrixTest, ReadSVPView) {
+  svp_t X{{{1, 11}, {2, 22}, {3, 33}}};
+  srm_t read_X;
+  srm_t expected_X{{1, 2, 3}, {{11}, {22}, {33}}};
+
+  OutputStringStream os;
+  InputStringStream is;
+
+  os << X;
+  ASSERT_TRUE(os);
+
+  is.SetView(os.GetBuf());
+  ReadSVPView(is, read_X);
+  ASSERT_TRUE(is);
+
+  EXPECT_EQ(read_X, expected_X);
 }
 
 }  // namespace deepx_core

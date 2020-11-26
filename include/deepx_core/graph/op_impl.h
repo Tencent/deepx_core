@@ -160,17 +160,6 @@ class OpImpl : public Op {
     return nullptr;
   }
 
-  srm_t* InitGradSRM(const GraphNode* node, int col) {
-    if (node->need_grad()) {
-      auto& G = grad_->get_or_insert<srm_t>(node->name());
-      G.set_col(col);
-      srm_t* srm = &G;
-      (*grad_ptr_)[node->name()] = srm;
-      return srm;
-    }
-    return nullptr;
-  }
-
   tsr_t* GetGradPtrTSR(const GraphNode* node) {
     if (node->need_grad()) {
       return grad_ptr_->get<tsr_t*>(node->name());

@@ -77,6 +77,12 @@ void TensorMap::_Read(InputStream& is) {
       case TENSOR_TYPE_TSRS:
         is >> insert<tsrs_t>(name);
         break;
+      case TENSOR_TYPE_SRP:  // compatiability
+        ReadSRP(is, insert<srm_t>(name));
+        break;
+      case TENSOR_TYPE_SVP:  // compatiability
+        ReadSVP(is, insert<srm_t>(name));
+        break;
     }
 
     if (!is) {
@@ -117,6 +123,12 @@ void TensorMap::_ReadView(InputStringStream& is) {
         break;
       case TENSOR_TYPE_TSRS:
         ReadView(is, insert<tsrs_t>(name));
+        break;
+      case TENSOR_TYPE_SRP:  // compatiability
+        ReadSRPView(is, insert<srm_t>(name));
+        break;
+      case TENSOR_TYPE_SVP:  // compatiability
+        ReadSVPView(is, insert<srm_t>(name));
         break;
     }
 

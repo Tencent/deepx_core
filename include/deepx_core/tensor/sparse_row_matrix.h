@@ -143,6 +143,28 @@ class SparseRowMatrix {
   friend InputStringStream& ReadView(InputStringStream& is,          // NOLINT
                                      SparseRowMatrix<T2, I2>& srm);  // NOLINT
 
+  // compatiability
+  template <typename T2, typename I2>
+  friend InputStream& ReadSRP(InputStream& is,                // NOLINT
+                              SparseRowMatrix<T2, I2>& srm);  // NOLINT
+
+  // compatiability
+  template <typename T2, typename I2>
+  friend InputStringStream& ReadSRPView(
+      InputStringStream& is,          // NOLINT
+      SparseRowMatrix<T2, I2>& srm);  // NOLINT
+
+  // compatiability
+  template <typename T2, typename I2>
+  friend InputStream& ReadSVP(InputStream& is,                // NOLINT
+                              SparseRowMatrix<T2, I2>& srm);  // NOLINT
+
+  // compatiability
+  template <typename T2, typename I2>
+  friend InputStringStream& ReadSVPView(
+      InputStringStream& is,          // NOLINT
+      SparseRowMatrix<T2, I2>& srm);  // NOLINT
+
  public:
   const Shape& shape() const noexcept { return shape_; }
   void set_col(int col) noexcept { shape_.resize(0, col); }
@@ -273,6 +295,7 @@ InputStream& operator>>(InputStream& is, SparseRowMatrix<T, I>& srm) {
     }
   } else {
     // deprecated
+    srm.clear();
     std::vector<T> value;
     HashMap<I, std::size_t, MurmurHash<I>> row_offset_map;
     is >> srm.shape_ >> value >> row_offset_map >> srm.initializer_type_ >>
@@ -309,6 +332,64 @@ InputStringStream& ReadView(InputStringStream& is,         // NOLINT
     // deprecated
     is.set_bad();
   }
+  return is;
+}
+
+template <typename T, typename I>
+InputStream& ReadSRP(InputStream& is,               // NOLINT
+                     SparseRowMatrix<T, I>& srm) {  // NOLINT
+  int version;
+  if (is.Peek(&version, sizeof(version)) != sizeof(version)) {
+    return is;
+  }
+
+  if (version == 0x0a0c72e7) {  // magic number version
+    int col;
+    is >> version;
+    is >> col >> srm.row_map_ >> srm.initializer_type_ >>
+        srm.initializer_param1_ >> srm.initializer_param2_;
+    if (is) {
+      srm.set_col(col);
+    }
+  } else {
+    // deprecated
+    int col;
+    is >> col >> srm.row_map_ >> srm.initializer_type_ >>
+        srm.initializer_param1_ >> srm.initializer_param2_;
+    if (is) {
+      srm.set_col(col);
+    }
+  }
+  return is;
+}
+
+template <typename T, typename I>
+InputStringStream& ReadSRPView(InputStringStream& is,         // NOLINT
+                               SparseRowMatrix<T, I>& srm) {  // NOLINT
+  return ReadView(is, srm);
+}
+
+template <typename T, typename I>
+InputStream& ReadSVP(InputStream& is,               // NOLINT
+                     SparseRowMatrix<T, I>& srm) {  // NOLINT
+                                                    // deprecated
+  srm.clear();
+  HashMap<I, T, MurmurHash<I>> row_map;
+  is >> row_map >> srm.initializer_type_ >> srm.initializer_param1_ >>
+      srm.initializer_param2_;
+  if (is) {
+    srm.set_col(1);
+    for (const auto& entry : row_map) {
+      srm.assign(entry.first, &entry.second);
+    }
+  }
+  return is;
+}
+
+template <typename T, typename I>
+InputStringStream& ReadSVPView(InputStringStream& is,         // NOLINT
+                               SparseRowMatrix<T, I>& srm) {  // NOLINT
+  ReadSVP(is, srm);
   return is;
 }
 

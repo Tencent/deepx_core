@@ -11,6 +11,10 @@ VariableNode::VariableNode(std::string name, const Shape& shape,
     : GraphNode(std::move(name)) {
   // 'name' must be valid.
   DXCHECK_THROW(IsValidName());
+  if (tensor_type == TENSOR_TYPE_SRP ||
+      tensor_type == TENSOR_TYPE_SVP) {  // compatiability
+    tensor_type = TENSOR_TYPE_SRM;
+  }
   DXCHECK_THROW(tensor_type == TENSOR_TYPE_TSR ||
                 tensor_type == TENSOR_TYPE_SRM);
   // 'shape' must be valid.

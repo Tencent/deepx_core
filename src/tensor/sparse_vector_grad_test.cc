@@ -4,7 +4,6 @@
 
 #include <deepx_core/common/stream.h>
 #include <deepx_core/tensor/data_type.h>
-#include <deepx_core/tensor/sparse_vector_grad.h>
 #include <gtest/gtest.h>
 #include <utility>
 

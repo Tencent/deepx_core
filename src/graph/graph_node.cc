@@ -63,6 +63,13 @@ void GraphNode::Read(InputStream& is) {
     DXERROR("Couldn't handle a higher version: %d.", version);
     is.set_bad();
   }
+
+  if (is) {
+    if (tensor_type_ == TENSOR_TYPE_SRP ||
+        tensor_type_ == TENSOR_TYPE_SVP) {  // compatiability
+      tensor_type_ = TENSOR_TYPE_SRM;
+    }
+  }
 }
 
 bool GraphNode::IsValidName() const noexcept {
