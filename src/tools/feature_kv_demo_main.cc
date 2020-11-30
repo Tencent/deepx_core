@@ -232,10 +232,13 @@ class ModelContext {
   int version() const noexcept { return version_; }
 
  public:
-  void GetVersion(FeatureKVClientContext* client) {
+  void GetVersion(FeatureKVClientContext* client, int default_version) {
     DXINFO("Getting version...");
-    DXCHECK_THROW(client->Get(FeatureKVUtil::GetVersionKey(), &value_));
-    DXCHECK_THROW(FeatureKVUtil::GetVersion(value_, &version_));
+    if (!client->Get(FeatureKVUtil::GetVersionKey(), &value_) ||
+        !FeatureKVUtil::GetVersion(value_, &version_)) {
+      DXERROR("Failed to get version, use default version.");
+      version_ = default_version;
+    }
     std::cout << "version=" << std::endl;
     std::cout << version_ << std::endl;
   }
@@ -375,6 +378,7 @@ DEFINE_int32(table_id, 0, "feature kv table id");
 #endif
 DEFINE_string(ids, "10000,10001,10002,10003,10004,10005",
               "feature ids(separated by comma)");
+DEFINE_int32(default_version, 2, "default feature kv protocol version");
 std::vector<int_t> ids;
 
 void CheckFlags() {
@@ -411,7 +415,7 @@ int main(int argc, char** argv) {
 #endif
 
   ModelContext model_context;
-  model_context.GetVersion(&client);
+  model_context.GetVersion(&client, FLAGS_default_version);
   model_context.GetGraph(&client);
   model_context.GetDenseParam(&client);
 
