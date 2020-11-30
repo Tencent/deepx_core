@@ -417,7 +417,7 @@ void FeatureKVUtil::SparseParamParser::Init(const Graph* graph,
   version_ = version;
 
   std::size_t node_size = graph_->name_2_node().size();
-  Ws_.assign(node_size, nullptr);
+  W_.assign(node_size, nullptr);
   for (auto& entry : *param_) {
     const std::string& name = entry.first;
     Any& Wany = entry.second;
@@ -427,7 +427,7 @@ void FeatureKVUtil::SparseParamParser::Init(const Graph* graph,
       auto& W = Wany.unsafe_to_ref<srm_t>();
       W.zeros();
       W.reserve(512);  // magic numner
-      Ws_[node_id] = &W;
+      W_[node_id] = &W;
     }
   }
 }
@@ -495,7 +495,7 @@ void FeatureKVUtil::SparseParamParser::Parse(const std::string& key,
     buf += sizeof(uint16_t);
     buf_size -= sizeof(uint16_t);
 
-    if ((std::size_t)node_id >= Ws_.size() || (W = Ws_[node_id]) == nullptr ||
+    if ((std::size_t)node_id >= W_.size() || (W = W_[node_id]) == nullptr ||
         (int)embedding_col != W->col()) {
       ++stat->value_bad;
       break;

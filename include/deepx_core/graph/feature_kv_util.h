@@ -183,7 +183,7 @@ class FeatureKVUtil : public DataType {
     const Graph* graph_ = nullptr;
     TensorMap* param_ = nullptr;
     int version_ = 0;
-    std::vector<srm_t*> Ws_;  // indexed by node id
+    std::vector<srm_t*> W_;  // indexed by node id
 
    public:
     void Init(const Graph* graph, TensorMap* param, int version);

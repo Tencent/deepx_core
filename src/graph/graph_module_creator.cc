@@ -65,17 +65,17 @@ GraphNode* WideGroupEmbeddingLookup(const std::string& prefix, GraphNode* X,
                                     int sparse, int need_grad) {
   DXCHECK_THROW(X->shape().is_rank(2));
   DXCHECK_THROW(!items.empty());
-  std::vector<GraphNode*> Ws(items.size());
+  std::vector<GraphNode*> W(items.size());
   std::vector<uint16_t> group_ids(items.size());
   int tensor_type = sparse ? TENSOR_TYPE_SRM : TENSOR_TYPE_TSR;
   for (std::size_t i = 0; i < items.size(); ++i) {
     group_ids[i] = items[i].group_id;
     auto ii = std::to_string(group_ids[i]);
-    Ws[i] = GetVariable(prefix + "W" + ii, Shape(items[i].embedding_row, 1),
-                        tensor_type, TENSOR_INITIALIZER_TYPE_ZEROS, 0, 0);
-    Ws[i]->set_need_grad(need_grad);
+    W[i] = GetVariable(prefix + "W" + ii, Shape(items[i].embedding_row, 1),
+                       tensor_type, TENSOR_INITIALIZER_TYPE_ZEROS, 0, 0);
+    W[i]->set_need_grad(need_grad);
   }
-  return GroupEmbeddingLookup("", X, Ws, group_ids);
+  return GroupEmbeddingLookup("", X, W, group_ids);
 }
 
 GraphNode* WideGroupEmbeddingLookup2(const std::string& prefix, GraphNode* X,
@@ -100,18 +100,18 @@ GraphNode* DeepGroupEmbeddingLookup(const std::string& prefix, GraphNode* X,
                                     int sparse, int need_grad) {
   DXCHECK_THROW(X->shape().is_rank(2));
   DXCHECK_THROW(!items.empty());
-  std::vector<GraphNode*> Ws(items.size());
+  std::vector<GraphNode*> W(items.size());
   std::vector<uint16_t> group_ids(items.size());
   int tensor_type = sparse ? TENSOR_TYPE_SRM : TENSOR_TYPE_TSR;
   for (std::size_t i = 0; i < items.size(); ++i) {
     group_ids[i] = items[i].group_id;
     auto ii = std::to_string(group_ids[i]);
-    Ws[i] = GetVariable(prefix + "W" + ii,
-                        Shape(items[i].embedding_row, items[i].embedding_col),
-                        tensor_type, TENSOR_INITIALIZER_TYPE_RANDN, 0, 1e-3);
-    Ws[i]->set_need_grad(need_grad);
+    W[i] = GetVariable(prefix + "W" + ii,
+                       Shape(items[i].embedding_row, items[i].embedding_col),
+                       tensor_type, TENSOR_INITIALIZER_TYPE_RANDN, 0, 1e-3);
+    W[i]->set_need_grad(need_grad);
   }
-  return GroupEmbeddingLookup("", X, Ws, group_ids);
+  return GroupEmbeddingLookup("", X, W, group_ids);
 }
 
 GraphNode* DeepGroupEmbeddingLookup2(const std::string& prefix, GraphNode* X,
