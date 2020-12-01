@@ -99,15 +99,15 @@ inline void LLOptimizer<float, uint64_t>::UpdateArray(
 
 template <>
 inline void LLOptimizer<float, uint64_t>::Init(RMSPropConfig* config) noexcept {
-  sage2_rmsprop_config_s_init((sage2_rmsprop_config_s*)config);
+  sage2_rms_prop_config_s_init((sage2_rms_prop_config_s*)config);
 }
 
 template <>
 template <>
 inline void LLOptimizer<float, uint64_t>::UpdateArray(
     const RMSPropConfig& config, int n, cptr_t g, ptr_t w, ptr_t v) noexcept {
-  static_assert(sizeof(sage2_rmsprop_config_s) == sizeof(RMSPropConfig), "");
-  sage2_rmsprop_update_ps((const sage2_rmsprop_config_s*)&config, n, g, w, v);
+  static_assert(sizeof(sage2_rms_prop_config_s) == sizeof(RMSPropConfig), "");
+  sage2_rms_prop_update_ps((const sage2_rms_prop_config_s*)&config, n, g, w, v);
 }
 
 }  // namespace deepx_core
