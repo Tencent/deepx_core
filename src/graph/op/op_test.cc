@@ -288,7 +288,7 @@ void OpTestContext::CompareGrad() {
     } else if (Gany1.is<srm_t>()) {
       const auto& G1 = Gany1.unsafe_to_ref<srm_t>();
       const auto& G2 = Gany2.to_ref<srm_t>();
-      EXPECT_SRX_NEAR_EPS(G1, G2, CHECK_GRAD_EPS);
+      EXPECT_SRM_NEAR_EPS(G1, G2, CHECK_GRAD_EPS);
     }
   }
 }

@@ -9,10 +9,6 @@
 | Tensor&lt;std::string&gt; | TENSOR\_TYPE\_TSRS | TSRS | 字符串型稠密张量 | 样本 |
 | SparseRowMatrix<int\_t, float\_t> | TENSOR\_TYPE\_SRM | SRM | 稀疏行矩阵 | 参数, 梯度 |
 | CSRMatrix<int\_t, float\_t> | TENSOR\_TYPE\_CSR | CSR | CSR矩阵 | 样本 |
-| SparseRowParam<int\_t, float\_t> | TENSOR\_TYPE\_SRP | SRP | 稀疏行矩阵(参数) | 参数 |
-| SparseVectorParam<int\_t, float\_t> | TENSOR\_TYPE\_SVP | SVP | 稀疏向量(参数) | 参数 |
-| SparseRowGrad<int\_t, float\_t> | TENSOR\_TYPE\_SRG | SRG | 稀疏行矩阵(梯度) | 梯度 |
-| SparseVectorGrad<int\_t, float\_t> | TENSOR\_TYPE\_SVG | SVG | 稀疏向量(梯度) | 梯度 |
 
 其中, float\_t是单精度浮点数, int\_t是64位无符号整数.
 
@@ -82,36 +78,3 @@ Compressed Sparse Row Matrix, 稀疏矩阵.
 - CSR没有随机访问能力.
 
 它的头文件是["csr\_matrix.h"](../include/deepx_core/tensor/csr_matrix.h).
-
-## SparseRowParam
-
-Sparse Row Matrix for Param, 概念上和SRM相同.
-
-它的头文件是["sparse\_row\_param.h"](../include/deepx_core/tensor/sparse_row_param.h).
-
-## SparseVectorParam
-
-Sparse Vector for Param, 概念上和列数是1的SRM相同.
-
-它的头文件是["sparse\_vector\_param.h"](../include/deepx_core/tensor/sparse_vector_param.h).
-
-## SparseRowGrad
-
-Sparse Row Matrix for Grad, 概念上和SRM相同.
-
-它的头文件是["sparse\_row\_grad.h"](../include/deepx_core/tensor/sparse_row_grad.h).
-
-## SparseVectorGrad
-
-Sparse Vector for Grad, 概念上和列数是1的SRM相同.
-
-它的头文件是["sparse\_vector\_grad.h"](../include/deepx_core/tensor/sparse_vector_grad.h).
-
-## 为什么有多种稀疏张量?
-
-所有稀疏张量在概念上均是SRM, 在实现上亦可用SRM取代.
-
-为了追求极致的性能, 考虑到以下因素, 将不同稀疏张量用于不同用途.
-
-- 稀疏向量的列数是1, 稀疏矩阵的列数通常大于1.
-- 参数需要在内存中长期保存, 梯度不需要在内存中长期保存.

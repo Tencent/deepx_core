@@ -150,15 +150,15 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
                 parsed_param.get<srm_t>(W7node->name()));
     } else if (version == 3) {
 #if HAVE_SAGE2 == 1
-      EXPECT_SRX_NEAR(param.get<srm_t>(W3node->name()),
+      EXPECT_SRM_NEAR(param.get<srm_t>(W3node->name()),
                       parsed_param.get<srm_t>(W3node->name()));
-      EXPECT_SRX_NEAR(param.get<srm_t>(W4node->name()),
+      EXPECT_SRM_NEAR(param.get<srm_t>(W4node->name()),
                       parsed_param.get<srm_t>(W4node->name()));
-      EXPECT_SRX_NEAR(param.get<srm_t>(W5node->name()),
+      EXPECT_SRM_NEAR(param.get<srm_t>(W5node->name()),
                       parsed_param.get<srm_t>(W5node->name()));
-      EXPECT_SRX_NEAR(param.get<srm_t>(W6node->name()),
+      EXPECT_SRM_NEAR(param.get<srm_t>(W6node->name()),
                       parsed_param.get<srm_t>(W6node->name()));
-      EXPECT_SRX_NEAR(param.get<srm_t>(W7node->name()),
+      EXPECT_SRM_NEAR(param.get<srm_t>(W7node->name()),
                       parsed_param.get<srm_t>(W7node->name()));
 #endif
     }

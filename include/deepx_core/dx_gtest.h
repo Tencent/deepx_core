@@ -52,8 +52,7 @@
     }                                                                   \
   } while (0)
 
-// for SRM, SRP, SRG
-#define EXPECT_SRX_NEAR_EPS(left, right, eps)                   \
+#define EXPECT_SRM_NEAR_EPS(left, right, eps)                   \
   do {                                                          \
     const auto& _l = (left);                                    \
     const auto& _r = (right);                                   \
@@ -81,37 +80,10 @@
     }                                                           \
   } while (0)
 
-// for SVP, SVG
-#define EXPECT_SVX_NEAR_EPS(left, right, eps)          \
-  do {                                                 \
-    const auto& _l = (left);                           \
-    const auto& _r = (right);                          \
-    auto _lsize = _l.size();                           \
-    auto _rsize = _r.size();                           \
-    EXPECT_EQ(_lsize, _rsize);                         \
-    if (_lsize != _rsize) {                            \
-      break;                                           \
-    }                                                  \
-                                                       \
-    for (const auto& _entry : _l) {                    \
-      auto _id = _entry.first;                         \
-      auto _it = _r.find(_id);                         \
-      EXPECT_TRUE(_it != _r.end());                    \
-      if (_it != _r.end()) {                           \
-        auto _lvalue = _entry.second;                  \
-        auto _rvalue = _it->second;                    \
-        EXPECT_DOUBLE_NEAR_EPS(_lvalue, _rvalue, eps); \
-      }                                                \
-    }                                                  \
-  } while (0)
-
 #define EXPECT_DOUBLE_EPS (1e-3)
 #define EXPECT_DOUBLE_NEAR(l, r) EXPECT_DOUBLE_NEAR_EPS(l, r, EXPECT_DOUBLE_EPS)
 #define EXPECT_ARRAY_NEAR(l, r, size) \
   EXPECT_ARRAY_NEAR_EPS(l, r, size, EXPECT_DOUBLE_EPS)
 #define EXPECT_VECTOR_NEAR(l, r) EXPECT_VECTOR_NEAR_EPS(l, r, EXPECT_DOUBLE_EPS)
 #define EXPECT_TSR_NEAR(l, r) EXPECT_TSR_NEAR_EPS(l, r, EXPECT_DOUBLE_EPS)
-// for SRM, SRP, SRG
-#define EXPECT_SRX_NEAR(l, r) EXPECT_SRX_NEAR_EPS(l, r, EXPECT_DOUBLE_EPS)
-// for SVP, SVG
-#define EXPECT_SVX_NEAR(l, r) EXPECT_SVX_NEAR_EPS(l, r, EXPECT_DOUBLE_EPS)
+#define EXPECT_SRM_NEAR(l, r) EXPECT_SRM_NEAR_EPS(l, r, EXPECT_DOUBLE_EPS)

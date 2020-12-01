@@ -8,11 +8,7 @@
 #include <deepx_core/dx_log.h>
 #include <deepx_core/tensor/csr_matrix.h>
 #include <deepx_core/tensor/ll_math.h>
-#include <deepx_core/tensor/sparse_row_grad.h>
 #include <deepx_core/tensor/sparse_row_matrix.h>
-#include <deepx_core/tensor/sparse_row_param.h>
-#include <deepx_core/tensor/sparse_vector_grad.h>
-#include <deepx_core/tensor/sparse_vector_param.h>
 #include <deepx_core/tensor/tensor.h>
 #include <deepx_core/tensor/tensor_type.h>
 #include <cstdint>
@@ -447,10 +443,6 @@ class LLSparseTensor : public LLTensor<T> {
   using csr_t = CSRMatrix<float_t, int_t>;
   using tsri_t = Tensor<int_t>;
   using tsrs_t = Tensor<std::string>;
-  using srp_t = SparseRowParam<float_t, int_t>;
-  using svp_t = SparseVectorParam<float_t, int_t>;
-  using srg_t = SparseRowGrad<float_t, int_t>;
-  using svg_t = SparseVectorGrad<float_t, int_t>;
   using ll_math_t = LLMath<float_t>;
 
   using base_t::get_data;
@@ -568,12 +560,6 @@ class LLSparseTensor : public LLTensor<T> {
   // Z: m * n tsr
   static void gesmsm(const csr_t& X, const srm_t& Y, int beta,
                      tsr_t* Z) noexcept;
-  // Y: ? * n srp
-  static void gesmsm(const csr_t& X, const srp_t& Y, float_t beta,
-                     tsr_t* Z) noexcept;
-  // Y: ? * 1 svp
-  static void gesmsm(const csr_t& X, const svp_t& Y, float_t beta,
-                     tsr_t* Z) noexcept;
 
   // GESTMM: General Sparse Transposed Matrix to Matrix Multiplication.
   // Compute Z = X.T * Y + beta * Z.
@@ -587,10 +573,6 @@ class LLSparseTensor : public LLTensor<T> {
   // A modulo-by-k operation will be performed to cols of X.
   static void gestmm_mod(int_t k, const csr_t& X, const tsr_t& Y, int beta,
                          srm_t* Z);
-  static void gestmm_mod(int_t k, const csr_t& X, const tsr_t& Y, float_t beta,
-                         srg_t* Z);
-  static void gestmm_mod(int_t k, const csr_t& X, const tsr_t& Y, float_t beta,
-                         svg_t* Z);
 
   // Compute Z = X.T * Y + beta * Z.
   //
@@ -600,20 +582,14 @@ class LLSparseTensor : public LLTensor<T> {
   // Y:   m * n tsr
   // Z:   ? * n srm
   static void gestmm(const csr_t& X, const tsr_t& Y, int beta, srm_t* Z);
-  static void gestmm(const csr_t& X, const tsr_t& Y, float_t beta, srg_t* Z);
-  static void gestmm(const csr_t& X, const tsr_t& Y, float_t beta, svg_t* Z);
 
   // Compute Z = X + Z.
   static void add_to(const tsr_t& X, tsr_t* Z) noexcept;
   static void add_to(const srm_t& X, srm_t* Z);
-  static void add_to(const srg_t& X, srg_t* Z);
-  static void add_to(const svg_t& X, svg_t* Z);
 
   // Compute Z = beta * Z.
   static void scale(float_t beta, tsr_t* Z) noexcept;
   static void scale(float_t beta, srm_t* Z) noexcept;
-  static void scale(float_t beta, srg_t* Z) noexcept;
-  static void scale(float_t beta, svg_t* Z) noexcept;
 };
 
 /************************************************************************/
@@ -720,49 +696,6 @@ void LLSparseTensor<T, I>::gesmsm(const csr_t& X, const srm_t& Y, int beta,
 }
 
 template <typename T, typename I>
-void LLSparseTensor<T, I>::gesmsm(const csr_t& X, const srp_t& Y, float_t beta,
-                                  tsr_t* Z) noexcept {
-  int n = Y.col();
-  cptr_t Yj;
-  DXASSERT(Z->same_shape(X.row(), n));
-  ptr_t _Z = get_data(Z);
-
-  if (beta == 0) {
-    Z->zeros();
-  }
-
-  CSR_FOR_EACH_ROW(X, i) {
-    CSR_FOR_EACH_COL(X, i) {
-      Yj = Y.get_row_no_init(CSR_COL(X));
-      if (Yj) {
-        ll_math_t::axpy(n, CSR_VALUE(X), Yj, _Z);
-      }
-    }
-    _Z += n;
-  }
-}
-
-template <typename T, typename I>
-void LLSparseTensor<T, I>::gesmsm(const csr_t& X, const svp_t& Y, float_t beta,
-                                  tsr_t* Z) noexcept {
-  float_t Yj;
-  DXASSERT(Z->same_shape(X.row(), 1));
-  ptr_t _Z = get_data(Z);
-
-  if (beta == 0) {
-    Z->zeros();
-  }
-
-  CSR_FOR_EACH_ROW(X, i) {
-    CSR_FOR_EACH_COL(X, i) {
-      Yj = Y.get_scalar_no_init(CSR_COL(X));
-      *_Z += CSR_VALUE(X) * Yj;
-    }
-    _Z += 1;
-  }
-}
-
-template <typename T, typename I>
 void LLSparseTensor<T, I>::gestmm_mod(int_t k, const csr_t& X, const tsr_t& Y,
                                       int beta, srm_t* Z) {
   int n = Z->col();
@@ -790,43 +723,6 @@ void LLSparseTensor<T, I>::gestmm_mod(int_t k, const csr_t& X, const tsr_t& Y,
       }
       _Y += n;
     }
-  }
-}
-
-template <typename T, typename I>
-void LLSparseTensor<T, I>::gestmm_mod(int_t k, const csr_t& X, const tsr_t& Y,
-                                      float_t beta, srg_t* Z) {
-  int n = Z->col();
-  DXASSERT(Y.same_shape(X.row(), n));
-  cptr_t _Y = get_data(Y);
-
-  if (beta == 0) {
-    Z->zeros();
-  }
-
-  CSR_FOR_EACH_ROW(X, i) {
-    CSR_FOR_EACH_COL(X, i) {
-      ll_math_t::axpy(n, CSR_VALUE(X), _Y, Z->get_row_no_init(CSR_COL(X) % k));
-    }
-    _Y += n;
-  }
-}
-
-template <typename T, typename I>
-void LLSparseTensor<T, I>::gestmm_mod(int_t k, const csr_t& X, const tsr_t& Y,
-                                      float_t beta, svg_t* Z) {
-  DXASSERT(Y.same_shape(X.row(), 1));
-  cptr_t _Y = get_data(Y);
-
-  if (beta == 0) {
-    Z->zeros();
-  }
-
-  CSR_FOR_EACH_ROW(X, i) {
-    CSR_FOR_EACH_COL(X, i) {
-      Z->get_scalar_no_init(CSR_COL(X) % k) += CSR_VALUE(X) * *_Y;
-    }
-    _Y += 1;
   }
 }
 
@@ -862,43 +758,6 @@ void LLSparseTensor<T, I>::gestmm(const csr_t& X, const tsr_t& Y, int beta,
 }
 
 template <typename T, typename I>
-void LLSparseTensor<T, I>::gestmm(const csr_t& X, const tsr_t& Y, float_t beta,
-                                  srg_t* Z) {
-  int n = Z->col();
-  DXASSERT(Y.same_shape(X.row(), n));
-  cptr_t _Y = get_data(Y);
-
-  if (beta == 0) {
-    Z->zeros();
-  }
-
-  CSR_FOR_EACH_ROW(X, i) {
-    CSR_FOR_EACH_COL(X, i) {
-      ll_math_t::axpy(n, CSR_VALUE(X), _Y, Z->get_row_no_init(CSR_COL(X)));
-    }
-    _Y += n;
-  }
-}
-
-template <typename T, typename I>
-void LLSparseTensor<T, I>::gestmm(const csr_t& X, const tsr_t& Y, float_t beta,
-                                  svg_t* Z) {
-  DXASSERT(Y.same_shape(X.row(), 1));
-  cptr_t _Y = get_data(Y);
-
-  if (beta == 0) {
-    Z->zeros();
-  }
-
-  CSR_FOR_EACH_ROW(X, i) {
-    CSR_FOR_EACH_COL(X, i) {
-      Z->get_scalar_no_init(CSR_COL(X)) += CSR_VALUE(X) * *_Y;
-    }
-    _Y += 1;
-  }
-}
-
-template <typename T, typename I>
 void LLSparseTensor<T, I>::add_to(const tsr_t& X, tsr_t* Z) noexcept {
   add(X, *Z, Z);
 }
@@ -914,23 +773,6 @@ void LLSparseTensor<T, I>::add_to(const srm_t& X, srm_t* Z) {
 }
 
 template <typename T, typename I>
-void LLSparseTensor<T, I>::add_to(const srg_t& X, srg_t* Z) {
-  DXASSERT(X.col() == Z->col());
-  for (const auto& entry : X) {
-    ptr_t _Z = Z->get_row_no_init(entry.first);
-    cptr_t _X = entry.second;
-    ll_math_t::add(X.col(), _X, _Z, _Z);
-  }
-}
-
-template <typename T, typename I>
-void LLSparseTensor<T, I>::add_to(const svg_t& X, svg_t* Z) {
-  for (const auto& entry : X) {
-    Z->get_scalar_no_init(entry.first) += entry.second;
-  }
-}
-
-template <typename T, typename I>
 void LLSparseTensor<T, I>::scale(float_t beta, tsr_t* Z) noexcept {
   mul_scalar(*Z, beta, Z);
 }
@@ -939,20 +781,6 @@ template <typename T, typename I>
 void LLSparseTensor<T, I>::scale(float_t beta, srm_t* Z) noexcept {
   for (auto& entry : *Z) {
     ll_math_t::mul_scalar(Z->col(), entry.second, beta, entry.second);
-  }
-}
-
-template <typename T, typename I>
-void LLSparseTensor<T, I>::scale(float_t beta, srg_t* Z) noexcept {
-  for (auto& entry : *Z) {
-    ll_math_t::mul_scalar(Z->col(), entry.second, beta, entry.second);
-  }
-}
-
-template <typename T, typename I>
-void LLSparseTensor<T, I>::scale(float_t beta, svg_t* Z) noexcept {
-  for (auto& entry : *Z) {
-    entry.second *= beta;
   }
 }
 
@@ -974,10 +802,6 @@ class LLOptimizer : protected LLSparseTensor<T, I> {
   using csr_t = CSRMatrix<float_t, int_t>;
   using tsri_t = Tensor<int_t>;
   using tsrs_t = Tensor<std::string>;
-  using srp_t = SparseRowParam<float_t, int_t>;
-  using svp_t = SparseVectorParam<float_t, int_t>;
-  using srg_t = SparseRowGrad<float_t, int_t>;
-  using svg_t = SparseVectorGrad<float_t, int_t>;
   using ll_math_t = LLMath<float_t>;
 
   using base_t::get_data;
@@ -1018,28 +842,6 @@ class LLOptimizer : protected LLSparseTensor<T, I> {
         ptr_t g = entry.second;
         ClipArray(n, g);
       }
-    }
-  }
-
-  static void Clip(srg_t* G) noexcept {
-    int n = G->col();
-    if (n == 1) {
-      for (auto& entry : *G) {
-        ptr_t g = entry.second;
-        ClipScalar(g);
-      }
-    } else {
-      for (auto& entry : *G) {
-        ptr_t g = entry.second;
-        ClipArray(n, g);
-      }
-    }
-  }
-
-  static void Clip(svg_t* G) noexcept {
-    for (auto& entry : *G) {
-      float_t& g = entry.second;
-      ClipScalar(&g);
     }
   }
 
@@ -1332,223 +1134,6 @@ class LLOptimizer : protected LLSparseTensor<T, I> {
         UpdateArray(config, n, g, W->get_row_no_init(i, Wlock),
                     A->get_row_no_init(i, Alock), B->get_row_no_init(i, Block));
       }
-    }
-  }
-
- public:
-  /************************************************************************/
-  /* grad srg, param tsr */
-  /************************************************************************/
-  template <class Config>
-  static void UpdateSRG2TSR(const Config& config, const srg_t& G,
-                            tsr_t* W) noexcept {
-    DXASSERT_RANK2(*W);
-    int n = W->dim(1);
-    DXASSERT(G.col() == n);
-    if (n == 1) {
-      for (const auto& entry : G) {
-        int_t i = entry.first;
-        float_t g = *entry.second;
-        UpdateScalar(config, g, get_data(W) + i);
-      }
-    } else {
-      for (const auto& entry : G) {
-        int_t i = entry.first;
-        cptr_t g = entry.second;
-        UpdateArray(config, n, g, get_data(W) + i * n);
-      }
-    }
-  }
-
-  template <class Config>
-  static void UpdateSRG2TSR(const Config& config, const srg_t& G, tsr_t* W,
-                            tsr_t* A) noexcept {
-    DXASSERT_RANK2(*W);
-    int n = W->dim(1);
-    DXASSERT(G.col() == n);
-    DXASSERT_SAME_SHAPE(*W, *A);
-    if (n == 1) {
-      for (const auto& entry : G) {
-        int_t i = entry.first;
-        float_t g = *entry.second;
-        UpdateScalar(config, g, get_data(W) + i, get_data(A) + i);
-      }
-    } else {
-      for (const auto& entry : G) {
-        int_t i = entry.first;
-        cptr_t g = entry.second;
-        UpdateArray(config, n, g, get_data(W) + i * n, get_data(A) + i * n);
-      }
-    }
-  }
-
-  template <class Config>
-  static void UpdateSRG2TSR(const Config& config, const srg_t& G, tsr_t* W,
-                            tsr_t* A, tsr_t* B) noexcept {
-    DXASSERT_RANK2(*W);
-    int n = W->dim(1);
-    DXASSERT(G.col() == n);
-    DXASSERT_SAME_SHAPE(*W, *A, *B);
-    if (n == 1) {
-      for (const auto& entry : G) {
-        int_t i = entry.first;
-        float_t g = *entry.second;
-        UpdateScalar(config, g, get_data(W) + i, get_data(A) + i,
-                     get_data(B) + i);
-      }
-    } else {
-      for (const auto& entry : G) {
-        int_t i = entry.first;
-        cptr_t g = entry.second;
-        UpdateArray(config, n, g, get_data(W) + i * n, get_data(A) + i * n,
-                    get_data(B) + i * n);
-      }
-    }
-  }
-
- public:
-  /************************************************************************/
-  /* grad svg, param tsr */
-  /************************************************************************/
-  template <class Config>
-  static void UpdateSVG2TSR(const Config& config, const svg_t& G,
-                            tsr_t* W) noexcept {
-    DXASSERT_RANK2(*W);
-    DXASSERT(W->dim(1) == 1);
-    for (const auto& entry : G) {
-      int_t i = entry.first;
-      float_t g = entry.second;
-      UpdateScalar(config, g, get_data(W) + i);
-    }
-  }
-
-  template <class Config>
-  static void UpdateSVG2TSR(const Config& config, const svg_t& G, tsr_t* W,
-                            tsr_t* A) noexcept {
-    DXASSERT_RANK2(*W);
-    DXASSERT(W->dim(1) == 1);
-    DXASSERT_SAME_SHAPE(*W, *A);
-    for (const auto& entry : G) {
-      int_t i = entry.first;
-      float_t g = entry.second;
-      UpdateScalar(config, g, get_data(W) + i, get_data(A) + i);
-    }
-  }
-
-  template <class Config>
-  static void UpdateSVG2TSR(const Config& config, const svg_t& G, tsr_t* W,
-                            tsr_t* A, tsr_t* B) noexcept {
-    DXASSERT_RANK2(*W);
-    DXASSERT(W->dim(1) == 1);
-    DXASSERT_SAME_SHAPE(*W, *A, *B);
-    for (const auto& entry : G) {
-      int_t i = entry.first;
-      float_t g = entry.second;
-      UpdateScalar(config, g, get_data(W) + i, get_data(A) + i,
-                   get_data(B) + i);
-    }
-  }
-
- public:
-  /************************************************************************/
-  /* grad srg, param srp */
-  /************************************************************************/
-  template <class Config>
-  static void UpdateSRG2SRP(const Config& config, const srg_t& G, srp_t* W) {
-    int n = G.col();
-    DXASSERT(W->col() == n);
-    if (n == 1) {
-      for (const auto& entry : G) {
-        int_t i = entry.first;
-        float_t g = *entry.second;
-        UpdateScalar(config, g, W->get_row_no_init(i));
-      }
-    } else {
-      for (const auto& entry : G) {
-        int_t i = entry.first;
-        cptr_t g = entry.second;
-        UpdateArray(config, n, g, W->get_row_no_init(i));
-      }
-    }
-  }
-
-  template <class Config>
-  static void UpdateSRG2SRP(const Config& config, const srg_t& G, srp_t* W,
-                            srp_t* A) {
-    int n = G.col();
-    DXASSERT(W->col() == n);
-    DXASSERT(A->col() == n);
-    if (n == 1) {
-      for (const auto& entry : G) {
-        int_t i = entry.first;
-        float_t g = *entry.second;
-        UpdateScalar(config, g, W->get_row_no_init(i), A->get_row_no_init(i));
-      }
-    } else {
-      for (const auto& entry : G) {
-        int_t i = entry.first;
-        cptr_t g = entry.second;
-        UpdateArray(config, n, g, W->get_row_no_init(i), A->get_row_no_init(i));
-      }
-    }
-  }
-
-  template <class Config>
-  static void UpdateSRG2SRP(const Config& config, const srg_t& G, srp_t* W,
-                            srp_t* A, srp_t* B) {
-    int n = G.col();
-    DXASSERT(W->col() == n);
-    DXASSERT(A->col() == n);
-    DXASSERT(B->col() == n);
-    if (n == 1) {
-      for (const auto& entry : G) {
-        int_t i = entry.first;
-        float_t g = *entry.second;
-        UpdateScalar(config, g, W->get_row_no_init(i), A->get_row_no_init(i),
-                     B->get_row_no_init(i));
-      }
-    } else {
-      for (const auto& entry : G) {
-        int_t i = entry.first;
-        cptr_t g = entry.second;
-        UpdateArray(config, n, g, W->get_row_no_init(i), A->get_row_no_init(i),
-                    B->get_row_no_init(i));
-      }
-    }
-  }
-
- public:
-  /************************************************************************/
-  /* grad svg, param svp */
-  /************************************************************************/
-  template <class Config>
-  static void UpdateSVG2SVP(const Config& config, const svg_t& G, svp_t* W) {
-    for (const auto& entry : G) {
-      int_t i = entry.first;
-      float_t g = entry.second;
-      UpdateScalar(config, g, &W->get_scalar_no_init(i));
-    }
-  }
-
-  template <class Config>
-  static void UpdateSVG2SVP(const Config& config, const svg_t& G, svp_t* W,
-                            svp_t* A) {
-    for (const auto& entry : G) {
-      int_t i = entry.first;
-      float_t g = entry.second;
-      UpdateScalar(config, g, &W->get_scalar_no_init(i),
-                   &A->get_scalar_no_init(i));
-    }
-  }
-
-  template <class Config>
-  static void UpdateSVG2SVP(const Config& config, const svg_t& G, svp_t* W,
-                            svp_t* A, svp_t* B) {
-    for (const auto& entry : G) {
-      int_t i = entry.first;
-      float_t g = entry.second;
-      UpdateScalar(config, g, &W->get_scalar_no_init(i),
-                   &A->get_scalar_no_init(i), &B->get_scalar_no_init(i));
     }
   }
 

@@ -473,19 +473,7 @@
     <ClInclude Include="..\include\deepx_core\tensor\shape.h">
       <Filter>tensor</Filter>
     </ClInclude>
-    <ClInclude Include="..\include\deepx_core\tensor\sparse_row_grad.h">
-      <Filter>tensor</Filter>
-    </ClInclude>
     <ClInclude Include="..\include\deepx_core\tensor\sparse_row_matrix.h">
-      <Filter>tensor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\deepx_core\tensor\sparse_row_param.h">
-      <Filter>tensor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\deepx_core\tensor\sparse_vector_grad.h">
-      <Filter>tensor</Filter>
-    </ClInclude>
-    <ClInclude Include="..\include\deepx_core\tensor\sparse_vector_param.h">
       <Filter>tensor</Filter>
     </ClInclude>
     <ClInclude Include="..\include\deepx_core\tensor\tensor.h">

@@ -46,8 +46,6 @@ GraphNode* Relu(std::string name, GraphNode* X);
 | TENSOR\_TYPE\_CSR | CSR | CSR矩阵 | INSTANCE |
 | TENSOR\_TYPE\_TSRI | TSRI | 整型稠密张量 | INSTANCE |
 | TENSOR\_TYPE\_TSRS | TSRS | 字符串型稠密张量 | INSTANCE |
-| TENSOR\_TYPE\_SRP | SRP | 稀疏行矩阵 | PARAM |
-| TENSOR\_TYPE\_SVP | SVP | 稀疏向量 | PARAM |
 
 参考[张量](tensor.md).
 
@@ -73,11 +71,11 @@ int initializer_type, double initializer_param1, double initializer_param2
 
 | initializer\_type | 初始化方式 | 支持的节点张量类型 |
 | - | - | - |
-| TENSOR\_INITIALIZER\_TYPE\_ZEROS | 全0初始化 | TSR, SRM, SRP, SVP |
-| TENSOR\_INITIALIZER\_TYPE\_ONES | 全1初始化 | TSR, SRM, SRP, SVP |
-| TENSOR\_INITIALIZER\_TYPE\_CONSTANT | 常数(initializer\_param1)初始化 | TSR, SRM, SRP, SVP |
-| TENSOR\_INITIALIZER\_TYPE\_RAND | 均匀分布(下限是initializer\_param1, 上限是initializer\_param2)初始化 | TSR, SRM, SRP, SVP |
-| TENSOR\_INITIALIZER\_TYPE\_RANDN | 正态分布(均值是initializer\_param1, 标准差是initializer\_param2)初始化 | TSR, SRM, SRP, SVP |
+| TENSOR\_INITIALIZER\_TYPE\_ZEROS | 全0初始化 | TSR, SRM |
+| TENSOR\_INITIALIZER\_TYPE\_ONES | 全1初始化 | TSR, SRM |
+| TENSOR\_INITIALIZER\_TYPE\_CONSTANT | 常数(initializer\_param1)初始化 | TSR, SRM |
+| TENSOR\_INITIALIZER\_TYPE\_RAND | 均匀分布(下限是initializer\_param1, 上限是initializer\_param2)初始化 | TSR, SRM |
+| TENSOR\_INITIALIZER\_TYPE\_RANDN | 正态分布(均值是initializer\_param1, 标准差是initializer\_param2)初始化 | TSR, SRM |
 | TENSOR\_INITIALIZER\_TYPE\_RAND\_LECUN | Lecun均匀分布初始化 | TSR |
 | TENSOR\_INITIALIZER\_TYPE\_RANDN\_LECUN | Lecun正态分布初始化 | TSR |
 | TENSOR\_INITIALIZER\_TYPE\_RAND\_XAVIER | Xavier均匀分布初始化 | TSR |
@@ -104,8 +102,6 @@ GraphNode* Relu(std::string name, GraphNode* X);
 下面文档有以下约定.
 
 - 将节点的返回张量记为Z.
-- SRM是deepx\_core特有的节点张量类型.
-- SRP和SVP是deepx2特有的节点张量类型.
 - 以"Batch"开头的节点表示输入节点和输出节点的第1个轴是batch轴.
 - axis做为参数表示轴.
   - 如果axis大于等于0, 表示第axis个轴(从0开始计数).
@@ -2301,8 +2297,6 @@ VariableNode(std::string name, const Shape& shape, int initializer_type,
 - tensor\_type, 节点张量类型.
   - TSR
   - SRM
-  - SRP
-  - SVP
   - 没有tensor\_type的版本, 同TSR.
   - 和模型参数中的张量类型必须匹配.
 - initializer\_type, initializer\_param1, initializer\_param2, 初始化方式.
@@ -2672,7 +2666,7 @@ GraphNode* TFEmbeddingLookup(std::string name, GraphNode* X, GraphNode* W);
 - W, 嵌入矩阵.
   - 形如(m, n)的TSR.
     - id的嵌入是W的第"id % m"行.
-  - 形如(?, n)的SRM或SRP.
+  - 形如(?, n)的SRM.
     - id的嵌入是W中id对应的行, 如果不存在, 则id的嵌入是全0行.
 
 返回.
@@ -2757,7 +2751,7 @@ $$
 - W, 嵌入矩阵.
   - 形如(m, n)的TSR.
     - 令$W_{ij}$表示X的第i行中, 第j个id的嵌入, 它是W的第"id % m"行.
-  - 形如(?, n)的SRM, SRP或SVP(n=1).
+  - 形如(?, n)的SRM.
     - 令$W_{ij}$表示X的第i行中, 第j个id的嵌入, 它是W中id对应的行, 如果不存在, 则$W_{ij}$是全0行.
 
 返回.

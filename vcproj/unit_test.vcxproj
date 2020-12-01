@@ -92,11 +92,7 @@
     <ClCompile Include="..\src\tensor\ll_math_test.cc" />
     <ClCompile Include="..\src\tensor\ll_tensor_test.cc" />
     <ClCompile Include="..\src\tensor\shape_test.cc" />
-    <ClCompile Include="..\src\tensor\sparse_row_grad_test.cc" />
     <ClCompile Include="..\src\tensor\sparse_row_matrix_test.cc" />
-    <ClCompile Include="..\src\tensor\sparse_row_param_test.cc" />
-    <ClCompile Include="..\src\tensor\sparse_vector_grad_test.cc" />
-    <ClCompile Include="..\src\tensor\sparse_vector_param_test.cc" />
     <ClCompile Include="..\src\tensor\tensor_test.cc" />
   </ItemGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

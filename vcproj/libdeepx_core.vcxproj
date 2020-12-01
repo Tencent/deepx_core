@@ -161,11 +161,7 @@
     <ClInclude Include="..\include\deepx_core\tensor\ll_tensor.h" />
     <ClInclude Include="..\include\deepx_core\tensor\ll_tensor_sage2.h" />
     <ClInclude Include="..\include\deepx_core\tensor\shape.h" />
-    <ClInclude Include="..\include\deepx_core\tensor\sparse_row_grad.h" />
     <ClInclude Include="..\include\deepx_core\tensor\sparse_row_matrix.h" />
-    <ClInclude Include="..\include\deepx_core\tensor\sparse_row_param.h" />
-    <ClInclude Include="..\include\deepx_core\tensor\sparse_vector_grad.h" />
-    <ClInclude Include="..\include\deepx_core\tensor\sparse_vector_param.h" />
     <ClInclude Include="..\include\deepx_core\tensor\tensor.h" />
     <ClInclude Include="..\include\deepx_core\tensor\tensor_type.h" />
     <ClInclude Include="..\src\graph\op\kernel\binary_meta.h" />

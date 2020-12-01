@@ -6,11 +6,7 @@
 #include <deepx_core/tensor/csr_matrix.h>
 #include <deepx_core/tensor/ll_math.h>
 #include <deepx_core/tensor/ll_tensor.h>
-#include <deepx_core/tensor/sparse_row_grad.h>
 #include <deepx_core/tensor/sparse_row_matrix.h>
-#include <deepx_core/tensor/sparse_row_param.h>
-#include <deepx_core/tensor/sparse_vector_grad.h>
-#include <deepx_core/tensor/sparse_vector_param.h>
 #include <deepx_core/tensor/tensor.h>
 #include <cstdint>
 #include <string>
@@ -30,10 +26,6 @@ class DataTypeT {
   using csr_t = CSRMatrix<float_t, int_t>;
   using tsri_t = Tensor<int_t>;
   using tsrs_t = Tensor<std::string>;
-  using srp_t = SparseRowParam<float_t, int_t>;
-  using svp_t = SparseVectorParam<float_t, int_t>;
-  using srg_t = SparseRowGrad<float_t, int_t>;
-  using svg_t = SparseVectorGrad<float_t, int_t>;
   using ll_math_t = LLMath<float_t>;
   using ll_tensor_t = LLTensor<float_t>;
   using ll_sparse_tensor_t = LLSparseTensor<float_t, int_t>;

@@ -267,19 +267,7 @@
     <ClCompile Include="..\src\tensor\shape_test.cc">
       <Filter>tensor</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\tensor\sparse_row_grad_test.cc">
-      <Filter>tensor</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\tensor\sparse_row_matrix_test.cc">
-      <Filter>tensor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\tensor\sparse_row_param_test.cc">
-      <Filter>tensor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\tensor\sparse_vector_grad_test.cc">
-      <Filter>tensor</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\tensor\sparse_vector_param_test.cc">
       <Filter>tensor</Filter>
     </ClCompile>
     <ClCompile Include="..\src\tensor\tensor_test.cc">
