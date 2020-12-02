@@ -35,10 +35,10 @@ enum TENSOR_TYPE {
   TENSOR_TYPE_CSR = 3,
   TENSOR_TYPE_TSRI = 4,
   TENSOR_TYPE_TSRS = 5,
-  TENSOR_TYPE_SRP = 10,  // compatiability
-  TENSOR_TYPE_SVP = 11,  // compatiability
-  TENSOR_TYPE_SRG = 12,  // compatiability
-  TENSOR_TYPE_SVG = 13,  // compatiability
+  TENSOR_TYPE_SRP = 10,  // backward compatibility
+  TENSOR_TYPE_SVP = 11,  // backward compatibility
+  TENSOR_TYPE_SRG = 12,  // backward compatibility
+  TENSOR_TYPE_SVG = 13,  // backward compatibility
 };
 
 /************************************************************************/

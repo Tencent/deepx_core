@@ -65,8 +65,8 @@ void GraphNode::Read(InputStream& is) {
   }
 
   if (is) {
-    if (tensor_type_ == TENSOR_TYPE_SRP ||
-        tensor_type_ == TENSOR_TYPE_SVP) {  // compatiability
+    // backward compatibility
+    if (tensor_type_ == TENSOR_TYPE_SRP || tensor_type_ == TENSOR_TYPE_SVP) {
       tensor_type_ = TENSOR_TYPE_SRM;
     }
   }

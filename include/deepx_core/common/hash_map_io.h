@@ -44,7 +44,7 @@ InputStream& operator>>(InputStream& is,
     is >> size_u64;
     size = (std::size_t)size_u64;
   } else {
-    // deprecated
+    // backward compatibility
     int size_i = 0;
     is >> size_i;
     size = (std::size_t)size_i;
@@ -85,7 +85,7 @@ InputStringStream& ReadView(
     is >> size_u64;
     size = (std::size_t)size_u64;
   } else {
-    // deprecated
+    // backward compatibility
     int size_i = 0;
     is >> size_i;
     size = (std::size_t)size_i;

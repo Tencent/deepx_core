@@ -77,10 +77,10 @@ void TensorMap::_Read(InputStream& is) {
       case TENSOR_TYPE_TSRS:
         is >> insert<tsrs_t>(name);
         break;
-      case TENSOR_TYPE_SRP:  // compatiability
+      case TENSOR_TYPE_SRP:  // backward compatibility
         ReadSRP(is, insert<srm_t>(name));
         break;
-      case TENSOR_TYPE_SVP:  // compatiability
+      case TENSOR_TYPE_SVP:  // backward compatibility
         ReadSVP(is, insert<srm_t>(name));
         break;
     }
@@ -124,10 +124,10 @@ void TensorMap::_ReadView(InputStringStream& is) {
       case TENSOR_TYPE_TSRS:
         ReadView(is, insert<tsrs_t>(name));
         break;
-      case TENSOR_TYPE_SRP:  // compatiability
+      case TENSOR_TYPE_SRP:  // backward compatibility
         ReadSRPView(is, insert<srm_t>(name));
         break;
-      case TENSOR_TYPE_SVP:  // compatiability
+      case TENSOR_TYPE_SVP:  // backward compatibility
         ReadSVPView(is, insert<srm_t>(name));
         break;
     }

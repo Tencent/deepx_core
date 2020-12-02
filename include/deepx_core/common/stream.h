@@ -907,7 +907,7 @@ InputStream& operator>>(InputStream& is, std::unordered_map<K, T, H, P, A>& m) {
     is >> size_u64;
     size = (std::size_t)size_u64;
   } else {
-    // deprecated
+    // backward compatibility
     int size_i = 0;
     is >> size_i;
     size = (std::size_t)size_i;
@@ -947,7 +947,7 @@ InputStringStream& ReadView(InputStringStream& is,
     is >> size_u64;
     size = (std::size_t)size_u64;
   } else {
-    // deprecated
+    // backward compatibility
     int size_i = 0;
     is >> size_i;
     size = (std::size_t)size_i;
@@ -1006,7 +1006,7 @@ InputStream& operator>>(InputStream& is, std::unordered_set<V, H, P, A>& s) {
     is >> size_u64;
     size = (std::size_t)size_u64;
   } else {
-    // deprecated
+    // backward compatibility
     int size_i = 0;
     is >> size_i;
     size = (std::size_t)size_i;
@@ -1045,7 +1045,7 @@ InputStringStream& ReadView(InputStringStream& is,
     is >> size_u64;
     size = (std::size_t)size_u64;
   } else {
-    // deprecated
+    // backward compatibility
     int size_i = 0;
     is >> size_i;
     size = (std::size_t)size_i;

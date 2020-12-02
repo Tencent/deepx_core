@@ -143,23 +143,23 @@ class SparseRowMatrix {
   friend InputStringStream& ReadView(InputStringStream& is,          // NOLINT
                                      SparseRowMatrix<T2, I2>& srm);  // NOLINT
 
-  // compatiability
+  // backward compatibility
   template <typename T2, typename I2>
   friend InputStream& ReadSRP(InputStream& is,                // NOLINT
                               SparseRowMatrix<T2, I2>& srm);  // NOLINT
 
-  // compatiability
+  // backward compatibility
   template <typename T2, typename I2>
   friend InputStringStream& ReadSRPView(
       InputStringStream& is,          // NOLINT
       SparseRowMatrix<T2, I2>& srm);  // NOLINT
 
-  // compatiability
+  // backward compatibility
   template <typename T2, typename I2>
   friend InputStream& ReadSVP(InputStream& is,                // NOLINT
                               SparseRowMatrix<T2, I2>& srm);  // NOLINT
 
-  // compatiability
+  // backward compatibility
   template <typename T2, typename I2>
   friend InputStringStream& ReadSVPView(
       InputStringStream& is,          // NOLINT
@@ -294,7 +294,7 @@ InputStream& operator>>(InputStream& is, SparseRowMatrix<T, I>& srm) {
       srm.set_col(col);
     }
   } else {
-    // deprecated
+    // backward compatibility
     srm.clear();
     std::vector<T> value;
     HashMap<I, std::size_t, MurmurHash<I>> row_offset_map;
@@ -329,7 +329,7 @@ InputStringStream& ReadView(InputStringStream& is,         // NOLINT
       srm.set_col(col);
     }
   } else {
-    // deprecated
+    // backward compatibility
     is.set_bad();
   }
   return is;
@@ -352,7 +352,7 @@ InputStream& ReadSRP(InputStream& is,               // NOLINT
       srm.set_col(col);
     }
   } else {
-    // deprecated
+    // backward compatibility
     int col;
     is >> col >> srm.row_map_ >> srm.initializer_type_ >>
         srm.initializer_param1_ >> srm.initializer_param2_;
@@ -372,7 +372,6 @@ InputStringStream& ReadSRPView(InputStringStream& is,         // NOLINT
 template <typename T, typename I>
 InputStream& ReadSVP(InputStream& is,               // NOLINT
                      SparseRowMatrix<T, I>& srm) {  // NOLINT
-                                                    // deprecated
   srm.clear();
   HashMap<I, T, MurmurHash<I>> row_map;
   is >> row_map >> srm.initializer_type_ >> srm.initializer_param1_ >>
