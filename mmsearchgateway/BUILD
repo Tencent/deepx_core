@@ -2,109 +2,33 @@
 # Author: Yafei Zhang (kimmyzhang@tencent.com)
 #
 
-cc_library(
+package(default_visibility=['//visibility:public'])
+
+load('/mmsearchgateway/deepx_core/build_config', 'deepx_core_library',
+     'deepx_core_user_library', 'deepx_core_user_binary')
+
+deepx_core_library(
     name='deepx_core',
-    alwayslink=1,
-    srcs=glob(
-        [
-            'src/**/*.cc',
-        ],
-        exclude=[
-            'src/**/*_test*.cc',
-            'src/**/*_main.cc',
-        ],
-    ),
-    hdrs=glob([
-        'include/**/*.h',
-    ],),
-    includes=[
-        'include',
-    ],
-    deps=[
-        '//comm2/core:core',
-        '//mm3rd/lz4-1.8.2:lz4',
-        '//mm3rd/zlib-1.2.3:z',
-        '//mmsearchgateway/sage2:sage2',
-    ],
-    copts=[
-        '-Immsearchgateway/deepx_core/thirdparty',
-        '-std=c++11',
-        '-Wall',
-        '-Wextra',
-        '-Werror',
-        '-pedantic',
-        '-Wno-array-bounds',
-        '-Wno-float-equal',
-        '-DOS_LINUX=1',
-        '-DOS_POSIX=1',
-        '-DNDEBUG',
-        '-DHAVE_SAGE2=1',
-        '-DHAVE_SAGE2_SGEMM=1',
-        # '-DHAVE_SAGE2_SGEMM_JIT=1',
-        '-DHAVE_WXG_LOG=1',
-    ],
-    visibility=[
-        '//visibility:public',
-    ],
+    have_wxg_log=True,
 )
 
-cc_library(
+deepx_core_library(
+    name='deepx_core_no_wxg_log',
+    have_wxg_log=False,
+)
+
+deepx_core_user_library(
     name='example_rank_model_server',
-    alwayslink=1,
-    srcs=[
-        'example/rank/model_server.cc',
-    ],
-    hdrs=[
-        'example/rank/model_server.h',
-    ],
-    deps=[
-        ':deepx_core',
-    ],
-    copts=[
-        '-std=c++11',
-        '-Wall',
-        '-Wextra',
-        '-Werror',
-        '-pedantic',
-        '-DOS_LINUX=1',
-        '-DOS_POSIX=1',
-        '-DNDEBUG',
-        '-DHAVE_SAGE2=1',
-        '-DHAVE_SAGE2_SGEMM=1',
-        # '-DHAVE_SAGE2_SGEMM_JIT=1',
-        '-DHAVE_WXG_LOG=1',
-    ],
-    visibility=[
-        '//visibility:public',
-    ],
+    srcs=['example/rank/model_server.cc'],
+    hdrs=['example/rank/model_server.h'],
+    alwayslink=True,
+    have_wxg_log=True,
 )
 
-cc_binary(
+deepx_core_user_binary(
     name='feature_kv_demo',
-    srcs=[
-        'src/tools/feature_kv_demo_main.cc',
-    ],
-    deps=[
-        ':deepx_core',
-        '//mm3rd/gflags:gflags',
-        '//platform/kvsvr_feature/new/kvsvr:featurekvclient',
-    ],
-    copts=[
-        '-std=c++11',
-        '-Wall',
-        '-Wextra',
-        '-Werror',
-        '-pedantic',
-        '-DOS_LINUX=1',
-        '-DOS_POSIX=1',
-        '-DNDEBUG',
-        '-DHAVE_SAGE2=1',
-        '-DHAVE_SAGE2_SGEMM=1',
-        # '-DHAVE_SAGE2_SGEMM_JIT=1',
-        # '-DHAVE_WXG_LOG=1',
-        '-DHAVE_WXG_FEATURE_KV_CLIENT=1',
-    ],
-    visibility=[
-        '//visibility:public',
-    ],
+    srcs=['src/tools/feature_kv_demo_main.cc'],
+    deps=['//mm3rd/gflags:gflags'],
+    have_wxg_log=False,
+    have_wxg_feature_kv_client=True,
 )
