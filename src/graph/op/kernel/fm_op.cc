@@ -7,11 +7,11 @@
 namespace deepx_core {
 
 /************************************************************************/
-/* BatchPairWiseInteraction */
+/* BatchFMInteraction */
 /************************************************************************/
 namespace {
 
-bool BatchPairWiseInteractionInferShape(const Shape& X, Shape* Z) noexcept {
+bool BatchFMInteractionInferShape(const Shape& X, Shape* Z) noexcept {
   if (!X.is_rank(3)) {
     DXERROR("Invalid X: rank of X %d must be 3.", X.rank());
     return false;
@@ -25,7 +25,7 @@ bool BatchPairWiseInteractionInferShape(const Shape& X, Shape* Z) noexcept {
 }
 
 template <typename T>
-void BatchPairWiseInteraction(const Tensor<T>& X, Tensor<T>* Z) noexcept {
+void BatchFMInteraction(const Tensor<T>& X, Tensor<T>* Z) noexcept {
   int batch = X.dim(0);
   int m = X.dim(1);
   int n = X.dim(2);
@@ -43,10 +43,8 @@ void BatchPairWiseInteraction(const Tensor<T>& X, Tensor<T>* Z) noexcept {
 }
 
 template <typename T>
-void BatchPairWiseInteractionBackward(const Tensor<T>& X,
-                                      const Tensor<T>& /*Z*/,
-                                      const Tensor<T>& gZ,
-                                      Tensor<T>* gX) noexcept {
+void BatchFMInteractionBackward(const Tensor<T>& X, const Tensor<T>& /*Z*/,
+                                const Tensor<T>& gZ, Tensor<T>* gX) noexcept {
   int batch = X.dim(0);
   int m = X.dim(1);
   int n = X.dim(2);
@@ -68,44 +66,46 @@ void BatchPairWiseInteractionBackward(const Tensor<T>& X,
 
 }  // namespace
 
-BatchPairWiseInteractionNode::BatchPairWiseInteractionNode(std::string name,
-                                                           GraphNode* X)
+BatchFMInteractionNode::BatchFMInteractionNode(std::string name, GraphNode* X)
     : GraphNodeUnaryBase(std::move(name), X) {
   if (!X->shape().empty()) {
-    (void)BatchPairWiseInteractionInferShape(X->shape(), &shape_);
+    (void)BatchFMInteractionInferShape(X->shape(), &shape_);
   }
 }
 
-class BatchPairWiseInteractionOp : public OpUnaryBase {
+class BatchFMInteractionOp : public OpUnaryBase {
  private:
   Shape Zshape_;
 
  public:
-  DEFINE_OP_LIKE(BatchPairWiseInteractionOp);
+  DEFINE_OP_LIKE(BatchFMInteractionOp);
 
   const Shape& InferShape() override {
-    DXCHECK_THROW(BatchPairWiseInteractionInferShape(X_->shape(), &Zshape_));
+    DXCHECK_THROW(BatchFMInteractionInferShape(X_->shape(), &Zshape_));
     return Zshape_;
   }
 
-  void Forward() override { BatchPairWiseInteraction(*X_, Z_); }
+  void Forward() override { BatchFMInteraction(*X_, Z_); }
 
   void Backward() override {
     if (gX_) {
-      BatchPairWiseInteractionBackward(*X_, *Z_, *gZ_, gX_);
+      BatchFMInteractionBackward(*X_, *Z_, *gZ_, gX_);
     }
   }
 };
 
-GRAPH_NODE_OP_REGISTER(BatchPairWiseInteraction);
+GRAPH_NODE_OP_REGISTER(BatchFMInteraction);
+// backward compatibility
+CLASS_FACTORY_REGISTER(GraphNode, BatchFMInteractionNode,
+                       "BatchPairWiseInteractionNode");
 
 /************************************************************************/
-/* BatchPairWiseInteraction2 */
+/* BatchFMInteraction2 */
 /************************************************************************/
 namespace {
 
-bool BatchPairWiseInteraction2InferShape(const Shape& X, const Shape& Y,
-                                         Shape* Z) noexcept {
+bool BatchFMInteraction2InferShape(const Shape& X, const Shape& Y,
+                                   Shape* Z) noexcept {
   if (!X.is_rank(3)) {
     DXERROR("Invalid X: rank of X %d must be 3.", X.rank());
     return false;
@@ -136,8 +136,8 @@ bool BatchPairWiseInteraction2InferShape(const Shape& X, const Shape& Y,
 }
 
 template <typename T>
-void BatchPairWiseInteraction2(const Tensor<T>& X, const Tensor<T>& Y,
-                               Tensor<T>* Z) noexcept {
+void BatchFMInteraction2(const Tensor<T>& X, const Tensor<T>& Y,
+                         Tensor<T>* Z) noexcept {
   int batch = X.dim(0);
   int m1 = X.dim(1);
   int n = X.dim(2);
@@ -158,10 +158,9 @@ void BatchPairWiseInteraction2(const Tensor<T>& X, const Tensor<T>& Y,
 }
 
 template <typename T>
-void BatchPairWiseInteraction2Backward(const Tensor<T>& X, const Tensor<T>& Y,
-                                       const Tensor<T>& /*Z*/,
-                                       const Tensor<T>& gZ, Tensor<T>* gX,
-                                       Tensor<T>* gY) noexcept {
+void BatchFMInteraction2Backward(const Tensor<T>& X, const Tensor<T>& Y,
+                                 const Tensor<T>& /*Z*/, const Tensor<T>& gZ,
+                                 Tensor<T>* gX, Tensor<T>* gY) noexcept {
   int batch = X.dim(0);
   int m1 = X.dim(1);
   int n = X.dim(2);
@@ -216,38 +215,40 @@ void BatchPairWiseInteraction2Backward(const Tensor<T>& X, const Tensor<T>& Y,
 
 }  // namespace
 
-BatchPairWiseInteraction2Node::BatchPairWiseInteraction2Node(std::string name,
-                                                             GraphNode* X,
-                                                             GraphNode* Y)
+BatchFMInteraction2Node::BatchFMInteraction2Node(std::string name, GraphNode* X,
+                                                 GraphNode* Y)
     : GraphNodeBinaryBase(std::move(name), X, Y) {
   if (!X->shape().empty() && !Y->shape().empty()) {
-    (void)BatchPairWiseInteraction2InferShape(X->shape(), Y->shape(), &shape_);
+    (void)BatchFMInteraction2InferShape(X->shape(), Y->shape(), &shape_);
   }
 }
 
-class BatchPairWiseInteraction2Op : public OpBinaryBase {
+class BatchFMInteraction2Op : public OpBinaryBase {
  private:
   Shape Zshape_;
 
  public:
-  DEFINE_OP_LIKE(BatchPairWiseInteraction2Op);
+  DEFINE_OP_LIKE(BatchFMInteraction2Op);
 
   const Shape& InferShape() override {
-    DXCHECK_THROW(BatchPairWiseInteraction2InferShape(X_->shape(), Y_->shape(),
-                                                      &Zshape_));
+    DXCHECK_THROW(
+        BatchFMInteraction2InferShape(X_->shape(), Y_->shape(), &Zshape_));
     return Zshape_;
   }
 
-  void Forward() override { BatchPairWiseInteraction2(*X_, *Y_, Z_); }
+  void Forward() override { BatchFMInteraction2(*X_, *Y_, Z_); }
 
   void Backward() override {
     if (gZ_) {
-      BatchPairWiseInteraction2Backward(*X_, *Y_, *Z_, *gZ_, gX_, gY_);
+      BatchFMInteraction2Backward(*X_, *Y_, *Z_, *gZ_, gX_, gY_);
     }
   }
 };
 
-GRAPH_NODE_OP_REGISTER(BatchPairWiseInteraction2);
+GRAPH_NODE_OP_REGISTER(BatchFMInteraction2);
+// backward compatibility
+CLASS_FACTORY_REGISTER(GraphNode, BatchFMInteraction2Node,
+                       "BatchPairWiseInteraction2Node");
 
 /************************************************************************/
 /* BatchFMQuadratic */

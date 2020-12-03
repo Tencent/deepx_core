@@ -230,7 +230,7 @@ GraphNode* CIN(const std::string& prefix, GraphNode* X,
     auto ii = std::to_string(i);
     int m0mi = X0->shape()[1] * Xi->shape()[1];
     auto* W = GetVariableRandXavier(prefix + "W" + ii, Shape(m0mi, dims[i]));
-    auto* Z1 = BatchPairWiseInteraction2("", X0, Xi);
+    auto* Z1 = BatchFMInteraction2("", X0, Xi);
     auto* Z2 = TensorDot("", Z1, W, Shape(1), Shape(0));
     auto* Z3 = Transpose("", Z2, Shape(0, 2, 1));
     auto* Z4 = ReduceSum("", Z3, -1, 0);

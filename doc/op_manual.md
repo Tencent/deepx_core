@@ -1371,11 +1371,11 @@ ArgMin(X, 2) = TSR([[1, 1, 2],
                     [3, 1, 2]])
 ```
 
-### BatchPairWiseInteractionNode
+### BatchFMInteractionNode
 
 ```c++
-BatchPairWiseInteractionNode(std::string name, GraphNode* X);
-GraphNode* BatchPairWiseInteraction(std::string name, GraphNode* X);
+BatchFMInteractionNode(std::string name, GraphNode* X);
+GraphNode* BatchFMInteraction(std::string name, GraphNode* X);
 ```
 
 以batch方式对X中m个长度是n的向量两两组合(相乘), 得到m*(m - 1)/2个长度是n的向量.
@@ -1401,7 +1401,7 @@ X = TSR([[[ 0,  1,  2],
           [18, 19, 20],
           [21, 22, 23]]])
 # (2, 6, 3)
-BatchPairWiseInteraction(X) = TSR(
+BatchFMInteraction(X) = TSR(
   [[[  0,   4,  10],
     [  0,   7,  16],
     [  0,  10,  22],
@@ -1417,12 +1417,11 @@ BatchPairWiseInteraction(X) = TSR(
 )
 ```
 
-### BatchPairWiseInteraction2Node
+### BatchFMInteraction2Node
 
 ```c++
-BatchPairWiseInteraction2Node(std::string name, GraphNode* X, GraphNode* Y);
-GraphNode* BatchPairWiseInteraction2(std::string name, GraphNode* X,
-                                     GraphNode* Y);
+BatchFMInteraction2Node(std::string name, GraphNode* X, GraphNode* Y);
+GraphNode* BatchFMInteraction2(std::string name, GraphNode* X, GraphNode* Y);
 ```
 
 以batch方式对X中m1个长度是n的向量和Y中m2个长度是n的向量两两组合(相乘), 得到m1*m2个长度是n的向量.
@@ -1452,7 +1451,7 @@ Y = TSR([[[ 0,  1,  2],
           [12, 13, 14],
           [15, 16, 17]]])
 # (2, 6, 3)
-BatchPairWiseInteraction2(X, Y) = TSR(
+BatchFMInteraction2(X, Y) = TSR(
   [[[  0,   1,   4],
     [  0,   4,  10],
     [  0,   7,  16],

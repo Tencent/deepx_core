@@ -7,14 +7,13 @@
 namespace deepx_core {
 
 /************************************************************************/
-/* BatchPairWiseInteraction */
+/* BatchFMInteraction */
 /************************************************************************/
-class BatchPairWiseInteractionForwardTest : public testing::Test,
-                                            public DataType {};
+class BatchFMInteractionForwardTest : public testing::Test, public DataType {};
 
-TEST_F(BatchPairWiseInteractionForwardTest, BatchPairWiseInteraction) {
+TEST_F(BatchFMInteractionForwardTest, BatchFMInteraction) {
   ConstantNode X("X", Shape(2, 3, 4), TENSOR_INITIALIZER_TYPE_ARANGE, 0, 0);
-  BatchPairWiseInteractionNode Z("Z", &X);
+  BatchFMInteractionNode Z("Z", &X);
   tsr_t expected_Z = {0,   5,   12,  21,   //
                       0,   9,   20,  33,   //
                       32,  45,  60,  77,   //
@@ -25,24 +24,23 @@ TEST_F(BatchPairWiseInteractionForwardTest, BatchPairWiseInteraction) {
   CheckOpForward(&Z, 0, expected_Z);
 }
 
-class BatchPairWiseInteractionBackwardTest : public testing::Test {};
+class BatchFMInteractionBackwardTest : public testing::Test {};
 
-TEST_F(BatchPairWiseInteractionBackwardTest, BatchPairWiseInteraction) {
+TEST_F(BatchFMInteractionBackwardTest, BatchFMInteraction) {
   VariableNode X("X", Shape(2, 4, 5), TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
-  BatchPairWiseInteractionNode Z("Z", &X);
+  BatchFMInteractionNode Z("Z", &X);
   CheckOpBackward(&Z, 0);
 }
 
 /************************************************************************/
-/* BatchPairWiseInteraction2 */
+/* BatchFMInteraction2 */
 /************************************************************************/
-class BatchPairWiseInteraction2ForwardTest : public testing::Test,
-                                             public DataType {};
+class BatchFMInteraction2ForwardTest : public testing::Test, public DataType {};
 
-TEST_F(BatchPairWiseInteraction2ForwardTest, BatchPairWiseInteraction2) {
+TEST_F(BatchFMInteraction2ForwardTest, BatchFMInteraction2) {
   ConstantNode X("X", Shape(2, 3, 4), TENSOR_INITIALIZER_TYPE_ARANGE, 0, 0);
   ConstantNode Y("Y", Shape(2, 1, 4), TENSOR_INITIALIZER_TYPE_ARANGE, 0, 0);
-  BatchPairWiseInteraction2Node Z("Z", &X, &Y);
+  BatchFMInteraction2Node Z("Z", &X, &Y);
   tsr_t expected_Z = {0,  1,   4,   9,    //
                       0,  5,   12,  21,   //
                       0,  9,   20,  33,   //
@@ -53,12 +51,12 @@ TEST_F(BatchPairWiseInteraction2ForwardTest, BatchPairWiseInteraction2) {
   CheckOpForward(&Z, 0, expected_Z);
 }
 
-class BatchPairWiseInteraction2BackwardTest : public testing::Test {};
+class BatchFMInteraction2BackwardTest : public testing::Test {};
 
-TEST_F(BatchPairWiseInteraction2BackwardTest, BatchPairWiseInteraction2) {
+TEST_F(BatchFMInteraction2BackwardTest, BatchFMInteraction2) {
   VariableNode X("X", Shape(2, 3, 4), TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
   VariableNode Y("Y", Shape(2, 3, 4), TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
-  BatchPairWiseInteraction2Node Z("Z", &X, &Y);
+  BatchFMInteraction2Node Z("Z", &X, &Y);
   CheckOpBackward(&Z, 0);
 }
 

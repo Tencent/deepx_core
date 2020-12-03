@@ -818,16 +818,16 @@ class ArgMinNode : public GraphNodeReduceAxisBase {
 /************************************************************************/
 /* fm op */
 /************************************************************************/
-class BatchPairWiseInteractionNode : public GraphNodeUnaryBase {
+class BatchFMInteractionNode : public GraphNodeUnaryBase {
  public:
-  BatchPairWiseInteractionNode(std::string name, GraphNode* X);
-  DEFINE_GRAPH_NODE_LIKE(BatchPairWiseInteractionNode);
+  BatchFMInteractionNode(std::string name, GraphNode* X);
+  DEFINE_GRAPH_NODE_LIKE(BatchFMInteractionNode);
 };
 
-class BatchPairWiseInteraction2Node : public GraphNodeBinaryBase {
+class BatchFMInteraction2Node : public GraphNodeBinaryBase {
  public:
-  BatchPairWiseInteraction2Node(std::string name, GraphNode* X, GraphNode* Y);
-  DEFINE_GRAPH_NODE_LIKE(BatchPairWiseInteraction2Node);
+  BatchFMInteraction2Node(std::string name, GraphNode* X, GraphNode* Y);
+  DEFINE_GRAPH_NODE_LIKE(BatchFMInteraction2Node);
 };
 
 class BatchFMQuadraticNode : public GraphNode {
@@ -1723,8 +1723,8 @@ DEFINE_GRAPH_NODE_CREATOR(ReduceL1)
 DEFINE_GRAPH_NODE_CREATOR(ReduceL2)
 DEFINE_GRAPH_NODE_CREATOR(ArgMax)
 DEFINE_GRAPH_NODE_CREATOR(ArgMin)
-DEFINE_GRAPH_NODE_CREATOR(BatchPairWiseInteraction)
-DEFINE_GRAPH_NODE_CREATOR(BatchPairWiseInteraction2)
+DEFINE_GRAPH_NODE_CREATOR(BatchFMInteraction)
+DEFINE_GRAPH_NODE_CREATOR(BatchFMInteraction2)
 DEFINE_GRAPH_NODE_CREATOR(BatchFMQuadratic)
 DEFINE_GRAPH_NODE_CREATOR(BatchGroupFMQuadratic)
 DEFINE_GRAPH_NODE_CREATOR(BatchGroupFMQuadratic2)
