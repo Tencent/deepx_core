@@ -512,7 +512,7 @@ bool RewriteCubicMulStage::MaySimplify(const GraphNode* node) const noexcept {
 }
 
 bool RewriteCubicMulStage::TrySimplify(GraphNode* node) {
-  auto is_modifiable = [&](const GraphNode* node) {
+  auto is_modifiable = [this](const GraphNode* node) {
     return !IsTarget(node) && IsSingleOutput(node);
   };
 

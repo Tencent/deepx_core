@@ -31,14 +31,14 @@ class ReadWriteLock {
   void lock_read() {
     std::unique_lock<std::mutex> guard(mutex_);
     read_cond_.wait(guard,
-                    [&]() { return waiting_writers_ == 0 && status_ >= 0; });
+                    [this]() { return waiting_writers_ == 0 && status_ >= 0; });
     status_ += 1;
   }
 
   void lock_write() {
     std::unique_lock<std::mutex> guard(mutex_);
     waiting_writers_ += 1;
-    write_cond_.wait(guard, [&]() { return status_ == 0; });
+    write_cond_.wait(guard, [this]() { return status_ == 0; });
     waiting_writers_ -= 1;
     status_ = -1;
   }
