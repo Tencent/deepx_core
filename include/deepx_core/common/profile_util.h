@@ -31,8 +31,8 @@ class TimerGuard {
 };
 
 using SecondTimerGuard = TimerGuard<std::chrono::seconds>;
-using MilliSecondTimerGuard = TimerGuard<std::chrono::milliseconds>;
-using MicroSecondTimerGuard = TimerGuard<std::chrono::microseconds>;
-using NanoSecondTimerGuard = TimerGuard<std::chrono::nanoseconds>;
+using MillisecondTimerGuard = TimerGuard<std::chrono::milliseconds>;
+using MicrosecondTimerGuard = TimerGuard<std::chrono::microseconds>;
+using NanosecondTimerGuard = TimerGuard<std::chrono::nanoseconds>;
 
 }  // namespace deepx_core

@@ -218,11 +218,11 @@ void OpContext::InitForward() {
   } else {
     for (int i = 0; i < forward_chain_size_; ++i) {
       Op* op = forward_chain_[i].get();
-      NanoSecondTimerGuard guard(profile_map_[op].init_forward);
+      NanosecondTimerGuard guard(profile_map_[op].init_forward);
       op->InitForward();
     }
 
-    NanoSecondTimerGuard guard(global_profile_.init_forward);
+    NanosecondTimerGuard guard(global_profile_.init_forward);
     if (has_loss_) {
       auto& Z = hidden_.get<tsr_t>(loss_name_);
       DXCHECK_THROW(Z.is_scalar());
@@ -249,11 +249,11 @@ void OpContext::InitPredict() {
   } else {
     for (int i = 0; i < forward_chain_size_; ++i) {
       Op* op = forward_chain_[i].get();
-      NanoSecondTimerGuard guard(profile_map_[op].init_predict);
+      NanosecondTimerGuard guard(profile_map_[op].init_predict);
       op->InitPredict();
     }
 
-    NanoSecondTimerGuard guard(global_profile_.init_predict);
+    NanosecondTimerGuard guard(global_profile_.init_predict);
     if (has_loss_) {
       auto& Z = hidden_.get<tsr_t>(loss_name_);
       DXCHECK_THROW(Z.is_scalar());
@@ -276,7 +276,7 @@ void OpContext::InitBackward() {
     }
   } else {
     {
-      NanoSecondTimerGuard guard(global_profile_.init_backward);
+      NanosecondTimerGuard guard(global_profile_.init_backward);
       DXCHECK_THROW(has_loss_);
       auto& G = grad_.get_or_insert<tsr_t>(loss_name_);
       G.resize(1);
@@ -285,7 +285,7 @@ void OpContext::InitBackward() {
 
     for (int i = 0; i < backward_chain_size_; ++i) {
       Op* op = backward_chain_[backward_chain_size_ - i - 1];
-      NanoSecondTimerGuard guard(profile_map_[op].init_backward);
+      NanosecondTimerGuard guard(profile_map_[op].init_backward);
       op->InitBackward();
     }
   }
@@ -299,7 +299,7 @@ void OpContext::Forward() {
   } else {
     for (int i = 0; i < forward_chain_size_; ++i) {
       Op* op = forward_chain_[i].get();
-      NanoSecondTimerGuard guard(profile_map_[op].forward);
+      NanosecondTimerGuard guard(profile_map_[op].forward);
       op->Forward();
     }
   }
@@ -313,7 +313,7 @@ void OpContext::Predict() {
   } else {
     for (int i = 0; i < forward_chain_size_; ++i) {
       Op* op = forward_chain_[i].get();
-      NanoSecondTimerGuard guard(profile_map_[op].predict);
+      NanosecondTimerGuard guard(profile_map_[op].predict);
       op->Predict();
     }
   }
@@ -335,7 +335,7 @@ void OpContext::Backward() {
     }
   } else {
     {
-      NanoSecondTimerGuard guard(global_profile_.backward);
+      NanosecondTimerGuard guard(global_profile_.backward);
       grad_.ZerosValue();
 
       if (has_loss_) {
@@ -348,7 +348,7 @@ void OpContext::Backward() {
 
     for (int i = 0; i < backward_chain_size_; ++i) {
       Op* op = backward_chain_[backward_chain_size_ - i - 1];
-      NanoSecondTimerGuard guard(profile_map_[op].backward);
+      NanosecondTimerGuard guard(profile_map_[op].backward);
       op->Backward();
     }
   }
@@ -362,13 +362,13 @@ void OpContext::GetPullRequest(PullRequest* pull_request) {
     }
   } else {
     {
-      NanoSecondTimerGuard guard(global_profile_.get_pull_request);
+      NanosecondTimerGuard guard(global_profile_.get_pull_request);
       pull_request->clear();
     }
 
     for (int i = 0; i < forward_chain_size_; ++i) {
       Op* op = forward_chain_[i].get();
-      NanoSecondTimerGuard guard(profile_map_[op].get_pull_request);
+      NanosecondTimerGuard guard(profile_map_[op].get_pull_request);
       op->GetPullRequest(pull_request);
     }
   }
