@@ -57,9 +57,6 @@ class TSStore : public DataType {
   // thread safe after 'InitLock'
   void Update(TensorMap* grad);
   id_set_t Expire();
-
- private:
-  void DumpMeta() const noexcept;
 };
 
 }  // namespace deepx_core

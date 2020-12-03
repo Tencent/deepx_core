@@ -5,7 +5,6 @@
 
 #include <deepx_core/dx_log.h>
 #include <deepx_core/graph/ts_store.h>
-#include <cinttypes>  // PRIu64
 
 namespace deepx_core {
 
@@ -23,7 +22,6 @@ bool TSStore::InitParam(const TensorMap& param) {
       }
     }
   }
-  DumpMeta();
   DXINFO("TSStore has %zu entries.", id_ts_map_.size());
   return true;
 }
@@ -90,7 +88,6 @@ bool TSStore::Load(const std::string& file) {
   if (!Read(is)) {
     return false;
   }
-  DumpMeta();
   DXINFO("Done.");
   return true;
 }
@@ -101,7 +98,6 @@ void TSStore::Warmup(TSStore* other) {
   for (auto& entry : other->id_ts_map_) {
     id_ts_map_.emplace(entry);
   }
-  DumpMeta();
   DXINFO("Done.");
 }
 
@@ -144,20 +140,6 @@ auto TSStore::Expire() -> id_set_t {
   DXINFO("TSStore has %zu entries expired, %zu entries remained.",
          expired.size(), id_ts_map_.size());
   return expired;
-}
-
-void TSStore::DumpMeta() const noexcept {
-  ts_t max_ts = 0;
-  auto first = id_ts_map_.begin();
-  auto last = id_ts_map_.end();
-  for (; first != last; ++first) {
-    if (max_ts < first->second) {
-      max_ts = first->second;
-    }
-  }
-  static_assert(sizeof(ts_t) <= sizeof(uint64_t), "");
-  DXINFO("max_ts=%" PRIu64 ", now=%" PRIu64 ", expire_threshold=%" PRIu64,
-         (uint64_t)max_ts, (uint64_t)now_, (uint64_t)expire_threshold_);
 }
 
 }  // namespace deepx_core
