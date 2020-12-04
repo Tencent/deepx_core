@@ -571,6 +571,15 @@ class LLMath {
     return std::sqrt(dot(n, x, x));
   }
 
+  // Compute euclidean distance of x and y.
+  static float_t euclidean_distance(int n, cptr_t x, cptr_t y) noexcept {
+    float_t s = 0;
+    for (int i = 0; i < n; ++i) {
+      s += (x[i] - y[i]) * (x[i] - y[i]);
+    }
+    return std::sqrt(s);
+  }
+
   // Compute y = softmax(x).
   static void softmax(int n, cptr_t x, ptr_t y) noexcept {
     sub_scalar(n, x, max(n, x), y);

@@ -120,4 +120,10 @@ inline float LLMath<float>::norm2(int n, cptr_t x) noexcept {
   return sage2_nrm2_ps(n, x);
 }
 
+template <>
+inline float LLMath<float>::euclidean_distance(int n, cptr_t x,
+                                               cptr_t y) noexcept {
+  return sage2_euclidean_distance_ps(n, x, y);
+}
+
 }  // namespace deepx_core

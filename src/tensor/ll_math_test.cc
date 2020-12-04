@@ -528,6 +528,15 @@ TEST_F(LLMathTest, norm2) {
   EXPECT_DOUBLE_NEAR(ll_math_t::norm2(3, x.data()), 6.1644140);
 }
 
+TEST_F(LLMathTest, euclidean_distance) {
+  vectorf_t x = {2, 3, 5};
+  vectorf_t y = {1, 1, 1};
+  EXPECT_DOUBLE_NEAR(ll_math_t::euclidean_distance(3, x.data(), x.data()), 0);
+  EXPECT_DOUBLE_NEAR(ll_math_t::euclidean_distance(3, x.data(), y.data()),
+                     4.5825757);
+  EXPECT_DOUBLE_NEAR(ll_math_t::euclidean_distance(3, y.data(), y.data()), 0);
+}
+
 TEST_F(LLMathTest, softmax) {
   vectorf_t x = {-1.1, 1.5, 2};
   ll_math_t::softmax(3, x.data(), x.data());

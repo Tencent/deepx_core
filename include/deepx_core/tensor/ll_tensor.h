@@ -382,6 +382,12 @@ class LLTensor {
     return ll_math_t::norm2(get_total_dim(x), get_data(x));
   }
 
+  static float_t euclidean_distance(const tsr_t& x, const tsr_t& y) noexcept {
+    DXASSERT_SAME_SHAPE(x, y);
+    return ll_math_t::euclidean_distance(get_total_dim(x), get_data(x),
+                                         get_data(y));
+  }
+
   static void softmax(const tsr_t& x, tsr_t* y) noexcept {
     DXASSERT_SAME_SHAPE(x, *y);
     ll_math_t::softmax(get_total_dim(x), get_data(x), get_data(y));
@@ -501,6 +507,7 @@ class LLSparseTensor : public LLTensor<T> {
 
   using base_t::abs;
   using base_t::dot;
+  using base_t::euclidean_distance;
   using base_t::max;
   using base_t::max_scalar;
   using base_t::min;
