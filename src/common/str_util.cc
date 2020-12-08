@@ -8,8 +8,8 @@
 namespace deepx_core {
 
 std::string& Trim(std::string* s) noexcept {
-  std::size_t left = s->find_first_not_of(" \n\r\t");
-  std::size_t right = s->find_last_not_of(" \n\r\t");
+  size_t left = s->find_first_not_of(" \n\r\t");
+  size_t right = s->find_last_not_of(" \n\r\t");
   if (right == std::string::npos && left == std::string::npos) {
     s->clear();
   } else {
@@ -42,7 +42,7 @@ void Split(const std::string& s, const std::string& sep,
     return;
   }
 
-  std::size_t index = s.find(sep, 0);
+  size_t index = s.find(sep, 0);
   if (index == std::string::npos) {
     if (!s.empty()) {
       vs->emplace_back(s);
@@ -50,7 +50,7 @@ void Split(const std::string& s, const std::string& sep,
     return;
   }
 
-  std::size_t first = 0;
+  size_t first = 0;
   while (index != std::string::npos) {
     if (!discard_empty || index > first) {
       vs->emplace_back(s.substr(first, index - first));
@@ -69,15 +69,15 @@ std::string Join(const std::vector<std::string>& vs, const std::string& sep) {
     return "";
   }
 
-  std::size_t size = (vs.size() - 1) * sep.size();
-  for (std::size_t i = 0; i < vs.size(); ++i) {  // NOLINT
+  size_t size = (vs.size() - 1) * sep.size();
+  for (size_t i = 0; i < vs.size(); ++i) {  // NOLINT
     size += vs[i].size();
   }
 
   std::string s;
   s.reserve(size);
   s += vs[0];
-  for (std::size_t i = 1; i < vs.size(); ++i) {
+  for (size_t i = 1; i < vs.size(); ++i) {
     s += sep;
     s += vs[i];
   }

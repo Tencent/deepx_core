@@ -284,7 +284,7 @@ void Model::RemoveZerosSRM() {
     Any& Wany = entry.second;
     if (Wany.is<srm_t>()) {
       auto& W = Wany.unsafe_to_ref<srm_t>();
-      std::size_t prev_size = W.size();
+      size_t prev_size = W.size();
       W.remove_zeros();
       DXINFO("SRM %s has %zu entries removed, %zu entries remained.",
              name.c_str(), prev_size - W.size(), W.size());
@@ -319,7 +319,7 @@ void Model::SplitPullRequest(const PullRequest& full_pull_request,
     (*pull_requests)[shard_id].tsr_set.emplace(name);
   }
 
-  std::size_t srm_feature_size = full_pull_request.srm_map.size() / shard_size;
+  size_t srm_feature_size = full_pull_request.srm_map.size() / shard_size;
   for (const auto& entry : full_pull_request.srm_map) {
     const std::string& name = entry.first;
     const PullRequest::id_set_t& feature_id_set = entry.second;
@@ -447,7 +447,7 @@ void Model::SplitGrad(const TensorMap& param, TensorMap* full_grad,
     } else if (Wany.is<srm_t>()) {
       if (Gany.is<srm_t>()) {
         auto& G = Gany.unsafe_to_ref<srm_t>();
-        std::size_t srm_feature_size = G.size() / shard_size;
+        size_t srm_feature_size = G.size() / shard_size;
         for (int i = 0; i < shard_size; ++i) {
           (*aux)[i] = &(*grads)[i]->get_or_insert<srm_t>(name);
           (*aux)[i]->set_col(G.col());
@@ -483,7 +483,7 @@ void Model::SplitParam(const TensorMap& full_param,
       (*params)[shard_id]->get_or_insert<tsr_t>(name) = W.get_view();
     } else if (Wany.is<srm_t>()) {
       auto& W = Wany.unsafe_to_ref<srm_t>();
-      std::size_t srm_feature_size = W.size() / shard_size;
+      size_t srm_feature_size = W.size() / shard_size;
       for (int i = 0; i < shard_size; ++i) {
         (*aux)[i] = &(*params)[i]->get_or_insert<srm_t>(name);
         (*aux)[i]->set_col(W.col());

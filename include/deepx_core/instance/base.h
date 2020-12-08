@@ -132,7 +132,7 @@ bool InstanceReaderHelper<T, I>::ParseUUID() noexcept {
     return true;
   }
 
-  if (std::strncmp(s_, UUID_TAG.c_str(), UUID_TAG.size()) != 0) {
+  if (strncmp(s_, UUID_TAG.c_str(), UUID_TAG.size()) != 0) {
     return true;
   }
   s_ += UUID_TAG.size();

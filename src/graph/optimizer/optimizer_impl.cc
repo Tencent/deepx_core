@@ -82,7 +82,7 @@ void OptimizerImpl::InitLock(AnyMap* param_lock) {
     OptimizerSRMSlot& slot = entry.second;
     slot.Wlock = param_lock->unsafe_get<std::shared_ptr<ReadWriteLock>>(name);
     slot.Olock.resize(slot.O.size());
-    for (std::size_t i = 0; i < slot.O.size(); ++i) {
+    for (size_t i = 0; i < slot.O.size(); ++i) {
       slot.Olock[i].reset(new ReadWriteLock);
     }
   }

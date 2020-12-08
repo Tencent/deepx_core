@@ -5,6 +5,7 @@
 
 #include "cse.h"
 #include <gtest/gtest.h>
+#include <memory>
 #include "simp_test.h"
 
 namespace deepx_core {

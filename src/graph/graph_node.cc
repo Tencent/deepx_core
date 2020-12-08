@@ -18,7 +18,7 @@ bool GraphNode::IsAttrEqual(const GraphNode* other) const noexcept {
 
 void GraphNode::Write(OutputStream& os) {
   input_name_.resize(input_.size());
-  for (std::size_t i = 0; i < input_.size(); ++i) {
+  for (size_t i = 0; i < input_.size(); ++i) {
     input_name_[i] = input_[i]->name();
   }
 

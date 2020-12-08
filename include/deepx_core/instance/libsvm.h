@@ -51,7 +51,7 @@ bool LibsvmInstanceReaderHelper<T, I>::Parse(csr_t* X, tsr_t* Y, tsr_t* W,
   int batch = Y->dim(0);
   int label_size = Y->dim(1);
   DXCHECK_THROW(label_size <= MAX_LABEL_SIZE);
-  std::size_t X_value_size = X->value_size();
+  size_t X_value_size = X->value_size();
   float_t* _Y;
   float_t* _W = nullptr;
   Y->resize(batch + 1, label_size);

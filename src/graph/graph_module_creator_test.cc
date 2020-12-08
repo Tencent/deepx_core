@@ -68,7 +68,7 @@ class EmbeddingCreatorBackwardTest : public testing::Test, public DataType {
       auto& W1 = param->get<srm_t>("ZW" + std::to_string(GROUP_ID1));
       auto& W2 = param->get<srm_t>("ZW" + std::to_string(GROUP_ID2));
       auto& W3 = param->get<srm_t>("ZW" + std::to_string(GROUP_ID3));
-      for (std::size_t i = 0; i < X_.col_size(); ++i) {
+      for (size_t i = 0; i < X_.col_size(); ++i) {
         W1.get_row(engine, X_.col(i));
         W2.get_row(engine, X_.col(i));
         W3.get_row(engine, X_.col(i));
@@ -85,7 +85,7 @@ class EmbeddingCreatorBackwardTest : public testing::Test, public DataType {
     auto post_param_initializer = [this](std::default_random_engine& engine,
                                          TensorMap* param) {
       auto& W = param->get<srm_t>("ZW");
-      for (std::size_t i = 0; i < X_.col_size(); ++i) {
+      for (size_t i = 0; i < X_.col_size(); ++i) {
         W.get_row(engine, X_.col(i));
       }
     };

@@ -172,7 +172,7 @@ TEST_F(HashMapTest, erase_1) {
   for (int i = 0; i < N; ++i) {
     hash_map.emplace(i, i);
   }
-  EXPECT_EQ(hash_map.size(), (std::size_t)N);
+  EXPECT_EQ(hash_map.size(), (size_t)N);
 
   for (int i = 0; i < N; ++i) {
     auto it = hash_map.find(i);
@@ -183,7 +183,7 @@ TEST_F(HashMapTest, erase_1) {
     } else {
       EXPECT_EQ(it, hash_map.end());
     }
-    EXPECT_EQ(hash_map.size(), (std::size_t)(N - 1 - i));
+    EXPECT_EQ(hash_map.size(), (size_t)(N - 1 - i));
   }
   EXPECT_TRUE(hash_map.empty());
 }
@@ -193,7 +193,7 @@ TEST_F(HashMapTest, erase_2) {
   for (int i = 0; i < N; ++i) {
     hash_map.emplace(i, i);
   }
-  EXPECT_EQ(hash_map.size(), (std::size_t)N);
+  EXPECT_EQ(hash_map.size(), (size_t)N);
 
   int n = 0;
   for (auto it = hash_map.begin(); it != hash_map.end();) {
@@ -214,7 +214,7 @@ TEST_F(HashMapTest, clear) {
 TEST_F(HashMapTest, rehash) {
   hash_map_t hash_map;
   hash_map.rehash(N);
-  std::size_t bucket_size = hash_map.bucket_size();
+  size_t bucket_size = hash_map.bucket_size();
   for (int i = 0; i < N; ++i) {
     hash_map.emplace(i, i);
     EXPECT_EQ(bucket_size, hash_map.bucket_size());

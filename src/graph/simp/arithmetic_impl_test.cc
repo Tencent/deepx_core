@@ -4,7 +4,7 @@
 //
 
 #include "arithmetic_impl.h"
-#include <vector>
+#include <string>
 #include "simp_test.h"
 
 namespace deepx_core {

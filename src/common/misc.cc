@@ -9,7 +9,7 @@
 
 namespace deepx_core {
 
-std::size_t GetVerboseBatch(int verbose) noexcept {
+size_t GetVerboseBatch(int verbose) noexcept {
   switch (verbose) {
     case 1:
       return 1024;

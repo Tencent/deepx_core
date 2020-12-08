@@ -147,7 +147,7 @@ int WriteRequest(TcpConnections* conns, int rpc_type,
     DXASSERT(conns->size() == masks->size());
   }
 
-  for (std::size_t i = 0; i < conns->size(); ++i) {
+  for (size_t i = 0; i < conns->size(); ++i) {
     if (masks == nullptr || (*masks)[i]) {
       TcpConnection* conn = (*conns)[i].get();
       const Request& request = requests[i];
@@ -167,7 +167,7 @@ int ReadResponse(TcpConnections* conns, std::vector<Response>* responses,
     DXASSERT(conns->size() == masks->size());
   }
 
-  for (std::size_t i = 0; i < conns->size(); ++i) {
+  for (size_t i = 0; i < conns->size(); ++i) {
     if (masks == nullptr || (*masks)[i]) {
       TcpConnection* conn = (*conns)[i].get();
       Response* response = &(*responses)[i];
@@ -187,7 +187,7 @@ int ReadResponseView(TcpConnections* conns, std::vector<Response>* responses,
     DXASSERT(conns->size() == masks->size());
   }
 
-  for (std::size_t i = 0; i < conns->size(); ++i) {
+  for (size_t i = 0; i < conns->size(); ++i) {
     if (masks == nullptr || (*masks)[i]) {
       TcpConnection* conn = (*conns)[i].get();
       Response* response = &(*responses)[i];
@@ -210,7 +210,7 @@ int WriteRequestReadResponse(TcpConnections* conns, int rpc_type,
     DXASSERT(conns->size() == masks->size());
   }
 
-  for (std::size_t i = 0; i < conns->size(); ++i) {
+  for (size_t i = 0; i < conns->size(); ++i) {
     if (masks == nullptr || (*masks)[i]) {
       TcpConnection* conn = (*conns)[i].get();
       const Request& request = requests[i];
@@ -219,7 +219,7 @@ int WriteRequestReadResponse(TcpConnections* conns, int rpc_type,
       }
     }
   }
-  for (std::size_t i = 0; i < conns->size(); ++i) {
+  for (size_t i = 0; i < conns->size(); ++i) {
     if (masks == nullptr || (*masks)[i]) {
       TcpConnection* conn = (*conns)[i].get();
       Response* response = &(*responses)[i];
@@ -242,7 +242,7 @@ int WriteRequestReadResponseView(TcpConnections* conns, int rpc_type,
     DXASSERT(conns->size() == masks->size());
   }
 
-  for (std::size_t i = 0; i < conns->size(); ++i) {
+  for (size_t i = 0; i < conns->size(); ++i) {
     if (masks == nullptr || (*masks)[i]) {
       TcpConnection* conn = (*conns)[i].get();
       const Request& request = requests[i];
@@ -251,7 +251,7 @@ int WriteRequestReadResponseView(TcpConnections* conns, int rpc_type,
       }
     }
   }
-  for (std::size_t i = 0; i < conns->size(); ++i) {
+  for (size_t i = 0; i < conns->size(); ++i) {
     if (masks == nullptr || (*masks)[i]) {
       TcpConnection* conn = (*conns)[i].get();
       Response* response = &(*responses)[i];
@@ -272,7 +272,7 @@ int WriteNotify(TcpConnections* conns, int rpc_type,
     DXASSERT(conns->size() == masks->size());
   }
 
-  for (std::size_t i = 0; i < conns->size(); ++i) {
+  for (size_t i = 0; i < conns->size(); ++i) {
     if (masks == nullptr || (*masks)[i]) {
       TcpConnection* conn = (*conns)[i].get();
       const Notify& notify = notifies[i];

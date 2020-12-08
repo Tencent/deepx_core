@@ -35,9 +35,8 @@ std::string to_string(const TcpEndpoint& endpoint);
 /************************************************************************/
 class TcpConnection {
  private:
-  static constexpr std::size_t INITIAL_BUF_BYTES = 100 * 1024;  // magic number
-  static constexpr std::size_t MAX_BUF_BYTES =
-      10 * 1024 * 1024;  // magic number
+  static constexpr size_t INITIAL_BUF_BYTES = 100 * 1024;    // magic number
+  static constexpr size_t MAX_BUF_BYTES = 10 * 1024 * 1024;  // magic number
 
   IoContext* const io_;
   std::unique_ptr<TcpSocket> socket_;
@@ -45,15 +44,15 @@ class TcpConnection {
 
   DistMessageView in_message_;
   std::string in_buf_;
-  std::size_t in_buf_offset_ = 0;
+  size_t in_buf_offset_ = 0;
   InputStringStream in_stream_;
   // bytes read for current message
-  std::size_t in_bytes_ = 0;
+  size_t in_bytes_ = 0;
 
   DistMessage out_message_;
   OutputStringStream out_stream_;
   // bytes written for current message
-  std::size_t out_bytes_ = 0;
+  size_t out_bytes_ = 0;
 
   // the file that remote worker is processing
   std::string file_;
@@ -93,7 +92,7 @@ class TcpConnection {
   // Return 0, success.
   // Return 1, incomplete message.
   // Return -2, message deserialization error.
-  int TryReadMessage(std::size_t in_bytes);
+  int TryReadMessage(size_t in_bytes);
 
   // Read data and deserialize to 'in_message_'.
   //
@@ -112,7 +111,7 @@ class TcpConnection {
   //
   // Return 0, completely written.
   // Return 1, incompletely written.
-  int OnWritten(std::size_t out_bytes);
+  int OnWritten(size_t out_bytes);
 
   // Connect to 'remote'.
   //

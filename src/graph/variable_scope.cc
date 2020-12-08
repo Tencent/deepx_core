@@ -14,7 +14,7 @@ namespace deepx_core {
 std::string VariableScopeManager::GetVariableName(
     const std::string& name) const {
   std::string variable_name;
-  for (std::size_t i = 0; i < scopes_.size(); ++i) {  // NOLINT
+  for (size_t i = 0; i < scopes_.size(); ++i) {  // NOLINT
     variable_name += scopes_[i];
     variable_name += "/";
   }

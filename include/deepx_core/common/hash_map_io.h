@@ -37,17 +37,17 @@ InputStream& operator>>(InputStream& is,
     return is;
   }
 
-  std::size_t size;
+  size_t size;
   if (version == 0x0a0c72e7) {  // magic number version
     uint64_t size_u64 = 0;
     is >> version;
     is >> size_u64;
-    size = (std::size_t)size_u64;
+    size = (size_t)size_u64;
   } else {
     // backward compatibility
     int size_i = 0;
     is >> size_i;
-    size = (std::size_t)size_i;
+    size = (size_t)size_i;
   }
   if (!is) {
     return is;
@@ -58,7 +58,7 @@ InputStream& operator>>(InputStream& is,
     Key key;
     Value value;
     m.reserve(size);
-    for (std::size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
       is >> key >> value;
       if (!is) {
         return is;
@@ -78,17 +78,17 @@ InputStringStream& ReadView(
     return is;
   }
 
-  std::size_t size;
+  size_t size;
   if (version == 0x0a0c72e7) {  // magic number version
     uint64_t size_u64 = 0;
     is >> version;
     is >> size_u64;
-    size = (std::size_t)size_u64;
+    size = (size_t)size_u64;
   } else {
     // backward compatibility
     int size_i = 0;
     is >> size_i;
-    size = (std::size_t)size_i;
+    size = (size_t)size_i;
   }
   if (!is) {
     return is;
@@ -99,7 +99,7 @@ InputStringStream& ReadView(
     Key key;
     Value value;
     m.reserve(size);
-    for (std::size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
       ReadView(is, key);
       ReadView(is, value);
       if (!is) {

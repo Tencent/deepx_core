@@ -255,7 +255,7 @@ class GraphNode {
   int input_size() const noexcept { return (int)input_.size(); }
   template <typename Int>
   const GraphNode* input(Int i) const noexcept {
-    return input_[(std::size_t)i];
+    return input_[(size_t)i];
   }
   const std::vector<GraphNode*>& input() const noexcept { return input_; }
 

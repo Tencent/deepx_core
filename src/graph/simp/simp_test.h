@@ -6,7 +6,9 @@
 #include <deepx_core/graph/graph.h>
 #include <gtest/gtest.h>
 #include <memory>
+#include <string>
 #include <typeindex>
+#include <vector>
 #include "simp_item.h"
 #include "simp_stage.h"
 

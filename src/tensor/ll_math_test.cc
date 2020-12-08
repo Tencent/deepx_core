@@ -607,10 +607,10 @@ TEST_F(LLMathTest, gemm_1) {
   const float_t* pX;
   float_t* pZ;
 
-  for (std::size_t i = 0; i < X.size(); ++i) {
+  for (size_t i = 0; i < X.size(); ++i) {
     X[i] = (float_t)i;
   }
-  for (std::size_t i = 0; i < Y.size(); ++i) {
+  for (size_t i = 0; i < Y.size(); ++i) {
     Y[i] = (float_t)i;
   }
   pX = &X[0];

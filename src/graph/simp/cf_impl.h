@@ -3,6 +3,7 @@
 //
 
 #pragma once
+#include <string>
 #include "cf.h"
 #include "simp_stage.h"
 

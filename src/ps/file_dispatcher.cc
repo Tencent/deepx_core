@@ -35,15 +35,15 @@ bool FileDispatcher::WorkerDispatchFile(std::string* file) {
     if (!to_dispatch_.empty()) {
       *file = to_dispatch_.front();
       to_dispatch_.pop_front();
-      dispatch_time_[*file] = std::time(nullptr);
+      dispatch_time_[*file] = time(nullptr);
       DXINFO("File is dispatched: %s.", file->c_str());
       return true;
     }
 
     if (timeout_ > 0) {
-      std::time_t now = std::time(nullptr);
+      time_t now = time(nullptr);
       for (const auto& entry : dispatch_time_) {
-        if (now - entry.second > (std::time_t)timeout_) {
+        if (now - entry.second > (time_t)timeout_) {
           const std::string& _file = entry.first;
           to_dispatch_.emplace_back(_file);
           dispatch_time_.erase(_file);

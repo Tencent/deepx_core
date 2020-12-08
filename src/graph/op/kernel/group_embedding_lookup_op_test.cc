@@ -61,7 +61,7 @@ TEST_F(GroupEmbeddingLookupBackwardTest, GroupEmbeddingLookup_SRM) {
     auto& W1 = param->get<srm_t>("W1");
     auto& W2 = param->get<srm_t>("W2");
     auto& W3 = param->get<srm_t>("W3");
-    for (std::size_t i = 0; i < X_.col_size(); ++i) {
+    for (size_t i = 0; i < X_.col_size(); ++i) {
       W1.get_row(engine, X_.col(i));
       W2.get_row(engine, X_.col(i));
       W3.get_row(engine, X_.col(i));
@@ -96,7 +96,7 @@ class GroupEmbeddingLookup2BackwardTest : public GroupEmbeddingLookupBaseTest {
     auto post_param_initializer = [this](std::default_random_engine& engine,
                                          TensorMap* param) {
       auto& W = param->get<srm_t>("W");
-      for (std::size_t i = 0; i < X_.col_size(); ++i) {
+      for (size_t i = 0; i < X_.col_size(); ++i) {
         W.get_row(engine, X_.col(i));
       }
     };

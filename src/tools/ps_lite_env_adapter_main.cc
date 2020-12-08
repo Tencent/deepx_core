@@ -14,7 +14,7 @@
 #include <algorithm>  // std::sort, ...
 #include <chrono>
 #include <cstdint>
-#include <cstdlib>  // std::getenv
+#include <cstdlib>  // getenv
 #include <functional>
 #include <iostream>
 #include <sstream>
@@ -109,7 +109,7 @@ class PSItems : public std::vector<PSItem> {
 
   std::vector<std::string> GetAddrs() const {
     std::vector<std::string> ps_addrs(size());
-    for (std::size_t i = 0; i < size(); ++i) {
+    for (size_t i = 0; i < size(); ++i) {
       ps_addrs[i] = (*this)[i].addr_str();
     }
     return ps_addrs;
@@ -134,7 +134,7 @@ class PSItems : public std::vector<PSItem> {
       });
     }
 
-    for (std::size_t i = 0; i < size(); ++i) {
+    for (size_t i = 0; i < size(); ++i) {
       PSItem& ps_item = (*this)[i];
       ps_item.set_id((int)i);
       DXINFO("ps_addr=%s, ps_id=%d", ps_item.addr_str().c_str(), ps_item.id());
@@ -323,8 +323,8 @@ void RunWK(const TcpEndpoint& cs_addr) {
 /* main */
 /************************************************************************/
 template <typename T>
-bool getenv(const char* name, T* value) {
-  const char* env = std::getenv(name);
+bool _getenv(const char* name, T* value) {
+  const char* env = getenv(name);
   if (env == nullptr) {
     return false;
   }
@@ -345,25 +345,25 @@ int main(int argc, char** argv) {
   google::ParseCommandLineFlags(&argc, &argv, true);
 
   std::string role;
-  DXCHECK_THROW(getenv("DMLC_ROLE", &role));
+  DXCHECK_THROW(_getenv("DMLC_ROLE", &role));
   DXCHECK_THROW(role == "scheduler" || role == "server" || role == "worker");
 
   std::string cs_ip;
   int cs_port;
   TcpEndpoint cs_addr;
-  DXCHECK_THROW(getenv("DMLC_PS_ROOT_URI", &cs_ip));
-  DXCHECK_THROW(getenv("DMLC_PS_ROOT_PORT", &cs_port));
+  DXCHECK_THROW(_getenv("DMLC_PS_ROOT_URI", &cs_ip));
+  DXCHECK_THROW(_getenv("DMLC_PS_ROOT_PORT", &cs_port));
   cs_addr = MakeTcpEndpoint(cs_ip, cs_port);
 
   if (role == "scheduler") {
     int ps_size = 0;
     int wk_size = 0;
-    DXCHECK_THROW(getenv("DMLC_NUM_SERVER", &ps_size));
-    DXCHECK_THROW(getenv("DMLC_NUM_WORKER", &wk_size));
+    DXCHECK_THROW(_getenv("DMLC_NUM_SERVER", &ps_size));
+    DXCHECK_THROW(_getenv("DMLC_NUM_WORKER", &wk_size));
     RunCS(cs_addr, ps_size, wk_size);
   } else if (role == "server") {
     int ps_id;
-    if (!getenv("DMLC_SERVER_ID", &ps_id)) {
+    if (!_getenv("DMLC_SERVER_ID", &ps_id)) {
       ps_id = -1;
     }
     RunPS(cs_addr, ps_id);

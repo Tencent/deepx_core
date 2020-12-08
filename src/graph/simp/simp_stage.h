@@ -7,6 +7,8 @@
 #include <memory>
 #include <string>
 #include <unordered_set>
+#include <utility>
+#include <vector>
 #include "simp_item.h"
 
 namespace deepx_core {

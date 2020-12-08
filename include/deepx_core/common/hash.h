@@ -21,8 +21,7 @@ inline uint64_t MurmurHash3Mix(uint64_t k) noexcept {
   return k;
 }
 
-uint64_t MurmurHash2(const void* data, std::size_t size,
-                     uint64_t seed) noexcept;
+uint64_t MurmurHash2(const void* data, size_t size, uint64_t seed) noexcept;
 
 inline uint64_t MurmurHash2(const std::string& k) noexcept {
   return MurmurHash2(k.data(), k.size(), UINT64_C(0xc70f6907));
@@ -31,12 +30,12 @@ inline uint64_t MurmurHash2(const std::string& k) noexcept {
 template <typename T>
 struct MurmurHash;
 
-#define DEFINE_MURMUR_HASH_T_IS_INTEGRAL(T)            \
-  template <>                                          \
-  struct MurmurHash<T> {                               \
-    std::size_t operator()(T k) const noexcept {       \
-      return (std::size_t)MurmurHash3Mix((uint64_t)k); \
-    }                                                  \
+#define DEFINE_MURMUR_HASH_T_IS_INTEGRAL(T)       \
+  template <>                                     \
+  struct MurmurHash<T> {                          \
+    size_t operator()(T k) const noexcept {       \
+      return (size_t)MurmurHash3Mix((uint64_t)k); \
+    }                                             \
   };
 
 DEFINE_MURMUR_HASH_T_IS_INTEGRAL(int8_t)
@@ -52,8 +51,8 @@ DEFINE_MURMUR_HASH_T_IS_INTEGRAL(uint64_t)
 
 template <>
 struct MurmurHash<std::string> {
-  std::size_t operator()(const std::string& k) const noexcept {
-    return (std::size_t)MurmurHash2(k);
+  size_t operator()(const std::string& k) const noexcept {
+    return (size_t)MurmurHash2(k);
   }
 };
 

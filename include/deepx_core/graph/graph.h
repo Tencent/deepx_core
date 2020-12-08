@@ -45,14 +45,14 @@ class GraphTarget {
   int forward_size() const noexcept { return (int)forward_.size(); }
   template <typename Int>
   const GraphNode* forward(Int i) const noexcept {
-    return forward_[(std::size_t)i];
+    return forward_[(size_t)i];
   }
   const std::vector<GraphNode*>& forward() const noexcept { return forward_; }
 
   int forward_name_size() const noexcept { return (int)forward_name_.size(); }
   template <typename Int>
   const std::string& forward_name(Int i) const noexcept {
-    return forward_name_[(std::size_t)i];
+    return forward_name_[(size_t)i];
   }
   const std::vector<std::string>& forward_name() const noexcept {
     return forward_name_;
@@ -79,7 +79,7 @@ class Graph {
   int target_size() const noexcept { return (int)target_.size(); }
   template <typename Int>
   const GraphTarget& target(Int i) const noexcept {
-    return target_[(std::size_t)i];
+    return target_[(size_t)i];
   }
   const std::vector<GraphTarget>& target() const noexcept { return target_; }
 

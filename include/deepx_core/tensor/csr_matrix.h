@@ -38,28 +38,28 @@ class CSRMatrix {
  public:
   int row() const noexcept { return row_; }
 
-  std::size_t row_offset_size() const noexcept { return row_offset_.size(); }
+  size_t row_offset_size() const noexcept { return row_offset_.size(); }
   template <typename Int>
   int row_offset(Int i) const noexcept {
-    return row_offset_[(std::size_t)i];
+    return row_offset_[(size_t)i];
   }
   const int* row_offset_begin() const noexcept { return row_offset_.data(); }
   const int* row_offset_end() const noexcept {
     return row_offset_.data() + row_offset_.size();
   }
 
-  std::size_t col_size() const noexcept { return col_.size(); }
+  size_t col_size() const noexcept { return col_.size(); }
   template <typename Int>
   int_t col(Int i) const noexcept {
-    return col_[(std::size_t)i];
+    return col_[(size_t)i];
   }
   const int_t* col_begin() const noexcept { return col_.data(); }
   const int_t* col_end() const noexcept { return col_.data() + col_.size(); }
 
-  std::size_t value_size() const noexcept { return value_.size(); }
+  size_t value_size() const noexcept { return value_.size(); }
   template <typename Int>
   float_t value(Int i) const noexcept {
-    return value_[(std::size_t)i];
+    return value_[(size_t)i];
   }
   cptr_t value_begin() const noexcept { return value_.data(); }
   cptr_t value_end() const noexcept { return value_.data() + value_.size(); }
@@ -76,7 +76,7 @@ class CSRMatrix {
   void reserve(Int size);
   inline void add_row();
   inline void emplace(int_t col, float_t value);
-  inline void trim(std::size_t value_size);
+  inline void trim(size_t value_size);
 
  public:
   // comparison
@@ -168,9 +168,9 @@ void CSRMatrix<T, I>::clear() noexcept {
 template <typename T, typename I>
 template <typename Int>
 void CSRMatrix<T, I>::reserve(Int size) {
-  row_offset_.reserve((std::size_t)size + 1);
-  col_.reserve((std::size_t)size * 512);    // magic number
-  value_.reserve((std::size_t)size * 512);  // magic number
+  row_offset_.reserve((size_t)size + 1);
+  col_.reserve((size_t)size * 512);    // magic number
+  value_.reserve((size_t)size * 512);  // magic number
 }
 
 template <typename T, typename I>
@@ -186,7 +186,7 @@ inline void CSRMatrix<T, I>::emplace(int_t col, float_t value) {
 }
 
 template <typename T, typename I>
-inline void CSRMatrix<T, I>::trim(std::size_t value_size) {
+inline void CSRMatrix<T, I>::trim(size_t value_size) {
   col_.erase(col_.begin() + value_size, col_.end());
   value_.erase(value_.begin() + value_size, value_.end());
 }

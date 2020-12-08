@@ -19,7 +19,7 @@ struct LogTime {
   int hour;
   int minute;
   int second;
-  int micro_second;
+  int microsecond;
 };
 
 LogTime GetLogTime() noexcept;
@@ -30,7 +30,7 @@ LogTime GetLogTime() noexcept;
 #define _DX_LOG_LOG_TIME_FORMAT "[%.4d%.2d%.2d %.2d:%.2d:%.2d.%.6d]"
 #define _DX_LOG_LOG_TIME_ARGS                                         \
   __log_time.year, __log_time.month, __log_time.day, __log_time.hour, \
-      __log_time.minute, __log_time.second, __log_time.micro_second
+      __log_time.minute, __log_time.second, __log_time.microsecond
 
 #define _DX_LOG_CONCAT(x, y) x y
 
@@ -42,21 +42,21 @@ LogTime GetLogTime() noexcept;
   _DX_LOG_IS_VA_ARGS_IMPL1((__VA_ARGS__, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0))
 
 // DXTHROW_INVALID_ARGUMENT
-#define _DXTHROW_INVALID_ARGUMENT0(format)                                     \
-  do {                                                                         \
-    char __buf[512];                                                           \
-    _DX_LOG_DEFINE_LOG_TIME();                                                 \
-    std::snprintf(__buf, sizeof(__buf), _DX_LOG_LOG_TIME_FORMAT "%s: " format, \
-                  _DX_LOG_LOG_TIME_ARGS, __func__);                            \
-    throw std::invalid_argument(&__buf[0]);                                    \
+#define _DXTHROW_INVALID_ARGUMENT0(format)                                \
+  do {                                                                    \
+    char __buf[512];                                                      \
+    _DX_LOG_DEFINE_LOG_TIME();                                            \
+    snprintf(__buf, sizeof(__buf), _DX_LOG_LOG_TIME_FORMAT "%s: " format, \
+             _DX_LOG_LOG_TIME_ARGS, __func__);                            \
+    throw std::invalid_argument(&__buf[0]);                               \
   } while (0)
-#define _DXTHROW_INVALID_ARGUMENT1(format, ...)                                \
-  do {                                                                         \
-    char __buf[512];                                                           \
-    _DX_LOG_DEFINE_LOG_TIME();                                                 \
-    std::snprintf(__buf, sizeof(__buf), _DX_LOG_LOG_TIME_FORMAT "%s: " format, \
-                  _DX_LOG_LOG_TIME_ARGS, __func__, __VA_ARGS__);               \
-    throw std::invalid_argument(&__buf[0]);                                    \
+#define _DXTHROW_INVALID_ARGUMENT1(format, ...)                           \
+  do {                                                                    \
+    char __buf[512];                                                      \
+    _DX_LOG_DEFINE_LOG_TIME();                                            \
+    snprintf(__buf, sizeof(__buf), _DX_LOG_LOG_TIME_FORMAT "%s: " format, \
+             _DX_LOG_LOG_TIME_ARGS, __func__, __VA_ARGS__);               \
+    throw std::invalid_argument(&__buf[0]);                               \
   } while (0)
 #define _DXTHROW_INVALID_ARGUMENT_IMPL2(is_var_args) \
   _DXTHROW_INVALID_ARGUMENT##is_var_args
@@ -69,21 +69,21 @@ LogTime GetLogTime() noexcept;
                  (__VA_ARGS__))
 
 // DXTHROW_RUNTIME_ERROR
-#define _DXTHROW_RUNTIME_ERROR0(format)                                        \
-  do {                                                                         \
-    char __buf[512];                                                           \
-    _DX_LOG_DEFINE_LOG_TIME();                                                 \
-    std::snprintf(__buf, sizeof(__buf), _DX_LOG_LOG_TIME_FORMAT "%s: " format, \
-                  _DX_LOG_LOG_TIME_ARGS, __func__);                            \
-    throw std::runtime_error(&__buf[0]);                                       \
+#define _DXTHROW_RUNTIME_ERROR0(format)                                   \
+  do {                                                                    \
+    char __buf[512];                                                      \
+    _DX_LOG_DEFINE_LOG_TIME();                                            \
+    snprintf(__buf, sizeof(__buf), _DX_LOG_LOG_TIME_FORMAT "%s: " format, \
+             _DX_LOG_LOG_TIME_ARGS, __func__);                            \
+    throw std::runtime_error(&__buf[0]);                                  \
   } while (0)
-#define _DXTHROW_RUNTIME_ERROR1(format, ...)                                   \
-  do {                                                                         \
-    char __buf[512];                                                           \
-    _DX_LOG_DEFINE_LOG_TIME();                                                 \
-    std::snprintf(__buf, sizeof(__buf), _DX_LOG_LOG_TIME_FORMAT "%s: " format, \
-                  _DX_LOG_LOG_TIME_ARGS, __func__, __VA_ARGS__);               \
-    throw std::runtime_error(&__buf[0]);                                       \
+#define _DXTHROW_RUNTIME_ERROR1(format, ...)                              \
+  do {                                                                    \
+    char __buf[512];                                                      \
+    _DX_LOG_DEFINE_LOG_TIME();                                            \
+    snprintf(__buf, sizeof(__buf), _DX_LOG_LOG_TIME_FORMAT "%s: " format, \
+             _DX_LOG_LOG_TIME_ARGS, __func__, __VA_ARGS__);               \
+    throw std::runtime_error(&__buf[0]);                                  \
   } while (0)
 #define _DXTHROW_RUNTIME_ERROR_IMPL2(is_var_args) \
   _DXTHROW_RUNTIME_ERROR##is_var_args
@@ -107,19 +107,17 @@ LogTime GetLogTime() noexcept;
                  __VA_ARGS__);                                               \
   } while (0)
 #else
-#define _DXINFO0(format)                                                    \
-  do {                                                                      \
-    _DX_LOG_DEFINE_LOG_TIME();                                              \
-    std::fprintf(stderr,                                                    \
-                 _DX_LOG_LOG_TIME_FORMAT "[INFO][%s:%d][%s]: " format "\n", \
-                 _DX_LOG_LOG_TIME_ARGS, __FILE__, __LINE__, __func__);      \
+#define _DXINFO0(format)                                                       \
+  do {                                                                         \
+    _DX_LOG_DEFINE_LOG_TIME();                                                 \
+    fprintf(stderr, _DX_LOG_LOG_TIME_FORMAT "[INFO][%s:%d][%s]: " format "\n", \
+            _DX_LOG_LOG_TIME_ARGS, __FILE__, __LINE__, __func__);              \
   } while (0)
-#define _DXINFO1(format, ...)                                              \
-  do {                                                                     \
-    _DX_LOG_DEFINE_LOG_TIME();                                             \
-    std::fprintf(                                                          \
-        stderr, _DX_LOG_LOG_TIME_FORMAT "[INFO][%s:%d][%s]: " format "\n", \
-        _DX_LOG_LOG_TIME_ARGS, __FILE__, __LINE__, __func__, __VA_ARGS__); \
+#define _DXINFO1(format, ...)                                                  \
+  do {                                                                         \
+    _DX_LOG_DEFINE_LOG_TIME();                                                 \
+    fprintf(stderr, _DX_LOG_LOG_TIME_FORMAT "[INFO][%s:%d][%s]: " format "\n", \
+            _DX_LOG_LOG_TIME_ARGS, __FILE__, __LINE__, __func__, __VA_ARGS__); \
   } while (0)
 #endif
 #define _DXINFO_IMPL2(is_var_args) _DXINFO##is_var_args
@@ -140,19 +138,19 @@ LogTime GetLogTime() noexcept;
                  __VA_ARGS__);                                                \
   } while (0)
 #else
-#define _DXERROR0(format)                                                    \
-  do {                                                                       \
-    _DX_LOG_DEFINE_LOG_TIME();                                               \
-    std::fprintf(stderr,                                                     \
-                 _DX_LOG_LOG_TIME_FORMAT "[ERROR][%s:%d][%s]: " format "\n", \
-                 _DX_LOG_LOG_TIME_ARGS, __FILE__, __LINE__, __func__);       \
+#define _DXERROR0(format)                                               \
+  do {                                                                  \
+    _DX_LOG_DEFINE_LOG_TIME();                                          \
+    fprintf(stderr,                                                     \
+            _DX_LOG_LOG_TIME_FORMAT "[ERROR][%s:%d][%s]: " format "\n", \
+            _DX_LOG_LOG_TIME_ARGS, __FILE__, __LINE__, __func__);       \
   } while (0)
-#define _DXERROR1(format, ...)                                              \
-  do {                                                                      \
-    _DX_LOG_DEFINE_LOG_TIME();                                              \
-    std::fprintf(                                                           \
-        stderr, _DX_LOG_LOG_TIME_FORMAT "[ERROR][%s:%d][%s]: " format "\n", \
-        _DX_LOG_LOG_TIME_ARGS, __FILE__, __LINE__, __func__, __VA_ARGS__);  \
+#define _DXERROR1(format, ...)                                                 \
+  do {                                                                         \
+    _DX_LOG_DEFINE_LOG_TIME();                                                 \
+    fprintf(stderr,                                                            \
+            _DX_LOG_LOG_TIME_FORMAT "[ERROR][%s:%d][%s]: " format "\n",        \
+            _DX_LOG_LOG_TIME_ARGS, __FILE__, __LINE__, __func__, __VA_ARGS__); \
   } while (0)
 #endif
 #define _DXERROR_IMPL2(is_var_args) _DXERROR##is_var_args
@@ -171,21 +169,20 @@ LogTime GetLogTime() noexcept;
     if (!(cond)) {                                                        \
       Comm::LogErr("[ASSERT][%s:%d][%s]: Assert failed: '%s'.", __FILE__, \
                    __LINE__, __func__, #cond);                            \
-      std::abort();                                                       \
+      abort();                                                            \
     }                                                                     \
   } while (0)
 #else
-#define DXASSERT(cond)                                                  \
-  do {                                                                  \
-    if (!(cond)) {                                                      \
-      _DX_LOG_DEFINE_LOG_TIME();                                        \
-      std::fprintf(stderr,                                              \
-                   _DX_LOG_LOG_TIME_FORMAT                              \
-                   "[ASSERT][%s:%d][%s]: Assert failed: '%s'.\n",       \
-                   _DX_LOG_LOG_TIME_ARGS, __FILE__, __LINE__, __func__, \
-                   #cond);                                              \
-      std::abort();                                                     \
-    }                                                                   \
+#define DXASSERT(cond)                                                     \
+  do {                                                                     \
+    if (!(cond)) {                                                         \
+      _DX_LOG_DEFINE_LOG_TIME();                                           \
+      fprintf(stderr,                                                      \
+              _DX_LOG_LOG_TIME_FORMAT                                      \
+              "[ASSERT][%s:%d][%s]: Assert failed: '%s'.\n",               \
+              _DX_LOG_LOG_TIME_ARGS, __FILE__, __LINE__, __func__, #cond); \
+      abort();                                                             \
+    }                                                                      \
   } while (0)
 #endif
 #endif
@@ -197,33 +194,33 @@ LogTime GetLogTime() noexcept;
     if (!(cond)) {                                                      \
       Comm::LogErr("[CHECK][%s:%d][%s]: Check failed: '%s'.", __FILE__, \
                    __LINE__, __func__, #cond);                          \
-      std::abort();                                                     \
+      abort();                                                          \
     }                                                                   \
   } while (0)
 #else
-#define DXCHECK(cond)                                                          \
-  do {                                                                         \
-    if (!(cond)) {                                                             \
-      _DX_LOG_DEFINE_LOG_TIME();                                               \
-      std::fprintf(                                                            \
-          stderr,                                                              \
-          _DX_LOG_LOG_TIME_FORMAT "[CHECK][%s:%d][%s]: Check failed: '%s'.\n", \
-          _DX_LOG_LOG_TIME_ARGS, __FILE__, __LINE__, __func__, #cond);         \
-      std::abort();                                                            \
-    }                                                                          \
+#define DXCHECK(cond)                                                      \
+  do {                                                                     \
+    if (!(cond)) {                                                         \
+      _DX_LOG_DEFINE_LOG_TIME();                                           \
+      fprintf(stderr,                                                      \
+              _DX_LOG_LOG_TIME_FORMAT                                      \
+              "[CHECK][%s:%d][%s]: Check failed: '%s'.\n",                 \
+              _DX_LOG_LOG_TIME_ARGS, __FILE__, __LINE__, __func__, #cond); \
+      abort();                                                             \
+    }                                                                      \
   } while (0)
 #endif
 
 // DXCHECK_THROW
-#define DXCHECK_THROW(cond)                                                  \
-  do {                                                                       \
-    if (!(cond)) {                                                           \
-      char __buf[512];                                                       \
-      _DX_LOG_DEFINE_LOG_TIME();                                             \
-      std::snprintf(                                                         \
-          __buf, sizeof(__buf),                                              \
-          _DX_LOG_LOG_TIME_FORMAT "[CHECK][%s:%d][%s]: Check failed: '%s'.", \
-          _DX_LOG_LOG_TIME_ARGS, __FILE__, __LINE__, __func__, #cond);       \
-      throw std::runtime_error(&__buf[0]);                                   \
-    }                                                                        \
+#define DXCHECK_THROW(cond)                                                 \
+  do {                                                                      \
+    if (!(cond)) {                                                          \
+      char __buf[512];                                                      \
+      _DX_LOG_DEFINE_LOG_TIME();                                            \
+      snprintf(__buf, sizeof(__buf),                                        \
+               _DX_LOG_LOG_TIME_FORMAT                                      \
+               "[CHECK][%s:%d][%s]: Check failed: '%s'.",                   \
+               _DX_LOG_LOG_TIME_ARGS, __FILE__, __LINE__, __func__, #cond); \
+      throw std::runtime_error(&__buf[0]);                                  \
+    }                                                                       \
   } while (0)

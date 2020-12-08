@@ -26,7 +26,7 @@ class FileDispatcher {
   std::vector<std::string> files_;
   std::list<std::string> to_dispatch_;
   std::vector<std::string> finished_;
-  std::unordered_map<std::string, std::time_t> dispatch_time_;
+  std::unordered_map<std::string, time_t> dispatch_time_;
 
  public:
   void set_reverse(int reverse) noexcept { reverse_ = reverse; }

@@ -316,10 +316,10 @@ void Im2colNWC(const T* in, T* out, const Im2colAux& aux) noexcept {
       int X_wi = X_wi_start + K_wi * dilation_w;
       if (GE0AndLT(X_wi, X_w)) {
         int in_offset = ComputeOffset(X_wi, in_channel);
-        std::memcpy(out + row_offset + col_offset, in + in_offset,
-                    in_channel * sizeof(T));
+        memcpy(out + row_offset + col_offset, in + in_offset,
+               in_channel * sizeof(T));
       } else {
-        std::memset(out + row_offset + col_offset, 0, in_channel * sizeof(T));
+        memset(out + row_offset + col_offset, 0, in_channel * sizeof(T));
       }
     }
   }
@@ -349,17 +349,16 @@ void Im2colNHWC(const T* in, T* out, const Im2colAux& aux) noexcept {
             int X_wi = X_wi_start + K_wi * dilation_w;
             if (GE0AndLT(X_wi, X_w)) {
               int in_offset = ComputeOffset(X_hi, X_wi, X_w, in_channel);
-              std::memcpy(out + row_offset + col_offset, in + in_offset,
-                          in_channel * sizeof(T));
+              memcpy(out + row_offset + col_offset, in + in_offset,
+                     in_channel * sizeof(T));
             } else {
-              std::memset(out + row_offset + col_offset, 0,
-                          in_channel * sizeof(T));
+              memset(out + row_offset + col_offset, 0, in_channel * sizeof(T));
             }
           }
         } else {
           int col_offset = K_hi * K_w * in_channel;
-          std::memset(out + row_offset + col_offset, 0,
-                      K_w * in_channel * sizeof(T));
+          memset(out + row_offset + col_offset, 0,
+                 K_w * in_channel * sizeof(T));
         }
       }
     }
@@ -403,23 +402,23 @@ void Im2colNDHWC(const T* in, T* out, const Im2colAux& aux) noexcept {
                   if (GE0AndLT(X_wi, X_w)) {
                     int in_offset =
                         ComputeOffset(X_di, X_hi, X_wi, X_hw, X_w, in_channel);
-                    std::memcpy(out + row_offset + col_offset, in + in_offset,
-                                in_channel * sizeof(T));
+                    memcpy(out + row_offset + col_offset, in + in_offset,
+                           in_channel * sizeof(T));
                   } else {
-                    std::memset(out + row_offset + col_offset, 0,
-                                in_channel * sizeof(T));
+                    memset(out + row_offset + col_offset, 0,
+                           in_channel * sizeof(T));
                   }
                 }
               } else {
                 int col_offset = (K_di * K_hw + K_hi * K_w) * in_channel;
-                std::memset(out + row_offset + col_offset, 0,
-                            K_w * in_channel * sizeof(T));
+                memset(out + row_offset + col_offset, 0,
+                       K_w * in_channel * sizeof(T));
               }
             }
           } else {
             int col_offset = K_di * K_hw * in_channel;
-            std::memset(out + row_offset + col_offset, 0,
-                        K_hw * in_channel * sizeof(T));
+            memset(out + row_offset + col_offset, 0,
+                   K_hw * in_channel * sizeof(T));
           }
         }
       }

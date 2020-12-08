@@ -4,7 +4,7 @@
 
 #include <deepx_core/common/stream.h>
 #include <gtest/gtest.h>
-#include <cstring>  // std::strncmp
+#include <cstring>  // strncmp
 #include <numeric>  // std::accumulate
 #include <string>
 #include <unordered_map>
@@ -264,7 +264,7 @@ class BufferedInputStreamTest : public testing::Test {
   static void TestGetLine(InputStream& is) {  // NOLINT
     std::string line;
     std::vector<std::string> lines;
-    std::size_t sum = 0;
+    size_t sum = 0;
     while (GetLine(is, line)) {
       lines.emplace_back(line);
       sum += std::accumulate(line.begin(), line.end(), 0);
@@ -275,8 +275,8 @@ class BufferedInputStreamTest : public testing::Test {
 
   static void TestRead(InputStream& is) {  // NOLINT
     char buf[256];
-    std::size_t bytes = 0;
-    std::size_t sum = 0;
+    size_t bytes = 0;
+    size_t sum = 0;
     for (;;) {
       bytes = is.Read(buf, sizeof(buf));
       sum += std::accumulate(buf, buf + bytes, 0);
@@ -290,8 +290,8 @@ class BufferedInputStreamTest : public testing::Test {
 
   static void TestPeek(InputStream& is) {  // NOLINT
     char peek_buf[256], read_buf[256];
-    std::size_t peek_bytes = 0, read_bytes = 0;
-    std::size_t peek_sum = 0, read_sum = 0;
+    size_t peek_bytes = 0, read_bytes = 0;
+    size_t peek_sum = 0, read_sum = 0;
     for (;;) {
       peek_bytes = is.Peek(peek_buf, sizeof(peek_buf));
       read_bytes = is.Read(read_buf, sizeof(read_buf));
@@ -432,11 +432,11 @@ TEST_F(OutputStringStreamTest, Write) {
   OutputStringStream os;
   os.Write("1234", 4);
   EXPECT_EQ(os.GetString(), "1234");
-  EXPECT_EQ(std::strncmp(os.GetData(), "1234", 4), 0);
+  EXPECT_EQ(strncmp(os.GetData(), "1234", 4), 0);
   EXPECT_EQ(os.GetSize(), 4u);
   os.Write("5678", 4);
   EXPECT_EQ(os.GetString(), "12345678");
-  EXPECT_EQ(std::strncmp(os.GetData(), "12345678", 8), 0);
+  EXPECT_EQ(strncmp(os.GetData(), "12345678", 8), 0);
   EXPECT_EQ(os.GetSize(), 8u);
 }
 
@@ -445,7 +445,7 @@ TEST_F(OutputStringStreamTest, SetString_Write) {
   os.SetString("1234");
   os.Write("5678", 4);
   EXPECT_EQ(os.GetString(), "12345678");
-  EXPECT_EQ(std::strncmp(os.GetData(), "12345678", 8), 0);
+  EXPECT_EQ(strncmp(os.GetData(), "12345678", 8), 0);
   EXPECT_EQ(os.GetSize(), 8u);
 }
 
@@ -456,7 +456,7 @@ TEST_F(OutputStringStreamTest, SetView_Write) {
   os.Write("5678", 4);
   EXPECT_EQ(buf, "12345678");
   EXPECT_EQ(os.GetString(), "12345678");
-  EXPECT_EQ(std::strncmp(os.GetData(), "12345678", 8), 0);
+  EXPECT_EQ(strncmp(os.GetData(), "12345678", 8), 0);
   EXPECT_EQ(os.GetSize(), 8u);
 }
 

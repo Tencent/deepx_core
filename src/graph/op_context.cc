@@ -6,8 +6,8 @@
 #include <deepx_core/dx_log.h>
 #include <deepx_core/graph/op_context.h>
 #include <cstdio>
-#include <cstdlib>  // std::getenv
-#include <cstring>  // std::strcmp
+#include <cstdlib>  // getenv
+#include <cstring>  // strcmp
 #include <sstream>
 #include <unordered_set>
 #include <utility>
@@ -49,7 +49,7 @@ void OpContext::DumpProfile() const {
   char buf2[256];
   std::ostringstream os;
   os << std::endl;
-  std::snprintf(buf2, sizeof(buf2), "%-16s %-40s %12s %13s", "name", "method",
+  snprintf(buf2, sizeof(buf2), "%-16s %-40s %12s %13s", "name", "method",
                 unit, "percentage");
   os << buf2 << std::endl;
   os << std::string(16 + 40 + 12 + 13 + 3, '-') << std::endl;
@@ -70,8 +70,8 @@ void OpContext::DumpProfile() const {
       name = "global";                                                       \
     }                                                                        \
     if (op_profile.member > 0) {                                             \
-      std::snprintf(buf1, sizeof(buf1), "%s::%s", class_name, member_name);  \
-      std::snprintf(buf2, sizeof(buf2), "%-16s %-40s %12.3f %12.3f%%", name, \
+      snprintf(buf1, sizeof(buf1), "%s::%s", class_name, member_name);  \
+      snprintf(buf2, sizeof(buf2), "%-16s %-40s %12.3f %12.3f%%", name, \
                     buf1, op_profile.member / scale,                         \
                     op_profile.member / total * 100);                        \
       os << buf2 << std::endl;                                               \
@@ -100,8 +100,8 @@ void OpContext::DumpProfile() const {
 }
 
 OpContext::OpContext() {
-  const char* enable_profile = std::getenv("DEEPX_OP_CONTEXT_ENABLE_PROFILE");
-  if (enable_profile && std::strcmp(enable_profile, "1") == 0) {
+  const char* enable_profile = getenv("DEEPX_OP_CONTEXT_ENABLE_PROFILE");
+  if (enable_profile && strcmp(enable_profile, "1") == 0) {
     enable_profile_ = 1;
   } else {
     enable_profile_ = 0;
@@ -122,7 +122,7 @@ void OpContext::Init(const Graph* graph, TensorMap* param) noexcept {
 bool OpContext::InitOp(const std::vector<int>& target_indices, int loss_index) {
   std::vector<GraphTarget> targets;
   targets.reserve(target_indices.size());
-  for (std::size_t i = 0; i < target_indices.size(); ++i) {  // NOLINT
+  for (size_t i = 0; i < target_indices.size(); ++i) {  // NOLINT
     if (target_indices[i] >= graph_->target_size()) {
       DXERROR("Invalid target index: %d.", target_indices[i]);
       return false;
@@ -135,7 +135,7 @@ bool OpContext::InitOp(const std::vector<int>& target_indices, int loss_index) {
 bool OpContext::InitOp(const std::vector<std::string>& target_names,
                        int loss_index) {
   std::vector<GraphTarget> targets;
-  for (std::size_t i = 0; i < target_names.size(); ++i) {  // NOLINT
+  for (size_t i = 0; i < target_names.size(); ++i) {  // NOLINT
     const GraphTarget* target = graph_->find_target(target_names[i]);
     if (target == nullptr) {
       DXERROR("Invalid target name: %s.", target_names[i].c_str());
@@ -167,7 +167,7 @@ bool OpContext::InitOp(const std::vector<GraphTarget>& targets,
   }
 
   std::unordered_set<std::string> dedup;
-  for (std::size_t i = 0; i < targets.size(); ++i) {
+  for (size_t i = 0; i < targets.size(); ++i) {
     int is_loss_index = ((int)i == loss_index);
     const GraphTarget& target = targets[i];
     for (int j = 0; j < target.forward_size(); ++j) {  // NOLINT

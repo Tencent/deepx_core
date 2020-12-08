@@ -20,8 +20,8 @@
 #include <algorithm>  // std::find_if, std::sort
 #include <cerrno>
 #include <cstdio>
-#include <cstdlib>  // std::getenv
-#include <cstring>  // std::memcpy
+#include <cstdlib>  // getenv
+#include <cstring>  // memset, memcpy
 #include <ctime>
 
 #if HAVE_STREAM_GFLAGS == 1
@@ -208,7 +208,7 @@ bool FileSystem::IsOther(const FilePath& path) {
   return stat.IsOther();
 }
 
-bool FileSystem::GetFileSize(const FilePath& path, std::size_t* size) {
+bool FileSystem::GetFileSize(const FilePath& path, size_t* size) {
   FileStat stat;
   if (!Stat(path, &stat)) {
     return false;
@@ -223,7 +223,7 @@ bool FileSystem::BackupIfExists(const FilePath& old_path, FilePath* new_path) {
   }
 
   if (Exists(old_path)) {
-    std::time_t now = std::time(nullptr);
+    time_t now = time(nullptr);
     *new_path = old_path.str() + "." + std::to_string(now);
     return Move(old_path, *new_path);
   }
@@ -263,7 +263,7 @@ bool LocalFileSystem::Stat(const FilePath& path, FileStat* stat) {
   LARGE_INTEGER size;
   size.HighPart = attr.nFileSizeHigh;
   size.LowPart = attr.nFileSizeLow;
-  stat->set_file_size((std::size_t)size.QuadPart);
+  stat->set_file_size((size_t)size.QuadPart);
   return true;
 }
 
@@ -416,7 +416,7 @@ bool LocalFileSystem::Stat(const FilePath& path, FileStat* _stat) {
     type = FILE_TYPE_OTHER;
   }
   _stat->set_type(type);
-  _stat->set_file_size((std::size_t)buf.st_size);
+  _stat->set_file_size((size_t)buf.st_size);
   return true;
 }
 
@@ -611,7 +611,7 @@ InputStream& GetLine(InputStream& is, std::string& line, char delim) {
 /************************************************************************/
 /* BufferedInputStream */
 /************************************************************************/
-BufferedInputStream::BufferedInputStream(InputStream* is, std::size_t buf_size)
+BufferedInputStream::BufferedInputStream(InputStream* is, size_t buf_size)
     : is_(is) {
   if (is_ == nullptr) {
     bad_ = 1;
@@ -629,8 +629,8 @@ BufferedInputStream::BufferedInputStream(InputStream* is, std::size_t buf_size)
   }
 }
 
-std::size_t BufferedInputStream::FillEmptyBuf() {
-  std::size_t avail_bytes = is_->Read(begin_, buf_size_);
+size_t BufferedInputStream::FillEmptyBuf() {
+  size_t avail_bytes = is_->Read(begin_, buf_size_);
   if (avail_bytes == 0) {
     bad_ = 1;
     return 0;
@@ -641,15 +641,15 @@ std::size_t BufferedInputStream::FillEmptyBuf() {
   return avail_bytes;
 }
 
-std::size_t BufferedInputStream::EnsureBuf(std::size_t need_bytes) {
-  std::size_t avail_bytes = end_ - cur_;
+size_t BufferedInputStream::EnsureBuf(size_t need_bytes) {
+  size_t avail_bytes = end_ - cur_;
   if (avail_bytes >= need_bytes) {
     return avail_bytes;
   }
 
-  std::size_t cur_offset = cur_ - begin_;
-  std::size_t end_offset = end_ - begin_;
-  std::size_t need_buf_size = cur_offset + need_bytes;
+  size_t cur_offset = cur_ - begin_;
+  size_t end_offset = end_ - begin_;
+  size_t need_buf_size = cur_offset + need_bytes;
   if (need_buf_size > buf_size_) {
     buf_size_ = need_buf_size;
     buf_.resize(need_buf_size);
@@ -658,7 +658,7 @@ std::size_t BufferedInputStream::EnsureBuf(std::size_t need_bytes) {
     end_ = begin_ + end_offset;
   }
 
-  std::size_t bytes = is_->Read(end_, buf_size_ - end_offset);
+  size_t bytes = is_->Read(end_, buf_size_ - end_offset);
   if (bytes == 0) {
     bad_ = 1;
     return avail_bytes;
@@ -669,16 +669,16 @@ std::size_t BufferedInputStream::EnsureBuf(std::size_t need_bytes) {
   return avail_bytes;
 }
 
-std::size_t BufferedInputStream::Read(void* data, std::size_t size) {
-  std::size_t need_bytes = size;
-  std::size_t avail_bytes = end_ - cur_;
+size_t BufferedInputStream::Read(void* data, size_t size) {
+  size_t need_bytes = size;
+  size_t avail_bytes = end_ - cur_;
   for (;;) {
     if (avail_bytes >= need_bytes) {
-      std::memcpy(data, cur_, need_bytes);
+      memcpy(data, cur_, need_bytes);
       cur_ += need_bytes;
       return size;
     } else if (avail_bytes > 0) {
-      std::memcpy(data, cur_, avail_bytes);
+      memcpy(data, cur_, avail_bytes);
       data = (char*)data + avail_bytes;
       cur_ += avail_bytes;
       need_bytes -= avail_bytes;
@@ -692,7 +692,7 @@ std::size_t BufferedInputStream::Read(void* data, std::size_t size) {
 }
 
 char BufferedInputStream::ReadChar() {
-  std::size_t avail_bytes = end_ - cur_;
+  size_t avail_bytes = end_ - cur_;
   if (avail_bytes == 0) {
     avail_bytes = FillEmptyBuf();
   }
@@ -703,19 +703,19 @@ char BufferedInputStream::ReadChar() {
   return (char)-1;
 }
 
-std::size_t BufferedInputStream::Peek(void* data, std::size_t size) {
-  std::size_t avail_bytes = EnsureBuf(size);
+size_t BufferedInputStream::Peek(void* data, size_t size) {
+  size_t avail_bytes = EnsureBuf(size);
   if (size > avail_bytes) {
     size = avail_bytes;
   }
-  std::memcpy(data, cur_, size);
+  memcpy(data, cur_, size);
   return size;
 }
 
 /************************************************************************/
 /* GunzipInputStream */
 /************************************************************************/
-GunzipInputStream::GunzipInputStream(InputStream* is, std::size_t buf_size)
+GunzipInputStream::GunzipInputStream(InputStream* is, size_t buf_size)
     : is_(is) {
   if (is_ == nullptr) {
     bad_ = 1;
@@ -729,7 +729,7 @@ GunzipInputStream::GunzipInputStream(InputStream* is, std::size_t buf_size)
   } else {
     bad_ = 0;
     zs_ = new z_stream;
-    std::memset(zs_, 0, sizeof(z_stream));
+    memset(zs_, 0, sizeof(z_stream));
     (void)inflateInit2((z_stream*)zs_, (16 + MAX_WBITS));
     comp_buf_size_ = buf_size;
     comp_buf_.resize(comp_buf_size_);
@@ -749,10 +749,10 @@ GunzipInputStream::~GunzipInputStream() {
   }
 }
 
-std::size_t GunzipInputStream::FillEmptyBuf() {
+size_t GunzipInputStream::FillEmptyBuf() {
   z_stream* zs = (z_stream*)zs_;  // NOLINT
   if (zs->avail_in == 0) {
-    std::size_t comp_bytes = is_->Read(comp_begin_, comp_buf_size_);
+    size_t comp_bytes = is_->Read(comp_begin_, comp_buf_size_);
     if (comp_bytes == 0) {
       bad_ = 1;
       return 0;
@@ -769,22 +769,22 @@ std::size_t GunzipInputStream::FillEmptyBuf() {
     return 0;
   }
 
-  std::size_t avail_bytes = buf_size_ - (std::size_t)zs->avail_out;
+  size_t avail_bytes = buf_size_ - (size_t)zs->avail_out;
   cur_ = begin_;
   end_ = cur_ + avail_bytes;
   return avail_bytes;
 }
 
-std::size_t GunzipInputStream::EnsureBuf(std::size_t need_bytes) {
-  std::size_t avail_bytes = end_ - cur_;
+size_t GunzipInputStream::EnsureBuf(size_t need_bytes) {
+  size_t avail_bytes = end_ - cur_;
   if (avail_bytes >= need_bytes) {
     return avail_bytes;
   }
 
   z_stream* zs = (z_stream*)zs_;  // NOLINT
-  std::size_t cur_offset = cur_ - begin_;
-  std::size_t end_offset = end_ - begin_;
-  std::size_t need_buf_size = cur_offset + need_bytes;
+  size_t cur_offset = cur_ - begin_;
+  size_t end_offset = end_ - begin_;
+  size_t need_buf_size = cur_offset + need_bytes;
   if (need_buf_size > buf_size_) {
     buf_size_ = need_buf_size;
     buf_.resize(need_buf_size);
@@ -797,7 +797,7 @@ std::size_t GunzipInputStream::EnsureBuf(std::size_t need_bytes) {
 
   for (;;) {
     if (zs->avail_in == 0) {
-      std::size_t comp_bytes = is_->Read(comp_begin_, comp_buf_size_);
+      size_t comp_bytes = is_->Read(comp_begin_, comp_buf_size_);
       if (comp_bytes == 0) {
         bad_ = 1;
         return avail_bytes;
@@ -806,14 +806,14 @@ std::size_t GunzipInputStream::EnsureBuf(std::size_t need_bytes) {
       zs->avail_in = (uInt)comp_bytes;
     }
 
-    std::size_t prev_avail_out = (std::size_t)zs->avail_out;  // NOLINT
+    size_t prev_avail_out = (size_t)zs->avail_out;  // NOLINT
     int ok = inflate(zs, Z_SYNC_FLUSH);
     if (ok != Z_OK && ok != Z_STREAM_END) {
       bad_ = 1;
       return avail_bytes;
     }
 
-    std::size_t bytes = prev_avail_out - (std::size_t)zs->avail_out;
+    size_t bytes = prev_avail_out - (size_t)zs->avail_out;
     avail_bytes += bytes;
     end_ += bytes;
     if (avail_bytes >= need_bytes) {
@@ -822,16 +822,16 @@ std::size_t GunzipInputStream::EnsureBuf(std::size_t need_bytes) {
   }
 }
 
-std::size_t GunzipInputStream::Read(void* data, std::size_t size) {
-  std::size_t need_bytes = size;
-  std::size_t avail_bytes = end_ - cur_;
+size_t GunzipInputStream::Read(void* data, size_t size) {
+  size_t need_bytes = size;
+  size_t avail_bytes = end_ - cur_;
   for (;;) {
     if (avail_bytes >= need_bytes) {
-      std::memcpy(data, cur_, need_bytes);
+      memcpy(data, cur_, need_bytes);
       cur_ += need_bytes;
       return size;
     } else if (avail_bytes > 0) {
-      std::memcpy(data, cur_, avail_bytes);
+      memcpy(data, cur_, avail_bytes);
       data = (char*)data + avail_bytes;
       cur_ += avail_bytes;
       need_bytes -= avail_bytes;
@@ -845,7 +845,7 @@ std::size_t GunzipInputStream::Read(void* data, std::size_t size) {
 }
 
 char GunzipInputStream::ReadChar() {
-  std::size_t avail_bytes = end_ - cur_;
+  size_t avail_bytes = end_ - cur_;
   if (avail_bytes == 0) {
     avail_bytes = FillEmptyBuf();
   }
@@ -856,12 +856,12 @@ char GunzipInputStream::ReadChar() {
   return (char)-1;
 }
 
-std::size_t GunzipInputStream::Peek(void* data, std::size_t size) {
-  std::size_t avail_bytes = EnsureBuf(size);
+size_t GunzipInputStream::Peek(void* data, size_t size) {
+  size_t avail_bytes = EnsureBuf(size);
   if (size > avail_bytes) {
     size = avail_bytes;
   }
-  std::memcpy(data, cur_, size);
+  memcpy(data, cur_, size);
   return size;
 }
 
@@ -910,8 +910,8 @@ CFileStream::CFileStream() { bad_ = 1; }
 
 CFileStream::~CFileStream() { Close(); }
 
-std::size_t CFileStream::Write(const void* data, std::size_t size) {
-  std::size_t bytes = fwrite(data, 1, size, (FILE*)f_);
+size_t CFileStream::Write(const void* data, size_t size) {
+  size_t bytes = fwrite(data, 1, size, (FILE*)f_);
   if (bytes < size) {
     bad_ = 1;
   }
@@ -928,8 +928,8 @@ bool CFileStream::Flush() {
   return true;
 }
 
-std::size_t CFileStream::Read(void* data, std::size_t size) {
-  std::size_t bytes = fread(data, 1, size, (FILE*)f_);
+size_t CFileStream::Read(void* data, size_t size) {
+  size_t bytes = fread(data, 1, size, (FILE*)f_);
   if (bytes < size) {
     bad_ = 1;
   }
@@ -944,13 +944,13 @@ char CFileStream::ReadChar() {
   return (char)c;
 }
 
-std::size_t CFileStream::Peek(void* data, std::size_t size) {
+size_t CFileStream::Peek(void* data, size_t size) {
   long offset = ftell((FILE*)f_);  // NOLINT
   if (offset == -1) {
     DXTHROW_RUNTIME_ERROR("Failed to ftell, errno=%d(%s).", errno,
                           strerror(errno));
   }
-  std::size_t bytes = Read(data, size);
+  size_t bytes = Read(data, size);
   if (fseek((FILE*)f_, offset, SEEK_SET) == -1) {
     DXTHROW_RUNTIME_ERROR("Failed to fseek, errno=%d(%s).", errno,
                           strerror(errno));
@@ -1000,7 +1000,7 @@ void CFileStream::Close() noexcept {
 /************************************************************************/
 /* OutputStringStream */
 /************************************************************************/
-std::size_t OutputStringStream::Write(const void* data, std::size_t size) {
+size_t OutputStringStream::Write(const void* data, size_t size) {
   buf_ptr_->insert(buf_ptr_->end(), (const char*)data,
                    (const char*)data + size);
   return size;
@@ -1019,7 +1019,7 @@ void OutputStringStream::EndMessage() noexcept {
 /************************************************************************/
 /* InputStringStream */
 /************************************************************************/
-void InputStringStream::Init(const char* data, std::size_t size) {
+void InputStringStream::Init(const char* data, size_t size) {
   if (size == 0) {
     bad_ = 1;
     cur_ = nullptr;
@@ -1033,14 +1033,14 @@ void InputStringStream::Init(const char* data, std::size_t size) {
 
 InputStringStream::InputStringStream() { Init(nullptr, 0); }
 
-std::size_t InputStringStream::Read(void* data, std::size_t size) {
-  std::size_t avail_bytes = end_ - cur_;
+size_t InputStringStream::Read(void* data, size_t size) {
+  size_t avail_bytes = end_ - cur_;
   if (avail_bytes >= size) {
-    std::memcpy(data, cur_, size);
+    memcpy(data, cur_, size);
     cur_ += size;
     return size;
   } else if (avail_bytes > 0) {
-    std::memcpy(data, cur_, avail_bytes);
+    memcpy(data, cur_, avail_bytes);
     cur_ += avail_bytes;
     bad_ = 1;
     return avail_bytes;
@@ -1051,7 +1051,7 @@ std::size_t InputStringStream::Read(void* data, std::size_t size) {
 }
 
 char InputStringStream::ReadChar() {
-  std::size_t avail_bytes = end_ - cur_;
+  size_t avail_bytes = end_ - cur_;
   if (avail_bytes > 0) {
     return *cur_++;
   }
@@ -1059,13 +1059,13 @@ char InputStringStream::ReadChar() {
   return (char)-1;
 }
 
-std::size_t InputStringStream::Peek(void* data, std::size_t size) {
-  std::size_t avail_bytes = end_ - cur_;
+size_t InputStringStream::Peek(void* data, size_t size) {
+  size_t avail_bytes = end_ - cur_;
   if (avail_bytes >= size) {
-    std::memcpy(data, cur_, size);
+    memcpy(data, cur_, size);
     return size;
   } else if (avail_bytes > 0) {
-    std::memcpy(data, cur_, avail_bytes);
+    memcpy(data, cur_, avail_bytes);
     bad_ = 1;
     return avail_bytes;
   } else {
@@ -1074,8 +1074,8 @@ std::size_t InputStringStream::Peek(void* data, std::size_t size) {
   }
 }
 
-std::size_t InputStringStream::Skip(std::size_t size) {
-  std::size_t avail_bytes = end_ - cur_;
+size_t InputStringStream::Skip(size_t size) {
+  size_t avail_bytes = end_ - cur_;
   if (avail_bytes >= size) {
     cur_ += size;
     return size;
@@ -1276,8 +1276,8 @@ bool HDFSHandle::Connect(const char* name_node_host, uint16_t name_node_port) {
   Close();
 
   std::string ugi, user;
-  const char* DEEPX_HDFS_UGI = std::getenv("DEEPX_HDFS_UGI");
-  const char* DEEPX_HDFS_USER = std::getenv("DEEPX_HDFS_USER");
+  const char* DEEPX_HDFS_UGI = getenv("DEEPX_HDFS_UGI");
+  const char* DEEPX_HDFS_USER = getenv("DEEPX_HDFS_USER");
   if (DEEPX_HDFS_UGI) {
     ugi = DEEPX_HDFS_UGI;
   } else {
@@ -1322,7 +1322,7 @@ static void HDFSInfo2Stat(const hdfsFileInfo& info, FileStat* stat) noexcept {
   } else {
     stat->set_type(FILE_TYPE_OTHER);
   }
-  stat->set_file_size((std::size_t)info.mSize);
+  stat->set_file_size((size_t)info.mSize);
 }
 
 HDFSFileSystem::HDFSFileSystem(HDFSHandle* handle) : handle_(handle) {}
@@ -1594,14 +1594,13 @@ HDFSFileStream::HDFSFileStream(HDFSHandle* handle) : handle_(handle) {
 
 HDFSFileStream::~HDFSFileStream() { Close(); }
 
-std::size_t HDFSFileStream::Write(const void* _data, std::size_t _size) {
-  static constexpr std::size_t MAX_HDFS_WRITE_BYTES =
+size_t HDFSFileStream::Write(const void* _data, size_t _size) {
+  static constexpr size_t MAX_HDFS_WRITE_BYTES =
       128 * 1024 * 1024;  // magic number
   const char* data = (const char*)_data;
-  std::size_t size = _size;
+  size_t size = _size;
   for (;;) {
-    std::size_t _bytes =
-        size <= MAX_HDFS_WRITE_BYTES ? size : MAX_HDFS_WRITE_BYTES;
+    size_t _bytes = size <= MAX_HDFS_WRITE_BYTES ? size : MAX_HDFS_WRITE_BYTES;
     tSize bytes = phdfsWrite((hdfsFS)handle_->raw_handle(),  // NOLINT
                              (hdfsFile)f_, data, (tSize)_bytes);
     if (bytes > 0) {
@@ -1633,9 +1632,9 @@ bool HDFSFileStream::Flush() {
   return true;
 }
 
-std::size_t HDFSFileStream::Read(void* _data, std::size_t _size) {
+size_t HDFSFileStream::Read(void* _data, size_t _size) {
   char* data = (char*)_data;
-  std::size_t size = _size;
+  size_t size = _size;
   for (;;) {
     tSize bytes = phdfsRead((hdfsFS)handle_->raw_handle(),  // NOLINT
                             (hdfsFile)f_, data, (tSize)size);
@@ -1673,8 +1672,8 @@ char HDFSFileStream::ReadChar() {
     } else if (errno == EINTR || errno == EAGAIN) {
       continue;
     } else {
-      DXERROR("Failed to hdfsRead, size=%zu, errno=%d(%s).", (std::size_t)1,
-              errno, strerror(errno));
+      DXERROR("Failed to hdfsRead, size=%zu, errno=%d(%s).", (size_t)1, errno,
+              strerror(errno));
       bad_ = 1;
       break;
     }
@@ -1682,14 +1681,14 @@ char HDFSFileStream::ReadChar() {
   return (char)-1;
 }
 
-std::size_t HDFSFileStream::Peek(void* data, std::size_t size) {
+size_t HDFSFileStream::Peek(void* data, size_t size) {
   tOffset offset = phdfsTell((hdfsFS)handle_->raw_handle(),  // NOLINT
                              (hdfsFile)f_);
   if (offset == -1) {
     DXTHROW_RUNTIME_ERROR("Failed to hdfsTell, errno=%d(%s).", errno,
                           strerror(errno));
   }
-  std::size_t bytes = Read(data, size);
+  size_t bytes = Read(data, size);
   if (phdfsSeek((hdfsFS)handle_->raw_handle(),  // NOLINT
                 (hdfsFile)f_, offset) == -1) {
     DXTHROW_RUNTIME_ERROR("Failed to hdfsSeek, errno=%d(%s).", errno,
@@ -1738,8 +1737,8 @@ void HDFSFileStream::Close() noexcept {
 static bool ParseHDFSNameNode(const std::string& path,
                               std::string* name_node_host,
                               uint16_t* name_node_port) noexcept {
-  std::size_t i = 7;
-  std::size_t j = path.find('/', i);
+  size_t i = 7;
+  size_t j = path.find('/', i);
   if (j == std::string::npos) {
     DXERROR("Invalid hdfs path: %s.", path.c_str());
     return false;
@@ -1752,7 +1751,7 @@ static bool ParseHDFSNameNode(const std::string& path,
     return true;
   }
 
-  std::size_t k = path.find(':', i);
+  size_t k = path.find(':', i);
   if (k == std::string::npos) {
     // hdfs://.../...
     *name_node_host = path.substr(i, j - i);
@@ -1877,7 +1876,7 @@ bool AutoFileSystem::IsOther(const std::string& path) {
   return fs.IsOther(FilePath(path));
 }
 
-bool AutoFileSystem::GetFileSize(const std::string& path, std::size_t* size) {
+bool AutoFileSystem::GetFileSize(const std::string& path, size_t* size) {
   AutoFileSystem fs;
   if (!fs.Open(path)) {
     return false;
@@ -1959,8 +1958,8 @@ bool AutoFileSystem::BackupIfExists(const std::string& old_path,
 /************************************************************************/
 AutoInputFileStream::AutoInputFileStream() { bad_ = 1; }
 
-std::size_t AutoInputFileStream::Read(void* data, std::size_t size) {
-  std::size_t bytes = is_->Read(data, size);
+size_t AutoInputFileStream::Read(void* data, size_t size) {
+  size_t bytes = is_->Read(data, size);
   bad_ = is_->bad();
   return bytes;
 }
@@ -1971,8 +1970,8 @@ char AutoInputFileStream::ReadChar() {
   return c;
 }
 
-std::size_t AutoInputFileStream::Peek(void* data, std::size_t size) {
-  std::size_t bytes = is_->Peek(data, size);
+size_t AutoInputFileStream::Peek(void* data, size_t size) {
+  size_t bytes = is_->Peek(data, size);
   bad_ = is_->bad();
   return bytes;
 }
@@ -2047,8 +2046,8 @@ void AutoInputFileStream::Close() noexcept {
 /************************************************************************/
 AutoOutputFileStream::AutoOutputFileStream() { bad_ = 1; }
 
-std::size_t AutoOutputFileStream::Write(const void* data, std::size_t size) {
-  std::size_t bytes = os_->Write(data, size);
+size_t AutoOutputFileStream::Write(const void* data, size_t size) {
+  size_t bytes = os_->Write(data, size);
   bad_ = os_->bad();
   return bytes;
 }

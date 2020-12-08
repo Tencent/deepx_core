@@ -34,9 +34,9 @@ bool ConcatPrepare(const std::vector<const Shape*>& X, int axis,
     return false;
   }
 
-  std::size_t size = X.size();
+  size_t size = X.size();
   int k = 0;
-  for (std::size_t i = 0; i < size; ++i) {
+  for (size_t i = 0; i < size; ++i) {
     const Shape& Xi = *X[i];
     if (Xi.rank() != rank) {
       DXERROR("Invalid X: inconsistent rank %d vs %d.", Xi.rank(), rank);
@@ -70,7 +70,7 @@ bool ConcatPrepare(const std::vector<const Shape*>& X, int axis,
   aux->m = m;
   aux->Xnk.resize(size);
   aux->Zoffset.resize(size);
-  for (std::size_t i = 0; i < size; ++i) {
+  for (size_t i = 0; i < size; ++i) {
     const Shape& Xi = *X[i];
     Xnk = Xi[axis] * n;
     aux->Xnk[i] = Xnk;
@@ -94,7 +94,7 @@ template <typename T>
 void Concat(const std::vector<const Tensor<T>*>& X, Tensor<T>* Z,
             const ConcatAux& aux) noexcept {
   int m = aux.m;
-  for (std::size_t i = 0; i < X.size(); ++i) {
+  for (size_t i = 0; i < X.size(); ++i) {
     int Xnk = aux.Xnk[i];
     const T* _X = X[i]->data();
     T* _Z = Z->data() + aux.Zoffset[i];
@@ -112,7 +112,7 @@ void ConcatBackward(const std::vector<const Tensor<T>*>& /*X*/,
                     std::vector<Tensor<T>*>* gX,
                     const ConcatAux& aux) noexcept {
   int m = aux.m;
-  for (std::size_t i = 0; i < gX->size(); ++i) {
+  for (size_t i = 0; i < gX->size(); ++i) {
     if ((*gX)[i]) {
       int Xnk = aux.Xnk[i];
       const T* _gZ = gZ.data() + aux.Zoffset[i];

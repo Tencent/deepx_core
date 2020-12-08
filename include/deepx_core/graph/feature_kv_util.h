@@ -110,7 +110,7 @@ class FeatureKVUtil : public DataType {
 
  private:
   static void GetItem(const std::string& key, const char* value,
-                      std::size_t value_size, std::string* item);
+                      size_t value_size, std::string* item);
   static void GetVersionItem(int version, std::string* item);
   static bool GetGraphItem(const Graph& graph, std::string* item);
   static void GetDenseParamItem(const std::string& key, const tsr_t& W,
@@ -197,18 +197,18 @@ class FeatureKVUtil : public DataType {
   };
 
  private:
-  static bool _GetKeyValue(const char*& item_buf,       // NOLINT
-                           std::size_t& item_buf_size,  // NOLINT
+  static bool _GetKeyValue(const char*& item_buf,  // NOLINT
+                           size_t& item_buf_size,  // NOLINT
                            std::string* key, std::string* value);
 
  public:
   // Get the 1st key and value.
-  static bool GetKeyValue(const char* item_buf, std::size_t item_buf_size,
+  static bool GetKeyValue(const char* item_buf, size_t item_buf_size,
                           std::string* key, std::string* value);
   static bool GetKeyValue(const std::string& item, std::string* key,
                           std::string* value);
   // Get all keys and values.
-  static bool GetKeyValues(const char* item_buf, std::size_t item_buf_size,
+  static bool GetKeyValues(const char* item_buf, size_t item_buf_size,
                            std::vector<std::string>* keys,
                            std::vector<std::string>* values);
   static bool GetKeyValues(const std::string& item,

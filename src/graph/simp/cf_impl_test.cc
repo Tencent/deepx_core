@@ -5,7 +5,9 @@
 #include "cf_impl.h"
 #include <deepx_core/tensor/data_type.h>
 #include <gtest/gtest.h>
+#include <memory>
 #include <string>
+#include <vector>
 #include "simp_test.h"
 
 namespace deepx_core {

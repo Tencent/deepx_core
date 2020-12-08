@@ -49,11 +49,11 @@ class TcpServer {
   virtual void OnAccept(conn_t conn);
 
   void AsyncRead(conn_t conn);
-  virtual void OnRead(conn_t conn, std::size_t in_bytes);
+  virtual void OnRead(conn_t conn, size_t in_bytes);
   virtual int OnReadMessage(conn_t conn) = 0;
 
   void AsyncWrite(conn_t conn);
-  virtual void OnWrite(conn_t conn, std::size_t out_bytes);
+  virtual void OnWrite(conn_t conn, size_t out_bytes);
   void AsyncWriteMessage(conn_t conn);
   virtual void OnWriteMessage(conn_t conn);
 };

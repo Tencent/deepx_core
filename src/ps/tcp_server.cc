@@ -65,7 +65,7 @@ void TcpServer::OnAccept(conn_t conn) {
 void TcpServer::AsyncRead(conn_t conn) {
   conn->socket().async_read_some(
       conn->GetInBuf(),
-      [this, conn](const std::error_code& ec, std::size_t in_bytes) {
+      [this, conn](const std::error_code& ec, size_t in_bytes) {
         if (ec) {
           DeleteConnection(conn);
         } else {
@@ -74,7 +74,7 @@ void TcpServer::AsyncRead(conn_t conn) {
       });
 }
 
-void TcpServer::OnRead(conn_t conn, std::size_t in_bytes) {
+void TcpServer::OnRead(conn_t conn, size_t in_bytes) {
   int read;
   for (;;) {
     switch (conn->TryReadMessage(in_bytes)) {
@@ -108,7 +108,7 @@ void TcpServer::OnRead(conn_t conn, std::size_t in_bytes) {
 void TcpServer::AsyncWrite(conn_t conn) {
   conn->socket().async_write_some(
       conn->GetOutBuf(),
-      [this, conn](const std::error_code& ec, std::size_t out_bytes) {
+      [this, conn](const std::error_code& ec, size_t out_bytes) {
         if (ec) {
           DeleteConnection(conn);
         } else {
@@ -117,7 +117,7 @@ void TcpServer::AsyncWrite(conn_t conn) {
       });
 }
 
-void TcpServer::OnWrite(conn_t conn, std::size_t out_bytes) {
+void TcpServer::OnWrite(conn_t conn, size_t out_bytes) {
   if (conn->OnWritten(out_bytes) == 0) {
     // complete message
     OnWriteMessage(conn);

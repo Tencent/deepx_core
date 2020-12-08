@@ -280,7 +280,7 @@ void ModelShard::Push(TensorMap* grad, TensorMap* overwritten_param) {
 void ModelShard::ExpireTSStore() {
   auto expired = ts_store_->Expire();
   auto filter = [&expired](const std::string& name, srm_t* W) {
-    std::size_t prev_size = W->size();
+    size_t prev_size = W->size();
     W->remove_if([&expired](const srm_t::value_type& entry) {
       return expired.count(entry.first) > 0;
     });

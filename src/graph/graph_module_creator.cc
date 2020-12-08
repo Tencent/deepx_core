@@ -68,7 +68,7 @@ GraphNode* WideGroupEmbeddingLookup(const std::string& prefix, GraphNode* X,
   std::vector<GraphNode*> W(items.size());
   std::vector<uint16_t> group_ids(items.size());
   int tensor_type = sparse ? TENSOR_TYPE_SRM : TENSOR_TYPE_TSR;
-  for (std::size_t i = 0; i < items.size(); ++i) {
+  for (size_t i = 0; i < items.size(); ++i) {
     group_ids[i] = items[i].group_id;
     auto ii = std::to_string(group_ids[i]);
     W[i] = GetVariable(prefix + "W" + ii, Shape(items[i].embedding_row, 1),
@@ -86,7 +86,7 @@ GraphNode* WideGroupEmbeddingLookup2(const std::string& prefix, GraphNode* X,
   DXCHECK_THROW(IsFMGroupConfig(items));
   std::vector<uint16_t> group_ids(items.size());
   int tensor_type = sparse ? TENSOR_TYPE_SRM : TENSOR_TYPE_TSR;
-  for (std::size_t i = 0; i < items.size(); ++i) {
+  for (size_t i = 0; i < items.size(); ++i) {
     group_ids[i] = items[i].group_id;
   }
   auto* W = GetVariable(prefix + "W", Shape(items[0].embedding_row, 1),
@@ -103,7 +103,7 @@ GraphNode* DeepGroupEmbeddingLookup(const std::string& prefix, GraphNode* X,
   std::vector<GraphNode*> W(items.size());
   std::vector<uint16_t> group_ids(items.size());
   int tensor_type = sparse ? TENSOR_TYPE_SRM : TENSOR_TYPE_TSR;
-  for (std::size_t i = 0; i < items.size(); ++i) {
+  for (size_t i = 0; i < items.size(); ++i) {
     group_ids[i] = items[i].group_id;
     auto ii = std::to_string(group_ids[i]);
     W[i] = GetVariable(prefix + "W" + ii,
@@ -122,7 +122,7 @@ GraphNode* DeepGroupEmbeddingLookup2(const std::string& prefix, GraphNode* X,
   DXCHECK_THROW(IsFMGroupConfig(items));
   std::vector<uint16_t> group_ids(items.size());
   int tensor_type = sparse ? TENSOR_TYPE_SRM : TENSOR_TYPE_TSR;
-  for (std::size_t i = 0; i < items.size(); ++i) {
+  for (size_t i = 0; i < items.size(); ++i) {
     group_ids[i] = items[i].group_id;
   }
   auto* W = GetVariable(prefix + "W",
@@ -226,7 +226,7 @@ GraphNode* CIN(const std::string& prefix, GraphNode* X,
   auto* X0 = X;
   auto* Xi = X;
   std::vector<GraphNode*> Z5in(dims.size());
-  for (std::size_t i = 0; i < dims.size(); ++i) {
+  for (size_t i = 0; i < dims.size(); ++i) {
     auto ii = std::to_string(i);
     int m0mi = X0->shape()[1] * Xi->shape()[1];
     auto* W = GetVariableRandXavier(prefix + "W" + ii, Shape(m0mi, dims[i]));

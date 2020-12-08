@@ -104,7 +104,7 @@ void FreqStore::Warmup(FreqStore* other) {
 void FreqStore::RemoveIf(
     const std::function<bool(const id_freq_map_t::value_type&)>& func) {
   DXINFO("Removing from FreqStore...");
-  std::size_t prev_size = id_freq_map_.size();
+  size_t prev_size = id_freq_map_.size();
   auto first = id_freq_map_.begin();
   auto last = id_freq_map_.end();
   for (; first != last;) {
@@ -124,7 +124,7 @@ void FreqStore::GetIdFreqMap(const Instance& inst, id_freq_map_t* id_freq_map) {
     const Any& Xany = entry.second;
     if (Xany.is<csr_t>()) {
       auto& X = Xany.unsafe_to_ref<csr_t>();
-      for (std::size_t i = 0; i < X.col_size(); ++i) {
+      for (size_t i = 0; i < X.col_size(); ++i) {
         int_t id = X.col(i);
         // no overflow check
         ++(*id_freq_map)[id];

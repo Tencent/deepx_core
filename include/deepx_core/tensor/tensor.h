@@ -10,7 +10,7 @@
 #include <algorithm>  // std::equal, ...
 #include <cmath>      // std::sqrt
 #include <cstddef>    // std::nullptr_t
-#include <cstring>    // std::memset
+#include <cstring>    // memset
 #include <initializer_list>
 #include <iostream>
 #include <iterator>  // std::distance, std::reverse_iterator
@@ -442,7 +442,7 @@ class TensorWriteTextHelper {
  private:
   const Tensor<T>& tsr_;
   int summary_;
-  std::size_t max_text_length_;
+  size_t max_text_length_;
 
  private:
   class SliceHelper {
@@ -466,7 +466,7 @@ class TensorWriteTextHelper {
   TensorWriteTextHelper(const Tensor<T>& tsr, int summary);
 
  private:
-  static std::size_t GetTextLength(const T& t);
+  static size_t GetTextLength(const T& t);
   void InitMaxTextLength(const Tensor<T>& slice);
 
  public:
@@ -503,14 +503,14 @@ TensorWriteTextHelper<T>::TensorWriteTextHelper(const Tensor<T>& tsr,
 }
 
 template <typename T>
-std::size_t TensorWriteTextHelper<T>::GetTextLength(const T& t) {
+size_t TensorWriteTextHelper<T>::GetTextLength(const T& t) {
   std::ostringstream os;
   os << t;
   return os.str().size();
 }
 
 template <>
-inline std::size_t TensorWriteTextHelper<std::string>::GetTextLength(
+inline size_t TensorWriteTextHelper<std::string>::GetTextLength(
     const std::string& s) {
   return s.size() + 2;  // 2 quotes
 }
@@ -948,7 +948,7 @@ void Tensor<T>::reserve(Int size) {
   if (is_view()) {
     DXTHROW_RUNTIME_ERROR("Couldn't reserve a tensor view.");
   }
-  storage_.reserve((std::size_t)size);
+  storage_.reserve((size_t)size);
 }
 
 template <typename T>
@@ -1050,7 +1050,7 @@ Tensor<T>& Tensor<T>::constant(value_type c) noexcept {
 template <typename T>
 Tensor<T>& Tensor<T>::zeros() noexcept {
   static_assert(IS_FLOAT || IS_INT, "");
-  std::memset(data_, 0, total_dim() * sizeof(value_type));
+  memset(data_, 0, total_dim() * sizeof(value_type));
   return *this;
 }
 

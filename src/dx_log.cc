@@ -10,9 +10,9 @@ namespace deepx_core {
 
 LogTime GetLogTime() noexcept {
   auto now = std::chrono::system_clock::now();
-  std::time_t time = std::chrono::system_clock::to_time_t(now);
-  const std::tm* tm = std::localtime(&time);
-  auto micro_second = std::chrono::duration_cast<std::chrono::microseconds>(
+  time_t time = std::chrono::system_clock::to_time_t(now);
+  const auto* tm = localtime(&time);
+  auto microsecond = std::chrono::duration_cast<std::chrono::microseconds>(
       now.time_since_epoch());
   LogTime log_time;
   log_time.year = tm->tm_year + 1900;
@@ -21,7 +21,7 @@ LogTime GetLogTime() noexcept {
   log_time.hour = tm->tm_hour;
   log_time.minute = tm->tm_min;
   log_time.second = tm->tm_sec;
-  log_time.micro_second = (int)(micro_second.count() % 1000000);
+  log_time.microsecond = (int)(microsecond.count() % 1000000);
   return log_time;
 }
 

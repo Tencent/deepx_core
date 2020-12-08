@@ -16,10 +16,10 @@ struct GroupEmbeddingLookupAux {
   std::vector<int> Zoffset;  // indexed by group id
 
   int GetZoffset(uint16_t group_id) const noexcept {
-    if ((std::size_t)group_id >= Zoffset.size()) {
+    if ((size_t)group_id >= Zoffset.size()) {
       return -1;
     }
-    return Zoffset[(std::size_t)group_id];
+    return Zoffset[(size_t)group_id];
   }
 };
 
@@ -37,7 +37,7 @@ bool GroupEmbeddingLookupPrepare(int Xrow,
       *std::max_element(group_ids.begin(), group_ids.end()) + 1;
   int n = 0;
   aux->Zoffset.assign(max_group_id, -1);
-  for (std::size_t i = 0; i < group_ids.size(); ++i) {
+  for (size_t i = 0; i < group_ids.size(); ++i) {
     if (!W[i]->is_rank(2)) {
       DXERROR("Invalid W: rank of each W %d must be 2.", W[i]->rank());
       return false;
@@ -220,7 +220,7 @@ GroupEmbeddingLookupNode::GroupEmbeddingLookupNode(
 
   if (X->shape().is_rank(2) && HasShape(W)) {
     std::vector<const Shape*> Wshape(group_ids_.size());
-    for (std::size_t i = 0; i < group_ids_.size(); ++i) {
+    for (size_t i = 0; i < group_ids_.size(); ++i) {
       Wshape[i] = &W[i]->shape();
     }
     (void)GroupEmbeddingLookupInferShape(X->shape()[0], group_ids_, Wshape,

@@ -4,8 +4,6 @@
 
 #include <deepx_core/common/blocking_queue.h>
 #include <gtest/gtest.h>
-#include <cstdlib>  // std::getenv
-#include <cstring>  // std::strcmp
 #include <thread>
 #include <vector>
 

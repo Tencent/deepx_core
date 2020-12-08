@@ -7,8 +7,10 @@
 #include <deepx_core/graph/op_context.h>
 #include <deepx_core/graph/tensor_map.h>
 #include <deque>
+#include <memory>
 #include <typeindex>
 #include <utility>
+#include <vector>
 
 namespace deepx_core {
 namespace {

@@ -26,7 +26,7 @@ int WriteTerminationNotify(TcpConnections* conns,
     DXASSERT(conns->size() == masks->size());
   }
 
-  for (std::size_t i = 0; i < conns->size(); ++i) {
+  for (size_t i = 0; i < conns->size(); ++i) {
     if (masks == nullptr || (*masks)[i]) {
       TcpConnection* conn = (*conns)[i].get();
       conn->mutable_out_message()->set_type(

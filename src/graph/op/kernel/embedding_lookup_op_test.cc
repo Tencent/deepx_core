@@ -100,7 +100,7 @@ class EmbeddingLookupBackwardTest : public EmbeddingLookupForwardTest {
     auto post_param_initializer = [this](std::default_random_engine& engine,
                                          TensorMap* param) {
       auto& W = param->get<srm_t>("W");
-      for (std::size_t i = 0; i < X_.col_size(); ++i) {
+      for (size_t i = 0; i < X_.col_size(); ++i) {
         W.get_row(engine, X_.col(i));
       }
     };

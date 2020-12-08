@@ -5,7 +5,7 @@
 
 #include <deepx_core/dx_log.h>
 #include <deepx_core/graph/feature_kv_util.h>
-#include <cstring>  // std::memcpy
+#include <cstring>  // memcpy
 #include <limits>   // std::numeric_limits
 #if HAVE_SAGE2 == 1
 #include <sage2/half.h>
@@ -88,7 +88,7 @@ void FeatureKVUtil::GetSparseParamKeys(const std::unordered_set<int_t>& id_set,
                                        std::vector<std::string>* keys) {
   auto it = id_set.begin();
   keys->resize(id_set.size());
-  for (std::size_t i = 0; i < id_set.size(); ++i, ++it) {
+  for (size_t i = 0; i < id_set.size(); ++i, ++it) {
     int_t id = *it;
     std::string& key = (*keys)[i];
     GetSparseParamKey(id, &key);
@@ -98,7 +98,7 @@ void FeatureKVUtil::GetSparseParamKeys(const std::unordered_set<int_t>& id_set,
 void FeatureKVUtil::GetSparseParamKeys(const std::vector<int_t>& ids,
                                        std::vector<std::string>* keys) {
   keys->resize(ids.size());
-  for (std::size_t i = 0; i < ids.size(); ++i) {
+  for (size_t i = 0; i < ids.size(); ++i) {
     int_t id = ids[i];
     std::string& key = (*keys)[i];
     GetSparseParamKey(id, &key);
@@ -115,7 +115,7 @@ void FeatureKVUtil::GetSparseParamKeys(const PullRequest& pull_request,
 }
 
 void FeatureKVUtil::GetItem(const std::string& key, const char* value,
-                            std::size_t value_size, std::string* item) {
+                            size_t value_size, std::string* item) {
   item->resize(sizeof(FeatureKVHead) + key.size() + value_size);
   char* buf = &(*item)[0];
 
@@ -124,19 +124,19 @@ void FeatureKVUtil::GetItem(const std::string& key, const char* value,
   head->magic = 0xb2;
   head->flag = 0;
   DXASSERT(0 < key.size() &&
-           key.size() <= (std::size_t)std::numeric_limits<uint8_t>::max());
+           key.size() <= (size_t)std::numeric_limits<uint8_t>::max());
   head->key_size = (uint8_t)key.size();
   DXASSERT(0 < value_size &&
-           value_size <= (std::size_t)std::numeric_limits<uint32_t>::max());
+           value_size <= (size_t)std::numeric_limits<uint32_t>::max());
   head->value_size = (uint32_t)value_size;
   buf += sizeof(FeatureKVHead);
 
   // key
-  std::memcpy(buf, key.data(), key.size());
+  memcpy(buf, key.data(), key.size());
   buf += key.size();
 
   // value
-  std::memcpy(buf, value, value_size);
+  memcpy(buf, value, value_size);
 }
 
 void FeatureKVUtil::GetVersionItem(int version, std::string* item) {
@@ -160,7 +160,7 @@ void FeatureKVUtil::GetDenseParamItem(const std::string& key, const tsr_t& W,
 void FeatureKVUtil::GetSparseParamItem(const std::string& key,
                                        const sparse_values_t& values,
                                        std::string* item, int version) {
-  std::size_t value_size = 0;
+  size_t value_size = 0;
   if (version == 2) {
     for (const sparse_value_t& value : values) {
       value_size += sizeof(uint16_t) +                     // node_id
@@ -185,15 +185,15 @@ void FeatureKVUtil::GetSparseParamItem(const std::string& key,
   head->magic = 0xb2;
   head->flag = 0;
   DXASSERT(0 < key.size() &&
-           key.size() <= (std::size_t)std::numeric_limits<uint8_t>::max());
+           key.size() <= (size_t)std::numeric_limits<uint8_t>::max());
   head->key_size = (uint8_t)key.size();
   DXASSERT(0 < value_size &&
-           value_size <= (std::size_t)std::numeric_limits<uint32_t>::max());
+           value_size <= (size_t)std::numeric_limits<uint32_t>::max());
   head->value_size = (uint32_t)value_size;
   buf += sizeof(FeatureKVHead);
 
   // key
-  std::memcpy(buf, key.data(), key.size());
+  memcpy(buf, key.data(), key.size());
   buf += key.size();
 
   // value
@@ -209,7 +209,7 @@ void FeatureKVUtil::GetSparseParamItem(const std::string& key,
     buf += sizeof(uint16_t);
 
     if (version == 2) {
-      std::memcpy(buf, embedding, sizeof(float_t) * embedding_col);
+      memcpy(buf, embedding, sizeof(float_t) * embedding_col);
       buf += sizeof(float_t) * embedding_col;
     } else if (version == 3) {
 #if HAVE_SAGE2 == 1
@@ -378,7 +378,7 @@ void FeatureKVUtil::DenseParamParser::Parse(
   DXASSERT(keys.size() == values.size());
   DXASSERT(keys.size() == codes.size());
   stat->clear();
-  for (std::size_t i = 0; i < keys.size(); ++i) {
+  for (size_t i = 0; i < keys.size(); ++i) {
     if (codes[i] == 0) {
       ++stat->key_exist;
       Parse(keys[i], values[i], stat);
@@ -416,7 +416,7 @@ void FeatureKVUtil::SparseParamParser::Init(const Graph* graph,
   param_ = param;
   version_ = version;
 
-  std::size_t node_size = graph_->name_2_node().size();
+  size_t node_size = graph_->name_2_node().size();
   W_.assign(node_size, nullptr);
   for (auto& entry : *param_) {
     const std::string& name = entry.first;
@@ -439,7 +439,7 @@ void FeatureKVUtil::SparseParamParser::Parse(
   DXASSERT(keys.size() == values.size());
   DXASSERT(keys.size() == codes.size());
   stat->clear();
-  for (std::size_t i = 0; i < keys.size(); ++i) {
+  for (size_t i = 0; i < keys.size(); ++i) {
     if (codes[i] == 0) {
       ++stat->key_exist;
       Parse(keys[i], values[i], stat);
@@ -458,12 +458,12 @@ void FeatureKVUtil::SparseParamParser::Parse(const std::string& key,
   DXASSERT(!value.empty());
   int_t id;
   const char* buf = value.data();
-  std::size_t buf_size = value.size();
+  size_t buf_size = value.size();
   uint16_t node_id;
   uint16_t embedding_col;
   const char* embedding;
   srm_t* W;
-  std::size_t float_size = 0;
+  size_t float_size = 0;
 
   if (!GetSparseParamId(key, &id)) {
     ++stat->key_bad;
@@ -495,7 +495,7 @@ void FeatureKVUtil::SparseParamParser::Parse(const std::string& key,
     buf += sizeof(uint16_t);
     buf_size -= sizeof(uint16_t);
 
-    if ((std::size_t)node_id >= W_.size() || (W = W_[node_id]) == nullptr ||
+    if ((size_t)node_id >= W_.size() || (W = W_[node_id]) == nullptr ||
         (int)embedding_col != W->col()) {
       ++stat->value_bad;
       break;
@@ -525,16 +525,15 @@ void FeatureKVUtil::SparseParamParser::Parse(const std::string& key,
 /************************************************************************/
 /* FeatureKVUtil */
 /************************************************************************/
-bool FeatureKVUtil::_GetKeyValue(const char*& item_buf,
-                                 std::size_t& item_buf_size, std::string* key,
-                                 std::string* value) {
+bool FeatureKVUtil::_GetKeyValue(const char*& item_buf, size_t& item_buf_size,
+                                 std::string* key, std::string* value) {
   if (item_buf_size < sizeof(FeatureKVHead)) {
     return false;
   }
 
-  FeatureKVHead* head = (FeatureKVHead*)item_buf;          // NOLINT
-  std::size_t key_size = (std::size_t)head->key_size;      // NOLINT
-  std::size_t value_size = (std::size_t)head->value_size;  // NOLINT
+  FeatureKVHead* head = (FeatureKVHead*)item_buf;  // NOLINT
+  size_t key_size = (size_t)head->key_size;        // NOLINT
+  size_t value_size = (size_t)head->value_size;    // NOLINT
   item_buf += sizeof(FeatureKVHead);
   item_buf_size -= sizeof(FeatureKVHead);
   if (item_buf_size < key_size + value_size) {
@@ -551,7 +550,7 @@ bool FeatureKVUtil::_GetKeyValue(const char*& item_buf,
   return true;
 }
 
-bool FeatureKVUtil::GetKeyValue(const char* item_buf, std::size_t item_buf_size,
+bool FeatureKVUtil::GetKeyValue(const char* item_buf, size_t item_buf_size,
                                 std::string* key, std::string* value) {
   return _GetKeyValue(item_buf, item_buf_size, key, value);
 }
@@ -561,8 +560,7 @@ bool FeatureKVUtil::GetKeyValue(const std::string& item, std::string* key,
   return GetKeyValue(item.data(), item.size(), key, value);
 }
 
-bool FeatureKVUtil::GetKeyValues(const char* item_buf,
-                                 std::size_t item_buf_size,
+bool FeatureKVUtil::GetKeyValues(const char* item_buf, size_t item_buf_size,
                                  std::vector<std::string>* keys,
                                  std::vector<std::string>* values) {
   keys->clear();

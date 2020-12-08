@@ -5,8 +5,6 @@
 #include <deepx_core/common/thread_pool.h>
 #include <gtest/gtest.h>
 #include <atomic>
-#include <cstdlib>  // std::getenv
-#include <cstring>  // std::strcmp
 
 namespace deepx_core {
 

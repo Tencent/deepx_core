@@ -119,7 +119,7 @@ class OptimizerImpl : public Optimizer {
       if (!local_slot.O.empty() &&
           local_slot.O.size() == remote_slot.O.size() &&
           local_slot.O[0].same_shape(remote_slot.O[0])) {
-        for (std::size_t i = 0; i < local_slot.O.size(); ++i) {
+        for (size_t i = 0; i < local_slot.O.size(); ++i) {
           reduce_tsr(name, local_slot.O[i], remote_slot.O[i]);
         }
       }
@@ -137,7 +137,7 @@ class OptimizerImpl : public Optimizer {
       if (!local_slot.O.empty() &&
           local_slot.O.size() == remote_slot.O.size() &&
           local_slot.O[0].col() == remote_slot.O[0].col()) {
-        for (std::size_t i = 0; i < local_slot.O.size(); ++i) {
+        for (size_t i = 0; i < local_slot.O.size(); ++i) {
           reduce_srm(name, local_slot.O[i], remote_slot.O[i]);
         }
       }

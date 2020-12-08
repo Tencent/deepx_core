@@ -4,7 +4,7 @@
 
 #pragma once
 #include <cmath>
-#include <cstring>  // std::memset, std::memcpy
+#include <cstring>  // memset, memcpy
 
 namespace deepx_core {
 
@@ -27,13 +27,13 @@ class LLMath {
 
   // Set y zero.
   static void zero(int n, ptr_t y) noexcept {
-    std::memset(y, 0, n * sizeof(float_t));
+    memset(y, 0, n * sizeof(float_t));
   }
 
   // Set y = x.
   static void copy(int n, cptr_t x, ptr_t y) noexcept {
     if (x != y) {
-      std::memcpy(y, x, n * sizeof(float_t));
+      memcpy(y, x, n * sizeof(float_t));
     }
   }
 

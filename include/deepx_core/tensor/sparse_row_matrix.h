@@ -13,7 +13,7 @@
 #include <deepx_core/dx_log.h>
 #include <deepx_core/tensor/shape.h>
 #include <deepx_core/tensor/tensor_type.h>
-#include <cstring>  // std::memcpy
+#include <cstring>  // memcpy
 #include <initializer_list>
 #include <iostream>
 #include <random>
@@ -185,7 +185,7 @@ class SparseRowMatrix {
   void reserve(Int size);
   void clear() noexcept;
   void zeros() noexcept { row_map_.clear(); }
-  std::size_t size() const noexcept { return row_map_.size(); }
+  size_t size() const noexcept { return row_map_.size(); }
   bool empty() const noexcept { return row_map_.empty(); }
   void upsert(const SparseRowMatrix& other);
   template <class Func>
@@ -297,7 +297,7 @@ InputStream& operator>>(InputStream& is, SparseRowMatrix<T, I>& srm) {
     // backward compatibility
     srm.clear();
     std::vector<T> value;
-    HashMap<I, std::size_t, MurmurHash<I>> row_offset_map;
+    HashMap<I, size_t, MurmurHash<I>> row_offset_map;
     is >> srm.shape_ >> value >> row_offset_map >> srm.initializer_type_ >>
         srm.initializer_param1_ >> srm.initializer_param2_;
     if (is) {
@@ -468,7 +468,7 @@ SparseRowMatrix<T, I>::SparseRowMatrix(
 template <typename T, typename I>
 template <typename Int>
 void SparseRowMatrix<T, I>::reserve(Int size) {
-  row_map_.reserve((std::size_t)size);
+  row_map_.reserve((size_t)size);
 }
 
 template <typename T, typename I>
@@ -569,7 +569,7 @@ template <typename T, typename I>
 void SparseRowMatrix<T, I>::assign(int_t row, cptr_t row_value) {
   auto& value = row_map_[row];
   value.resize(col());
-  std::memcpy(&value[0], row_value, col() * sizeof(float_t));
+  memcpy(&value[0], row_value, col() * sizeof(float_t));
 }
 
 template <typename T, typename I>
@@ -644,7 +644,7 @@ void SparseRowMatrix<T, I>::assign(int_t row, cptr_t row_value,
                                    ReadWriteLock* lock) {
   WriteLockGuard guard(lock);
   ptr_t value = get_row_no_init(row);
-  std::memcpy(value, row_value, col() * sizeof(float_t));
+  memcpy(value, row_value, col() * sizeof(float_t));
 }
 
 template <typename T, typename I>

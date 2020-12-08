@@ -16,7 +16,7 @@ namespace detail {
 template <typename Key>
 struct KeyHash {
   using key_type = Key;
-  using size_type = std::size_t;
+  using size_type = size_t;
 
   size_type operator()(const key_type& k) const noexcept {
     return operator()(k, typename std::is_integral<key_type>::type());
@@ -44,7 +44,7 @@ struct KeyEqual {
   }
 };
 
-template <std::size_t>
+template <size_t>
 struct RoundUpPow2;
 
 template <>
@@ -76,8 +76,8 @@ struct RoundUpPow2<8> {
   }
 };
 
-constexpr std::size_t HASH_MAP_INVALID_SLOT_INDEX = (std::size_t)-1;
-constexpr std::size_t HASH_MAP_MIN_BUCKET_SIZE = 128;
+constexpr size_t HASH_MAP_INVALID_SLOT_INDEX = (size_t)-1;
+constexpr size_t HASH_MAP_MIN_BUCKET_SIZE = 128;
 constexpr double HASH_MAP_MAX_LOAD_FACTOR = 2.0;
 constexpr double HASH_MAP_INV_MIN_LOAD_FACTOR = 1 / 1.5;
 
@@ -225,7 +225,7 @@ class HashMap {
   using key_type = Key;
   using mapped_type = Value;
   using value_type = std::pair<key_type, mapped_type>;
-  using size_type = std::size_t;
+  using size_type = size_t;
 
  private:
   enum META_FLAG {

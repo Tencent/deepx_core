@@ -37,7 +37,7 @@ class FilePath {
  public:
   FilePath() = default;
   FilePath(const char* s) : path_(s) {}  // NOLINT
-  FilePath(const char* s, std::size_t size) : path_(s, size) {}
+  FilePath(const char* s, size_t size) : path_(s, size) {}
   FilePath(const std::string& path) : path_(path) {}  // NOLINT
   template <typename II>
   FilePath(II first, II last) : path_(first, last) {}
@@ -130,12 +130,12 @@ class FileStat {
  private:
   int exists_ = 0;
   int type_ = FILE_TYPE_NONE;
-  std::size_t file_size_ = 0;
+  size_t file_size_ = 0;
 
  public:
   void set_exists(int exists) noexcept { exists_ = exists; }
   void set_type(int type) noexcept { type_ = type; }
-  void set_file_size(std::size_t file_size) noexcept { file_size_ = file_size; }
+  void set_file_size(size_t file_size) noexcept { file_size_ = file_size; }
   void clear() noexcept;
 
  public:
@@ -147,7 +147,7 @@ class FileStat {
   bool IsRegFile() const noexcept { return type_ & FILE_TYPE_REG_FILE; }
   bool IsSymLink() const noexcept { return type_ & FILE_TYPE_SYM_LINK; }
   bool IsOther() const noexcept { return type_ & FILE_TYPE_OTHER; }
-  std::size_t GetFileSize() const noexcept { return file_size_; }
+  size_t GetFileSize() const noexcept { return file_size_; }
 
  public:
   static FileStat StdinStdout() noexcept;
@@ -167,7 +167,7 @@ class FileSystem {
   bool IsRegFile(const FilePath& path);
   bool IsSymLink(const FilePath& path);
   bool IsOther(const FilePath& path);
-  bool GetFileSize(const FilePath& path, std::size_t* size);
+  bool GetFileSize(const FilePath& path, size_t* size);
 
   // List 'path'.
   //
@@ -234,7 +234,7 @@ class StreamBase {
 /************************************************************************/
 class OutputStream : virtual public StreamBase {
  public:
-  virtual std::size_t Write(const void* data, std::size_t size) = 0;
+  virtual size_t Write(const void* data, size_t size) = 0;
   virtual bool Flush() { return true; }
 
   template <typename T>
@@ -268,9 +268,9 @@ void OutputStream::WriteObject(Args&&... args) {
 /************************************************************************/
 class InputStream : virtual public StreamBase {
  public:
-  virtual std::size_t Read(void* data, std::size_t size) = 0;
+  virtual size_t Read(void* data, size_t size) = 0;
   virtual char ReadChar() = 0;
-  virtual std::size_t Peek(void* data, std::size_t size) = 0;
+  virtual size_t Peek(void* data, size_t size) = 0;
 
  public:
   template <typename T>
@@ -316,23 +316,22 @@ class IOStream : virtual public InputStream, virtual public OutputStream {};
 class BufferedInputStream : public InputStream {
  protected:
   InputStream* const is_;
-  std::size_t buf_size_;
+  size_t buf_size_;
   std::string buf_;
   char* begin_;
   char* cur_;
   char* end_;
 
  protected:
-  std::size_t FillEmptyBuf();
-  std::size_t EnsureBuf(std::size_t need_bytes);
+  size_t FillEmptyBuf();
+  size_t EnsureBuf(size_t need_bytes);
 
  public:
   explicit BufferedInputStream(InputStream* is,
-                               std::size_t buf_size = 64 * 1024  // magic number
-  );
-  std::size_t Read(void* data, std::size_t size) override;
+                               size_t buf_size = 64 * 1024);  // magic number
+  size_t Read(void* data, size_t size) override;
   char ReadChar() override;
-  std::size_t Peek(void* data, std::size_t size) override;
+  size_t Peek(void* data, size_t size) override;
 };
 
 /************************************************************************/
@@ -342,27 +341,26 @@ class GunzipInputStream : public InputStream {
  protected:
   InputStream* const is_;
   void* zs_;
-  std::size_t comp_buf_size_;
+  size_t comp_buf_size_;
   std::string comp_buf_;
   char* comp_begin_;
-  std::size_t buf_size_;
+  size_t buf_size_;
   std::string buf_;
   char* begin_;
   char* cur_;
   char* end_;
 
  protected:
-  std::size_t FillEmptyBuf();
-  std::size_t EnsureBuf(std::size_t need_bytes);
+  size_t FillEmptyBuf();
+  size_t EnsureBuf(size_t need_bytes);
 
  public:
   explicit GunzipInputStream(InputStream* is,
-                             std::size_t buf_size = 64 * 1024  // magic number
-  );
+                             size_t buf_size = 64 * 1024);  // magic number
   ~GunzipInputStream() override;
-  std::size_t Read(void* data, std::size_t size) override;
+  size_t Read(void* data, size_t size) override;
   char ReadChar() override;
-  std::size_t Peek(void* data, std::size_t size) override;
+  size_t Peek(void* data, size_t size) override;
 };
 
 /************************************************************************/
@@ -388,11 +386,11 @@ class CFileStream : public IOStream {
  public:
   CFileStream();
   ~CFileStream() override;
-  std::size_t Write(const void* data, std::size_t size) override;
+  size_t Write(const void* data, size_t size) override;
   bool Flush() override;
-  std::size_t Read(void* data, std::size_t size) override;
+  size_t Read(void* data, size_t size) override;
   char ReadChar() override;
-  std::size_t Peek(void* data, std::size_t size) override;
+  size_t Peek(void* data, size_t size) override;
 
  public:
   bool Open(const std::string& file, int mode);
@@ -409,7 +407,7 @@ class OutputStringStream : public OutputStream {
   std::string* buf_ptr_ = &buf_;
 
  public:
-  std::size_t Write(const void* data, std::size_t size) override;
+  size_t Write(const void* data, size_t size) override;
 
  public:
   void SetString(std::string s) noexcept {
@@ -426,9 +424,9 @@ class OutputStringStream : public OutputStream {
 
   const char* GetData() const noexcept { return buf_ptr_->data(); }
 
-  std::size_t GetSize() const noexcept { return buf_ptr_->size(); }
+  size_t GetSize() const noexcept { return buf_ptr_->size(); }
 
-  std::pair<const char*, std::size_t> GetBuf() const noexcept {
+  std::pair<const char*, size_t> GetBuf() const noexcept {
     return std::make_pair(buf_ptr_->data(), buf_ptr_->size());
   }
 
@@ -449,14 +447,14 @@ class InputStringStream : public InputStream {
   const char* end_;
 
  protected:
-  void Init(const char* data, std::size_t size);
+  void Init(const char* data, size_t size);
 
  public:
   InputStringStream();
-  std::size_t Read(void* data, std::size_t size) override;
+  size_t Read(void* data, size_t size) override;
   char ReadChar() override;
-  std::size_t Peek(void* data, std::size_t size) override;
-  std::size_t Skip(std::size_t size);
+  size_t Peek(void* data, size_t size) override;
+  size_t Skip(size_t size);
 
  public:
   void SetString(const char* s) {
@@ -474,28 +472,26 @@ class InputStringStream : public InputStream {
     Init(buf_.data(), buf_.size());
   }
 
-  void SetString(const char* data, std::size_t size) {
+  void SetString(const char* data, size_t size) {
     buf_.assign(data, size);
     Init(buf_.data(), buf_.size());
   }
 
-  void SetString(const std::pair<const char*, std::size_t>& buf) {
+  void SetString(const std::pair<const char*, size_t>& buf) {
     buf_.assign(buf.first, buf.second);
     Init(buf_.data(), buf_.size());
   }
 
   void SetView(const std::string& s) noexcept { Init(s.data(), s.size()); }
 
-  void SetView(const char* data, std::size_t size) noexcept {
-    Init(data, size);
-  }
+  void SetView(const char* data, size_t size) noexcept { Init(data, size); }
 
-  void SetView(const std::pair<const char*, std::size_t>& buf) noexcept {
+  void SetView(const std::pair<const char*, size_t>& buf) noexcept {
     Init(buf.first, buf.second);
   }
 
   std::string GetString() const {
-    std::size_t size = end_ - cur_;
+    size_t size = end_ - cur_;
     if (size) {
       return std::string(cur_, size);
     } else {
@@ -504,7 +500,7 @@ class InputStringStream : public InputStream {
   }
 
   const char* GetData() const noexcept {
-    std::size_t size = end_ - cur_;
+    size_t size = end_ - cur_;
     if (size) {
       return cur_;
     } else {
@@ -512,10 +508,10 @@ class InputStringStream : public InputStream {
     }
   }
 
-  std::size_t GetSize() const noexcept { return end_ - cur_; }
+  size_t GetSize() const noexcept { return end_ - cur_; }
 
-  std::pair<const char*, std::size_t> GetBuf() const noexcept {
-    std::size_t size = end_ - cur_;
+  std::pair<const char*, size_t> GetBuf() const noexcept {
+    size_t size = end_ - cur_;
     if (size) {
       return std::make_pair(cur_, size);
     } else {
@@ -582,11 +578,11 @@ class HDFSFileStream : public IOStream {
  public:
   explicit HDFSFileStream(HDFSHandle* handle);
   ~HDFSFileStream() override;
-  std::size_t Write(const void* data, std::size_t size) override;
+  size_t Write(const void* data, size_t size) override;
   bool Flush() override;
-  std::size_t Read(void* data, std::size_t size) override;
+  size_t Read(void* data, size_t size) override;
   char ReadChar() override;
-  std::size_t Peek(void* data, std::size_t size) override;
+  size_t Peek(void* data, size_t size) override;
 
  public:
   bool Open(const std::string& file, int mode);
@@ -633,7 +629,7 @@ class AutoFileSystem : public FileSystem {
   static bool IsRegFile(const std::string& path);
   static bool IsSymLink(const std::string& path);
   static bool IsOther(const std::string& path);
-  static bool GetFileSize(const std::string& path, std::size_t* size);
+  static bool GetFileSize(const std::string& path, size_t* size);
   static bool List(const std::string& path, bool skip_dir,
                    std::vector<std::string>* children);
   static bool ListRecursive(const std::string& path, bool skip_dir,
@@ -655,9 +651,9 @@ class AutoInputFileStream : public InputStream {
 
  public:
   AutoInputFileStream();
-  std::size_t Read(void* data, std::size_t size) override;
+  size_t Read(void* data, size_t size) override;
   char ReadChar() override;
-  std::size_t Peek(void* data, std::size_t size) override;
+  size_t Peek(void* data, size_t size) override;
 
  public:
   bool Open(const std::string& file);
@@ -675,7 +671,7 @@ class AutoOutputFileStream : public OutputStream {
 
  public:
   AutoOutputFileStream();
-  std::size_t Write(const void* data, std::size_t size) override;
+  size_t Write(const void* data, size_t size) override;
   bool Flush() override;
 
  public:
@@ -900,17 +896,17 @@ InputStream& operator>>(InputStream& is, std::unordered_map<K, T, H, P, A>& m) {
     return is;
   }
 
-  std::size_t size;
+  size_t size;
   if (version == 0x0a0c72e7) {  // magic number version
     uint64_t size_u64 = 0;
     is >> version;
     is >> size_u64;
-    size = (std::size_t)size_u64;
+    size = (size_t)size_u64;
   } else {
     // backward compatibility
     int size_i = 0;
     is >> size_i;
-    size = (std::size_t)size_i;
+    size = (size_t)size_i;
   }
   if (!is) {
     return is;
@@ -921,7 +917,7 @@ InputStream& operator>>(InputStream& is, std::unordered_map<K, T, H, P, A>& m) {
     K key;
     T value;
     m.reserve(size);
-    for (std::size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
       is >> key >> value;
       if (!is) {
         return is;
@@ -940,17 +936,17 @@ InputStringStream& ReadView(InputStringStream& is,
     return is;
   }
 
-  std::size_t size;
+  size_t size;
   if (version == 0x0a0c72e7) {  // magic number version
     uint64_t size_u64 = 0;
     is >> version;
     is >> size_u64;
-    size = (std::size_t)size_u64;
+    size = (size_t)size_u64;
   } else {
     // backward compatibility
     int size_i = 0;
     is >> size_i;
-    size = (std::size_t)size_i;
+    size = (size_t)size_i;
   }
   if (!is) {
     return is;
@@ -961,7 +957,7 @@ InputStringStream& ReadView(InputStringStream& is,
     K key;
     T value;
     m.reserve(size);
-    for (std::size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
       ReadView(is, key);
       ReadView(is, value);
       if (!is) {
@@ -999,17 +995,17 @@ InputStream& operator>>(InputStream& is, std::unordered_set<V, H, P, A>& s) {
     return is;
   }
 
-  std::size_t size;
+  size_t size;
   if (version == 0x0a0c72e7) {  // magic number version
     uint64_t size_u64 = 0;
     is >> version;
     is >> size_u64;
-    size = (std::size_t)size_u64;
+    size = (size_t)size_u64;
   } else {
     // backward compatibility
     int size_i = 0;
     is >> size_i;
-    size = (std::size_t)size_i;
+    size = (size_t)size_i;
   }
   if (!is) {
     return is;
@@ -1019,7 +1015,7 @@ InputStream& operator>>(InputStream& is, std::unordered_set<V, H, P, A>& s) {
   if (size > 0) {
     V value;
     s.reserve(size);
-    for (std::size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
       is >> value;
       if (!is) {
         return is;
@@ -1038,17 +1034,17 @@ InputStringStream& ReadView(InputStringStream& is,
     return is;
   }
 
-  std::size_t size;
+  size_t size;
   if (version == 0x0a0c72e7) {  // magic number version
     uint64_t size_u64 = 0;
     is >> version;
     is >> size_u64;
-    size = (std::size_t)size_u64;
+    size = (size_t)size_u64;
   } else {
     // backward compatibility
     int size_i = 0;
     is >> size_i;
-    size = (std::size_t)size_i;
+    size = (size_t)size_i;
   }
   if (!is) {
     return is;
@@ -1058,7 +1054,7 @@ InputStringStream& ReadView(InputStringStream& is,
   if (size > 0) {
     V value;
     s.reserve(size);
-    for (std::size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < size; ++i) {
       ReadView(is, value);
       if (!is) {
         return is;
@@ -1087,7 +1083,7 @@ bool ParseFromString(const std::string& buf, T* t) {
 }
 
 template <typename T>
-bool ParseFromArray(const char* buf, std::size_t size, T* t) {
+bool ParseFromArray(const char* buf, size_t size, T* t) {
   InputStringStream is;
   is.SetView(buf, size);
   is >> *t;
@@ -1103,7 +1099,7 @@ bool ParseViewFromString(const std::string& buf, T* t) {
 }
 
 template <typename T>
-bool ParseViewFromArray(const char* buf, std::size_t size, T* t) {
+bool ParseViewFromArray(const char* buf, size_t size, T* t) {
   InputStringStream is;
   is.SetView(buf, size);
   ReadView(is, *t);

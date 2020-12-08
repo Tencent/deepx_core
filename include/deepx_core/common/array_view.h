@@ -29,7 +29,7 @@ class ArrayView {
   using const_iterator = const value_type*;
   using reverse_iterator = std::reverse_iterator<iterator>;
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-  using size_type = std::size_t;
+  using size_type = size_t;
   using difference_type = std::ptrdiff_t;
 
  private:
@@ -211,7 +211,7 @@ class ConstArrayView {
   using const_reference = const value_type&;
   using const_iterator = const value_type*;
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-  using size_type = std::size_t;
+  using size_type = size_t;
   using difference_type = std::ptrdiff_t;
 
  private:

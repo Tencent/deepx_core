@@ -33,7 +33,7 @@ bool Split(const std::string& s, const std::string& sep, std::vector<T>* vt,
   std::vector<std::string> vs;
   Split(s, sep, &vs, discard_empty);
   vt->resize(vs.size());
-  for (std::size_t i = 0; i < vs.size(); ++i) {
+  for (size_t i = 0; i < vs.size(); ++i) {
     std::istringstream is(vs[i]);
     is >> (*vt)[i];
     if (!is || !is.eof()) {

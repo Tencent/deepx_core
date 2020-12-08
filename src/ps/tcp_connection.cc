@@ -34,7 +34,7 @@ TcpEndpoint MakeTcpEndpoint(const std::string& ip, int port) {
 }
 
 TcpEndpoint MakeTcpEndpoint(const std::string& addr) {
-  std::size_t semi = addr.rfind(':');
+  size_t semi = addr.rfind(':');
   if (semi == std::string::npos) {
     DXTHROW_INVALID_ARGUMENT("Invalid addr: %s.", addr.c_str());
   }
@@ -98,7 +98,7 @@ MutableBuffers TcpConnection::GetInBuf() {
     in_buf_offset_ = 0;
   }
 
-  std::size_t in_buf_bytes = in_buf_.size();
+  size_t in_buf_bytes = in_buf_.size();
   if (in_buf_bytes == in_bytes_) {
     // double 'in_buf_'
     in_buf_bytes = in_buf_bytes * 2;
@@ -123,14 +123,14 @@ MutableBuffers TcpConnection::GetOutBuf() {
                       out_stream_.GetSize() - out_bytes_);
 }
 
-int TcpConnection::TryReadMessage(std::size_t in_bytes) {
+int TcpConnection::TryReadMessage(size_t in_bytes) {
   in_bytes_ += in_bytes;
   if (in_bytes_ < sizeof(int)) {
     return 1;
   }
 
   const char* in_packet = in_buf_.data() + in_buf_offset_;
-  std::size_t packet_bytes = *(const int*)in_packet;
+  size_t packet_bytes = *(const int*)in_packet;
   if (in_bytes_ < packet_bytes) {
     return 1;
   }
@@ -153,7 +153,7 @@ int TcpConnection::TryReadMessage(std::size_t in_bytes) {
 
 int TcpConnection::ReadMessage() {
   std::error_code ec;
-  std::size_t n = 0;
+  size_t n = 0;
   int read;
   for (;;) {
     switch (read = TryReadMessage(n)) {
@@ -177,7 +177,7 @@ int TcpConnection::ReadMessage() {
 
 int TcpConnection::WriteMessage() {
   std::error_code ec;
-  std::size_t to_out_bytes, n;
+  size_t to_out_bytes, n;
   PrepareOutBuf();
   to_out_bytes = out_stream_.GetSize();
   while (to_out_bytes != 0) {
@@ -194,7 +194,7 @@ int TcpConnection::WriteMessage() {
   return 0;
 }
 
-int TcpConnection::OnWritten(std::size_t out_bytes) {
+int TcpConnection::OnWritten(size_t out_bytes) {
   if ((out_bytes_ += out_bytes) == out_stream_.GetSize()) {
     return 0;
   }
@@ -348,7 +348,7 @@ int TcpConnections::Rpc(int type, const std::vector<int>* masks) {
     DXASSERT(size() == masks->size());
   }
 
-  for (std::size_t i = 0; i < size(); ++i) {
+  for (size_t i = 0; i < size(); ++i) {
     if (masks == nullptr || (*masks)[i]) {
       TcpConnection* conn = (*this)[i].get();
       conn->mutable_out_message()->set_type(type);
@@ -358,7 +358,7 @@ int TcpConnections::Rpc(int type, const std::vector<int>* masks) {
     }
   }
   if (DistMessage::HasResponse(type)) {
-    for (std::size_t i = 0; i < size(); ++i) {
+    for (size_t i = 0; i < size(); ++i) {
       if (masks == nullptr || (*masks)[i]) {
         TcpConnection* conn = (*this)[i].get();
         if (conn->RpcRead() == -1) {

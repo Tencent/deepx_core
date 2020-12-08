@@ -32,7 +32,7 @@ class BlockingQueue {
  public:
   ~BlockingQueue() { stop(); }
 
-  std::size_t size() const noexcept {
+  size_t size() const noexcept {
     std::unique_lock<std::mutex> guard(mutex_);
     return queue_.size();
   }

@@ -42,7 +42,7 @@ class MockFeatureKVClient {
   void InitMock(const std::vector<std::string>& keys,
                 const std::vector<std::string>& values) {
     kv_map_.clear();
-    for (std::size_t i = 0; i < keys.size(); ++i) {
+    for (size_t i = 0; i < keys.size(); ++i) {
       kv_map_.emplace(keys[i], values[i]);
     }
   }
@@ -65,7 +65,7 @@ class MockFeatureKVClient {
                uint32_t /*cli_version*/ = 0) {
     codes->assign(keys.size(), 1);
     values->assign(keys.size(), "");
-    for (std::size_t i = 0; i < keys.size(); ++i) {
+    for (size_t i = 0; i < keys.size(); ++i) {
       auto it = kv_map_.find(keys[i]);
       if (it != kv_map_.end()) {
         (*codes)[i] = 0;

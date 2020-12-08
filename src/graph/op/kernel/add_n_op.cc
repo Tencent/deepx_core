@@ -20,7 +20,7 @@ bool AddNInferShape(const std::vector<const Shape*>& X, Shape* Z) {
     return false;
   }
 
-  for (std::size_t i = 0; i < X.size(); ++i) {  // NOLINT
+  for (size_t i = 0; i < X.size(); ++i) {  // NOLINT
     const Shape& Xi = *X[i];
     if (Xi != X0) {
       DXERROR("Invalid X: inconsistent shape %s vs %s.", to_string(Xi).c_str(),
@@ -36,7 +36,7 @@ bool AddNInferShape(const std::vector<const Shape*>& X, Shape* Z) {
 template <typename T>
 void AddN(const std::vector<const Tensor<T>*>& X, Tensor<T>* Z) noexcept {
   Z->zeros();
-  for (std::size_t i = 0; i < X.size(); ++i) {
+  for (size_t i = 0; i < X.size(); ++i) {
     LLTensor<T>::add(*X[i], *Z, Z);
   }
 }
@@ -45,7 +45,7 @@ template <typename T>
 void AddNBackward(const std::vector<const Tensor<T>*>& /*X*/,
                   const Tensor<T>& /*Z*/, const Tensor<T>& gZ,
                   std::vector<Tensor<T>*>* gX) noexcept {
-  for (std::size_t i = 0; i < gX->size(); ++i) {
+  for (size_t i = 0; i < gX->size(); ++i) {
     if ((*gX)[i]) {
       LLTensor<T>::add(gZ, *(*gX)[i], (*gX)[i]);
     }

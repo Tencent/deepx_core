@@ -9,7 +9,6 @@
 #include <memory>
 #include <set>
 #include <utility>
-#include <vector>
 #include "../op/kernel/broadcast.h"
 
 namespace deepx_core {

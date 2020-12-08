@@ -3,6 +3,9 @@
 //
 
 #pragma once
+#include <string>
+#include <unordered_map>
+#include <vector>
 #include "arithmetic.h"
 #include "simp_stage.h"
 

@@ -6,8 +6,7 @@
 
 namespace deepx_core {
 
-uint64_t MurmurHash2(const void* data, std::size_t size,
-                     uint64_t seed) noexcept {
+uint64_t MurmurHash2(const void* data, size_t size, uint64_t seed) noexcept {
   static constexpr uint64_t M = UINT64_C(0xc6a4a7935bd1e995);
   static constexpr uint64_t R = 47;
 

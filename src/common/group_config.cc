@@ -223,7 +223,7 @@ bool GuessGroupConfig(const std::string& file_or_info,
 std::vector<GroupConfigItem3> GetLRGroupConfig(
     const std::vector<GroupConfigItem3>& items) {
   std::vector<GroupConfigItem3> lr_items(items.size());
-  for (std::size_t i = 0; i < items.size(); ++i) {
+  for (size_t i = 0; i < items.size(); ++i) {
     const GroupConfigItem3& item = items[i];
     GroupConfigItem3& lr_item = lr_items[i];
     lr_item.group_id = item.group_id;

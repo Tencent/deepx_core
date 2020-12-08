@@ -94,9 +94,9 @@ bool UCHInstanceReaderHelper<T, I>::Parse(csr_t* X_user, csr_t* X_cand,
   int label_size = Y->dim(1);
   DXCHECK_THROW(_X_hist_size <= MAX_X_SIZE);
   DXCHECK_THROW(label_size <= MAX_LABEL_SIZE);
-  std::size_t X_user_value_size = X_user->value_size();
-  std::size_t X_cand_value_size = X_cand->value_size();
-  std::size_t X_hist_value_size[MAX_X_SIZE];
+  size_t X_user_value_size = X_user->value_size();
+  size_t X_cand_value_size = X_cand->value_size();
+  size_t X_hist_value_size[MAX_X_SIZE];
   float_t* _Y;
   float_t* _W = nullptr;
   for (int i = 0; i < _X_hist_size; ++i) {

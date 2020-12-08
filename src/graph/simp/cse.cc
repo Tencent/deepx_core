@@ -77,7 +77,7 @@ bool CSESimp::Simplify(SimpItem* item) const {
 
   bool simplified = false;
   std::unordered_set<GraphNode*> processed;
-  for (std::size_t i = 0; i < sorted.size(); ++i) {
+  for (size_t i = 0; i < sorted.size(); ++i) {
     GraphNode* node = sorted[i];
     if (processed.count(node) > 0) {
       continue;
@@ -86,7 +86,7 @@ bool CSESimp::Simplify(SimpItem* item) const {
     if (item->is_target(node->name())) {
       continue;
     }
-    for (std::size_t j = i + 1; j < sorted.size(); ++j) {
+    for (size_t j = i + 1; j < sorted.size(); ++j) {
       GraphNode* candidate = sorted[j];
       if (processed.count(candidate) > 0 ||
           item->is_target(candidate->name())) {

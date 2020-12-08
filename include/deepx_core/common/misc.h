@@ -8,7 +8,7 @@
 
 namespace deepx_core {
 
-std::size_t GetVerboseBatch(int verbose) noexcept;
+size_t GetVerboseBatch(int verbose) noexcept;
 std::string GetOutputPredictFile(const std::string& dir,
                                  const std::string& file);
 

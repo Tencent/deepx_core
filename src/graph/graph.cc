@@ -183,10 +183,10 @@ bool Graph::Compile(const std::vector<GraphNode*>& target_nodes, int on_heap) {
   // fill 'target_', 'name_2_target_'
   std::unordered_set<GraphNode*> dedup_node;
   std::unordered_set<std::string> dedup_name;
-  std::size_t target_size = target_nodes.size();
+  size_t target_size = target_nodes.size();
   target_.resize(target_size);
   name_2_target_.reserve(target_size);
-  for (std::size_t i = 0; i < target_size; ++i) {
+  for (size_t i = 0; i < target_size; ++i) {
     GraphTarget& target = target_[i];
     CompileTarget(target_nodes[i], &dedup_name, &target);
     name_2_target_.emplace(target.name(), &target);

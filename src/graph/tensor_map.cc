@@ -3,6 +3,7 @@
 //
 
 #include <deepx_core/graph/tensor_map.h>
+#include <string>
 
 namespace deepx_core {
 

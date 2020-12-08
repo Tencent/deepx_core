@@ -69,7 +69,7 @@ bool LibsvmExInstanceReaderHelper<T, I>::Parse(std::vector<csr_t*>* X, tsr_t* Y,
   int label_size = Y->dim(1);
   DXCHECK_THROW(X_size <= MAX_X_SIZE);
   DXCHECK_THROW(label_size <= MAX_LABEL_SIZE);
-  std::size_t X_value_size[MAX_X_SIZE];
+  size_t X_value_size[MAX_X_SIZE];
   float_t* _Y;
   float_t* _W = nullptr;
   for (int i = 0; i < X_size; ++i) {
