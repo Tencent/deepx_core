@@ -60,6 +60,8 @@ OutputStringStream& operator<<(OutputStringStream& os,
       break;
     case DIST_MESSAGE_TYPE_MODEL_SAVE_REQUEST:
       os << message.model_save_request().epoch;
+      os << message.model_save_request().timestamp;
+      os << message.model_save_request().feature_kv_protocol_version;
       break;
     case DIST_MESSAGE_TYPE_MODEL_SAVE_RESPONSE:
       break;
@@ -139,6 +141,10 @@ InputStringStream& ReadView(InputStringStream& is, DistMessageView& message) {
       break;
     case DIST_MESSAGE_TYPE_MODEL_SAVE_REQUEST:
       ReadView(is, message.mutable_model_save_request()->epoch);
+      ReadView(is, message.mutable_model_save_request()->timestamp);
+      ReadView(
+          is,
+          message.mutable_model_save_request()->feature_kv_protocol_version);
       break;
     case DIST_MESSAGE_TYPE_MODEL_SAVE_RESPONSE:
       break;

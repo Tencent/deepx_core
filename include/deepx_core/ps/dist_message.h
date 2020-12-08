@@ -74,6 +74,8 @@ class DistMessage {
   };
   struct ModelSaveRequest {
     int epoch = 0;
+    std::string timestamp;
+    int feature_kv_protocol_version = 0;
   };
   struct UserRequest {
     std::string buf;
@@ -183,6 +185,8 @@ class DistMessageView {
   };
   struct ModelSaveRequest {
     int epoch = 0;
+    std::string timestamp;
+    int feature_kv_protocol_version = 0;
   };
   struct UserRequest {
     const_string_view buf;
