@@ -7,8 +7,7 @@
 #include <deepx_core/common/any_map.h>
 #include <deepx_core/common/stream.h>
 #include <deepx_core/dx_log.h>
-#include <deepx_core/graph/freq_store.h>
-#include <deepx_core/graph/ts_store.h>
+#include <deepx_core/tensor/data_type.h>
 #include <limits>  // std::numeric_limits
 #include <string>
 
@@ -151,14 +150,13 @@ void CheckFlags() {
   if (FLAGS_is_train) {
     if (FLAGS_ts_enable) {
       DXCHECK_THROW(FLAGS_ts_now <=
-                    (google::uint64)std::numeric_limits<TSStore::ts_t>::max());
+                    (google::uint64)std::numeric_limits<DataType::ts_t>::max());
       DXCHECK_THROW(FLAGS_ts_expire_threshold <=
-                    (google::uint64)std::numeric_limits<TSStore::ts_t>::max());
+                    (google::uint64)std::numeric_limits<DataType::ts_t>::max());
     }
 
-    DXCHECK_THROW(
-        FLAGS_freq_filter_threshold <=
-        (google::uint64)std::numeric_limits<FreqStore::freq_t>::max());
+    DXCHECK_THROW(FLAGS_freq_filter_threshold <=
+                  (google::uint64)std::numeric_limits<DataType::freq_t>::max());
   }
 
   if (FLAGS_is_train) {

@@ -20,10 +20,6 @@ namespace deepx_core {
 /* FreqStore */
 /************************************************************************/
 class FreqStore : public DataType {
- public:
-  using freq_t = PullRequest::freq_t;
-  using id_freq_map_t = PullRequest::id_freq_map_t;
-
  private:
   freq_t freq_filter_threshold_ = 0;
   id_freq_map_t id_freq_map_;

@@ -13,11 +13,6 @@ namespace deepx_core {
 
 class TSStoreTest : public testing::Test, public DataType {
  protected:
-  using ts_t = TSStore::ts_t;
-  using id_ts_map_t = TSStore::id_ts_map_t;
-  using id_set_t = TSStore::id_set_t;
-
- protected:
   void TestExpire(ts_t now, ts_t expire, const id_set_t& expected_expired) {
     Graph graph;
     auto* X = new InstanceNode("X", Shape(1, 0), TENSOR_TYPE_CSR);

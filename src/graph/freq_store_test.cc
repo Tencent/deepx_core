@@ -12,11 +12,6 @@ namespace deepx_core {
 
 class FreqStoreTest : public testing::Test, public DataType {
  protected:
-  using id_set_t = PullRequest::id_set_t;
-  using freq_t = PullRequest::freq_t;
-  using id_freq_map_t = PullRequest::id_freq_map_t;
-
- protected:
   const freq_t FREQ_THRESHOLD = 5;
   const freq_t LO_FREQ = 1;
   const freq_t HI_FREQ = 9;

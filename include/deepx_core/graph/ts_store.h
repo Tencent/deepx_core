@@ -8,12 +8,9 @@
 #include <deepx_core/graph/graph.h>
 #include <deepx_core/graph/tensor_map.h>
 #include <deepx_core/tensor/data_type.h>
-#include <cstdint>
 #include <memory>
 #include <mutex>
 #include <string>
-#include <unordered_map>
-#include <unordered_set>
 
 namespace deepx_core {
 
@@ -21,11 +18,6 @@ namespace deepx_core {
 /* TSStore */
 /************************************************************************/
 class TSStore : public DataType {
- public:
-  using ts_t = uint32_t;
-  using id_ts_map_t = std::unordered_map<int_t, ts_t>;
-  using id_set_t = std::unordered_set<int_t>;
-
  private:
   ts_t now_ = 0;
   ts_t expire_threshold_ = 0;

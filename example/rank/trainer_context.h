@@ -6,7 +6,6 @@
 #pragma once
 #include <deepx_core/common/stream.h>
 #include <deepx_core/graph/dist_proto.h>
-#include <deepx_core/graph/freq_store.h>
 #include <deepx_core/graph/model.h>
 #include <deepx_core/graph/model_shard.h>
 #include <deepx_core/graph/op_context.h>
@@ -28,7 +27,7 @@ class TrainerContext : public DataType {
   std::string instance_reader_config_;
   int batch_ = 0;
   int verbose_ = 0;
-  FreqStore::freq_t freq_filter_threshold_ = 0;
+  freq_t freq_filter_threshold_ = 0;
   std::string target_name_;
 
   Model* local_model_ = nullptr;
@@ -46,8 +45,7 @@ class TrainerContext : public DataType {
   }
   void set_batch(int batch) noexcept { batch_ = batch; }
   void set_verbose(int verbose) noexcept { verbose_ = verbose; }
-  void set_freq_filter_threshold(
-      FreqStore::freq_t freq_filter_threshold) noexcept {
+  void set_freq_filter_threshold(freq_t freq_filter_threshold) noexcept {
     freq_filter_threshold_ = freq_filter_threshold;
   }
   void set_target_name(const std::string& target_name) {

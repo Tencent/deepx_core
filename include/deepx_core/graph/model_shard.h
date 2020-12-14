@@ -84,8 +84,8 @@ class ModelShard : public DataType {
   bool InitOptimizer(const std::string& optimizer,
                      const std::string& optimizer_config);
   bool InitOptimizerConfig(const std::string& optimizer_config);
-  bool InitTSStore(TSStore::ts_t now, TSStore::ts_t expire_threshold);
-  bool InitFreqStore(FreqStore::freq_t freq_filter_threshold);
+  bool InitTSStore(ts_t now, ts_t expire_threshold);
+  bool InitFreqStore(freq_t freq_filter_threshold);
   void InitLock();
 
   bool SaveModel(const std::string& dir) const;
@@ -95,11 +95,10 @@ class ModelShard : public DataType {
   bool LoadOptimizer(const std::string& dir,
                      const std::string& optimizer_config);
   bool SaveTSStore(const std::string& dir) const;
-  bool LoadTSStore(const std::string& dir, TSStore::ts_t now,
-                   TSStore::ts_t expire_threshold);
+  bool LoadTSStore(const std::string& dir, ts_t now, ts_t expire_threshold);
   bool SaveFreqStore(const std::string& dir) const;
   bool LoadFreqStore(const std::string& dir,
-                     FreqStore::freq_t freq_filter_threshold);
+                     freq_t freq_filter_threshold);
 
   bool WarmupModel(const std::string& dir);
   bool WarmupOptimizer(const std::string& dir);

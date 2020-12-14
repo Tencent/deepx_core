@@ -7,6 +7,7 @@
 #include <deepx_core/common/any_map.h>
 #include <deepx_core/common/misc.h>
 #include <deepx_core/dx_log.h>
+#include <deepx_core/graph/freq_store.h>
 #include <deepx_core/graph/instance_reader.h>
 #include <chrono>
 #include <mutex>

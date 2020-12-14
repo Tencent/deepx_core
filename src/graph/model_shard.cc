@@ -135,8 +135,7 @@ bool ModelShard::InitOptimizerConfig(const std::string& optimizer_config) {
   return optimizer_->InitConfig(config);
 }
 
-bool ModelShard::InitTSStore(TSStore::ts_t now,
-                             TSStore::ts_t expire_threshold) {
+bool ModelShard::InitTSStore(ts_t now, ts_t expire_threshold) {
   ts_store_.reset(new TSStore);
   ts_store_->set_now(now);
   ts_store_->set_expire_threshold(expire_threshold);
@@ -144,7 +143,7 @@ bool ModelShard::InitTSStore(TSStore::ts_t now,
   return ts_store_->InitParam(model_->param());
 }
 
-bool ModelShard::InitFreqStore(FreqStore::freq_t freq_filter_threshold) {
+bool ModelShard::InitFreqStore(freq_t freq_filter_threshold) {
   freq_store_.reset(new FreqStore);
   freq_store_->set_freq_filter_threshold(freq_filter_threshold);
   return freq_store_->InitParam(model_->param());
@@ -196,8 +195,8 @@ bool ModelShard::SaveTSStore(const std::string& dir) const {
   return ts_store_->Save(GetTSStoreFile(dir));
 }
 
-bool ModelShard::LoadTSStore(const std::string& dir, TSStore::ts_t now,
-                             TSStore::ts_t expire_threshold) {
+bool ModelShard::LoadTSStore(const std::string& dir, ts_t now,
+                             ts_t expire_threshold) {
   ts_store_.reset(new TSStore);
   ts_store_->set_now(now);
   ts_store_->set_expire_threshold(expire_threshold);
@@ -210,7 +209,7 @@ bool ModelShard::SaveFreqStore(const std::string& dir) const {
 }
 
 bool ModelShard::LoadFreqStore(const std::string& dir,
-                               FreqStore::freq_t freq_filter_threshold) {
+                               freq_t freq_filter_threshold) {
   freq_store_.reset(new FreqStore);
   freq_store_->set_freq_filter_threshold(freq_filter_threshold);
   return freq_store_->Load(GetFreqStoreFile(dir));

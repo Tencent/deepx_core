@@ -10,6 +10,8 @@
 #include <deepx_core/tensor/tensor.h>
 #include <cstdint>
 #include <string>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace deepx_core {
 
@@ -30,6 +32,13 @@ class DataTypeT {
   using ll_tensor_t = LLTensor<float_t>;
   using ll_sparse_tensor_t = LLSparseTensor<float_t, int_t>;
   using ll_optimizer_t = LLOptimizer<float_t, int_t>;
+
+  using id_set_t = std::unordered_set<int_t>;
+  using freq_t = uint32_t;
+  using id_freq_map_t = std::unordered_map<int_t, freq_t>;
+  using ts_t = uint32_t;
+  using id_ts_map_t = std::unordered_map<int_t, ts_t>;
+
   static constexpr int DATA_TYPE_TOKEN = TOKEN;
 };
 

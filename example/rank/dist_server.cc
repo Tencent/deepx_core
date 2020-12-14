@@ -12,6 +12,7 @@
 #include <deepx_core/graph/tensor_map.h>
 #include <deepx_core/ps/coord_server.h>
 #include <deepx_core/ps/param_server.h>
+#include <deepx_core/tensor/data_type.h>
 #include <memory>
 #include "dist_flags.h"
 #include "model_zoo.h"
@@ -71,13 +72,13 @@ void RankParamServer::Init() {
       DXCHECK_THROW(
           model_shard_.InitOptimizer(FLAGS_optimizer, FLAGS_optimizer_config));
       if (FLAGS_ts_enable) {
-        DXCHECK_THROW(
-            model_shard_.InitTSStore((TSStore::ts_t)FLAGS_ts_now,
-                                     (TSStore::ts_t)FLAGS_ts_expire_threshold));
+        DXCHECK_THROW(model_shard_.InitTSStore(
+            (DataType::ts_t)FLAGS_ts_now,
+            (DataType::ts_t)FLAGS_ts_expire_threshold));
       }
       if (FLAGS_freq_filter_threshold > 0) {
         DXCHECK_THROW(model_shard_.InitFreqStore(
-            (FreqStore::freq_t)FLAGS_freq_filter_threshold));
+            (DataType::freq_t)FLAGS_freq_filter_threshold));
       }
     } else {
       DXCHECK_THROW(model_shard_.LoadModel(FLAGS_in_model));
@@ -87,16 +88,16 @@ void RankParamServer::Init() {
         if (!model_shard_.LoadTSStore(FLAGS_in_model, FLAGS_ts_now,
                                       FLAGS_ts_expire_threshold)) {
           DXCHECK_THROW(model_shard_.InitTSStore(
-              (TSStore::ts_t)FLAGS_ts_now,
-              (TSStore::ts_t)FLAGS_ts_expire_threshold));
+              (DataType::ts_t)FLAGS_ts_now,
+              (DataType::ts_t)FLAGS_ts_expire_threshold));
         }
       }
       if (FLAGS_freq_filter_threshold > 0) {
         if (!model_shard_.LoadFreqStore(
                 FLAGS_in_model,
-                (FreqStore::freq_t)FLAGS_freq_filter_threshold)) {
+                (DataType::freq_t)FLAGS_freq_filter_threshold)) {
           DXCHECK_THROW(model_shard_.InitFreqStore(
-              (FreqStore::freq_t)FLAGS_freq_filter_threshold));
+              (DataType::freq_t)FLAGS_freq_filter_threshold));
         }
       }
     }

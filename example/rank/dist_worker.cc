@@ -213,7 +213,7 @@ void TrainerDist::Init() {
   context_.set_verbose(FLAGS_verbose);
   if (FLAGS_freq_filter_threshold > 0) {
     context_.set_freq_filter_threshold(
-        (FreqStore::freq_t)FLAGS_freq_filter_threshold);
+        (DataType::freq_t)FLAGS_freq_filter_threshold);
   }
   // Check out graph target conventions.
   context_.set_target_name(graph_.target(FLAGS_is_train ? 0 : 1).name());

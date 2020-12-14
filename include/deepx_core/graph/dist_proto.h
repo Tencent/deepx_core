@@ -6,7 +6,6 @@
 #pragma once
 #include <deepx_core/common/stream.h>
 #include <deepx_core/tensor/data_type.h>
-#include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -18,10 +17,6 @@ namespace deepx_core {
 /************************************************************************/
 struct PullRequest : DataType {
  public:
-  using id_set_t = std::unordered_set<int_t>;
-  using freq_t = uint32_t;
-  using id_freq_map_t = std::unordered_map<int_t, freq_t>;
-
   int is_train = 0;  // 1: train, 0: predict
   std::unordered_set<std::string> tsr_set;
   std::unordered_map<std::string, id_set_t> srm_map;
