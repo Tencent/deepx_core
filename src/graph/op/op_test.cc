@@ -22,7 +22,7 @@ class OpTestDataType : public DataType {
       std::is_same<float_t, double>::value ? (float_t)1e-6 : (float_t)1e-3;
   static constexpr float_t CHECK_GRAD_EPS =
       std::is_same<float_t, double>::value ? (float_t)1e-4 : (float_t)5e-2;
-  static constexpr int FORWARD_SEED = 9527;
+  static constexpr int FORWARD_SEED = 9527;  // magic number
   static const std::string LOSS_NAME;
 };
 
