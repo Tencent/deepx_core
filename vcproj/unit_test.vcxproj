@@ -37,6 +37,7 @@
     <ClCompile Include="..\src\common\thread_pool_test.cc" />
     <ClCompile Include="..\src\common\vector_test.cc" />
     <ClCompile Include="..\src\graph\feature_kv_util_test.cc" />
+    <ClCompile Include="..\src\graph\freq_store_test.cc" />
     <ClCompile Include="..\src\graph\graph_module_creator_test.cc" />
     <ClCompile Include="..\src\graph\graph_test.cc" />
     <ClCompile Include="..\src\graph\instance_reader\libsvm_ex_instance_reader_test.cc" />
@@ -81,6 +82,7 @@
     <ClCompile Include="..\src\graph\simp\simp_item_test.cc" />
     <ClCompile Include="..\src\graph\simp\simp_test.cc" />
     <ClCompile Include="..\src\graph\tensor_map_test.cc" />
+    <ClCompile Include="..\src\graph\ts_store_test.cc" />
     <ClCompile Include="..\src\graph\variable_scope_test.cc" />
     <ClCompile Include="..\src\instance\libsvm_ex_test.cc" />
     <ClCompile Include="..\src\instance\libsvm_test.cc" />

@@ -125,20 +125,21 @@ void TSStore::Update(TensorMap* grad) {
 }
 
 auto TSStore::Expire() -> id_set_t {
-  DXASSERT(expire_threshold_ > 0);
   id_set_t expired;
-  auto first = id_ts_map_.begin();
-  auto last = id_ts_map_.end();
-  for (; first != last;) {
-    if (now_ > expire_threshold_ + first->second) {
-      expired.emplace(first->first);
-      first = id_ts_map_.erase(first);
-    } else {
-      ++first;
+  if (expire_threshold_ > 0) {
+    auto first = id_ts_map_.begin();
+    auto last = id_ts_map_.end();
+    for (; first != last;) {
+      if (now_ > expire_threshold_ + first->second) {
+        expired.emplace(first->first);
+        first = id_ts_map_.erase(first);
+      } else {
+        ++first;
+      }
     }
+    DXINFO("TSStore has %zu entries expired, %zu entries remained.",
+           expired.size(), id_ts_map_.size());
   }
-  DXINFO("TSStore has %zu entries expired, %zu entries remained.",
-         expired.size(), id_ts_map_.size());
   return expired;
 }
 
