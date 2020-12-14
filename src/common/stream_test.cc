@@ -469,8 +469,7 @@ TEST_F(InputStringStreamTest, SetString_GetLine) {
   InputStringStream is;
   std::string line;
   std::vector<std::string> lines;
-  std::vector<std::string> expected_lines = {"1a2a", "3a4a", "", "1a2a",
-                                             "3a4a"};
+  std::vector<std::string> expected_lines{"1a2a", "3a4a", "", "1a2a", "3a4a"};
   is.SetString("1a2a\n3a4a\n\n1a2a\n3a4a\n");
   while (GetLine(is, line)) {
     lines.emplace_back(line);
@@ -482,7 +481,7 @@ TEST_F(InputStringStreamTest, SetString_GetLine_delim) {
   InputStringStream is;
   std::string line;
   std::vector<std::string> lines;
-  std::vector<std::string> expected_lines = {"1", "2", "3", "4"};
+  std::vector<std::string> expected_lines{"1", "2", "3", "4"};
   is.SetString("1a2a3a4a");
   while (GetLine(is, line, 'a')) {
     lines.emplace_back(line);
@@ -526,8 +525,7 @@ TEST_F(InputStringStreamTest, SetView_GetLine) {
   std::string buf = "1a2a\n3a4a\n\n1a2a\n3a4a\n";
   std::string line;
   std::vector<std::string> lines;
-  std::vector<std::string> expected_lines = {"1a2a", "3a4a", "", "1a2a",
-                                             "3a4a"};
+  std::vector<std::string> expected_lines{"1a2a", "3a4a", "", "1a2a", "3a4a"};
   is.SetView(buf);
   while (GetLine(is, line)) {
     lines.emplace_back(line);
@@ -540,7 +538,7 @@ TEST_F(InputStringStreamTest, SetView_GetLine_delim) {
   std::string buf = "1a2a3a4a";
   std::string line;
   std::vector<std::string> lines;
-  std::vector<std::string> expected_lines = {"1", "2", "3", "4"};
+  std::vector<std::string> expected_lines{"1", "2", "3", "4"};
   is.SetView(buf);
   while (GetLine(is, line, 'a')) {
     lines.emplace_back(line);

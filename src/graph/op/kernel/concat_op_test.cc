@@ -17,11 +17,11 @@ TEST_F(ConcatForwardTest, Concat_X1shape23_X2shape33_axis0) {
                    3, 4, 5,  //
                    6, 7, 8});
   ConcatNode Z("Z", {&X1, &X2}, 0);
-  tsr_t expected_Z = {{0, 1, 2},  //
-                      {3, 4, 5},  //
-                      {0, 1, 2},  //
-                      {3, 4, 5},  //
-                      {6, 7, 8}};
+  tsr_t expected_Z{{0, 1, 2},  //
+                   {3, 4, 5},  //
+                   {0, 1, 2},  //
+                   {3, 4, 5},  //
+                   {6, 7, 8}};
   CheckOpForward(&Z, 0, expected_Z);
 }
 
@@ -33,8 +33,8 @@ TEST_F(ConcatForwardTest, Concat_X1shape23_X2shape24_axis1) {
                   {0, 1, 2, 3,  //
                    4, 5, 6, 7});
   ConcatNode Z("Z", {&X1, &X2}, 1);
-  tsr_t expected_Z = {{0, 1, 2, 0, 1, 2, 3},  //
-                      {3, 4, 5, 4, 5, 6, 7}};
+  tsr_t expected_Z{{0, 1, 2, 0, 1, 2, 3},  //
+                   {3, 4, 5, 4, 5, 6, 7}};
   CheckOpForward(&Z, 0, expected_Z);
 }
 
@@ -50,15 +50,15 @@ TEST_F(ConcatForwardTest, Concat_X1shape234_X2shape134_axis0) {
                    4, 5, 6, 7,  //
                    8, 9, 10, 11});
   ConcatNode Z("Z", {&X1, &X2}, 0);
-  tsr_t expected_Z = {0,  1,  2,  3,   //
-                      4,  5,  6,  7,   //
-                      8,  9,  10, 11,  //
-                      12, 13, 14, 15,  //
-                      16, 17, 18, 19,  //
-                      20, 21, 22, 23,  //
-                      0,  1,  2,  3,   //
-                      4,  5,  6,  7,   //
-                      8,  9,  10, 11};
+  tsr_t expected_Z{0,  1,  2,  3,   //
+                   4,  5,  6,  7,   //
+                   8,  9,  10, 11,  //
+                   12, 13, 14, 15,  //
+                   16, 17, 18, 19,  //
+                   20, 21, 22, 23,  //
+                   0,  1,  2,  3,   //
+                   4,  5,  6,  7,   //
+                   8,  9,  10, 11};
   expected_Z.reshape(3, 3, 4);
   CheckOpForward(&Z, 0, expected_Z);
 }
@@ -74,14 +74,14 @@ TEST_F(ConcatForwardTest, Concat_X1shape234_X2shape214_axis1) {
                   {0, 1, 2, 3,  //
                    4, 5, 6, 7});
   ConcatNode Z("Z", {&X1, &X2}, 1);
-  tsr_t expected_Z = {0,  1,  2,  3,   //
-                      4,  5,  6,  7,   //
-                      8,  9,  10, 11,  //
-                      0,  1,  2,  3,   //
-                      12, 13, 14, 15,  //
-                      16, 17, 18, 19,  //
-                      20, 21, 22, 23,  //
-                      4,  5,  6,  7};
+  tsr_t expected_Z{0,  1,  2,  3,   //
+                   4,  5,  6,  7,   //
+                   8,  9,  10, 11,  //
+                   0,  1,  2,  3,   //
+                   12, 13, 14, 15,  //
+                   16, 17, 18, 19,  //
+                   20, 21, 22, 23,  //
+                   4,  5,  6,  7};
   expected_Z.reshape(2, 4, 4);
   CheckOpForward(&Z, 0, expected_Z);
 }
@@ -97,12 +97,12 @@ TEST_F(ConcatForwardTest, Concat_X1shape234_X2shape231_axis2) {
                   {0, 1, 2,  //
                    3, 4, 5});
   ConcatNode Z("Z", {&X1, &X2}, 2);
-  tsr_t expected_Z = {0,  1,  2,  3,  0,  //
-                      4,  5,  6,  7,  1,  //
-                      8,  9,  10, 11, 2,  //
-                      12, 13, 14, 15, 3,  //
-                      16, 17, 18, 19, 4,  //
-                      20, 21, 22, 23, 5};
+  tsr_t expected_Z{0,  1,  2,  3,  0,  //
+                   4,  5,  6,  7,  1,  //
+                   8,  9,  10, 11, 2,  //
+                   12, 13, 14, 15, 3,  //
+                   16, 17, 18, 19, 4,  //
+                   20, 21, 22, 23, 5};
   expected_Z.reshape(2, 3, 5);
   CheckOpForward(&Z, 0, expected_Z);
 }

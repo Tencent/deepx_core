@@ -16,7 +16,7 @@ TEST_F(BatchCosForwardTest, BatchCos_1) {
                  {1, 1, 1,  //
                   1, 1, 1});
   BatchCosNode Z("Z", &X, &Y);
-  tsr_t expected_Z = {(float_t)0.7745967, (float_t)0.9797959};
+  tsr_t expected_Z{(float_t)0.7745967, (float_t)0.9797959};
   expected_Z.reshape(2, 1);
   CheckOpForward(&Z, 0, expected_Z);
 }
@@ -29,7 +29,7 @@ TEST_F(BatchCosForwardTest, BatchCos_2) {
                  {0, 0, 0,  //
                   0, 0, 0});
   BatchCosNode Z("Z", &X, &Y);
-  tsr_t expected_Z = {0, 0};
+  tsr_t expected_Z{0, 0};
   expected_Z.reshape(2, 1);
   CheckOpForward(&Z, 0, expected_Z);
 }

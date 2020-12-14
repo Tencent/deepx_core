@@ -16,7 +16,7 @@ TEST_F(BatchDotForwardTest, BatchDot) {
                  {0, 1, 2,  //
                   3, 4, 5});
   BatchDotNode Z("Z", &X, &Y);
-  tsr_t expected_Z = {5, 50};
+  tsr_t expected_Z{5, 50};
   expected_Z.reshape(2, 1);
   CheckOpForward(&Z, 0, expected_Z);
 }

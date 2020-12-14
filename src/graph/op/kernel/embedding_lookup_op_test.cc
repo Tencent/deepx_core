@@ -49,34 +49,34 @@ class EmbeddingLookupForwardTest : public testing::Test, public DataType {
 };
 
 TEST_F(EmbeddingLookupForwardTest, EmbeddingLookup_TSR_Wcol1) {
-  tsr_t expected_Z = {1, 9, 17, 14, 12, 66};
+  tsr_t expected_Z{1, 9, 17, 14, 12, 66};
   expected_Z.reshape(6, 1);
   TestTSR(Shape(10, 1), expected_Z);
 }
 
 TEST_F(EmbeddingLookupForwardTest, EmbeddingLookup_TSR_Wcol4) {
-  tsr_t expected_Z = {{4, 5, 6, 7},      //
-                      {36, 39, 42, 45},  //
-                      {68, 71, 74, 77},  //
-                      {56, 58, 60, 62},  //
-                      {48, 54, 60, 66},  //
-                      {264, 276, 288, 300}};
+  tsr_t expected_Z{{4, 5, 6, 7},      //
+                   {36, 39, 42, 45},  //
+                   {68, 71, 74, 77},  //
+                   {56, 58, 60, 62},  //
+                   {48, 54, 60, 66},  //
+                   {264, 276, 288, 300}};
   TestTSR(Shape(10, 4), expected_Z);
 }
 
 TEST_F(EmbeddingLookupForwardTest, EmbeddingLookup_SRM_Wcol1) {
-  tsr_t expected_Z = {1, 9, 17, 14, 12, 66};
+  tsr_t expected_Z{1, 9, 17, 14, 12, 66};
   expected_Z.reshape(6, 1);
   TestSRM(Shape(0, 1), expected_Z);
 }
 
 TEST_F(EmbeddingLookupForwardTest, EmbeddingLookup_SRM_Wcol4) {
-  tsr_t expected_Z = {{1, 1, 1, 1},      //
-                      {9, 9, 9, 9},      //
-                      {17, 17, 17, 17},  //
-                      {14, 14, 14, 14},  //
-                      {12, 12, 12, 12},  //
-                      {66, 66, 66, 66}};
+  tsr_t expected_Z{{1, 1, 1, 1},      //
+                   {9, 9, 9, 9},      //
+                   {17, 17, 17, 17},  //
+                   {14, 14, 14, 14},  //
+                   {12, 12, 12, 12},  //
+                   {66, 66, 66, 66}};
   TestSRM(Shape(0, 4), expected_Z);
 }
 

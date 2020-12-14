@@ -12,28 +12,28 @@ class SubscriptRangeForwardTest : public testing::Test, public DataType {};
 TEST_F(SubscriptRangeForwardTest, SubscriptRange_Xshape2_axis0_index0to2) {
   ConstantNode X("X", Shape(2), {0, 1});
   SubscriptRangeNode Z("Z", &X, 0, 0, 2);
-  tsr_t expected_Z = {0, 1};
+  tsr_t expected_Z{0, 1};
   CheckOpForward(&Z, 0, expected_Z);
 }
 
 TEST_F(SubscriptRangeForwardTest, SubscriptRange_Xshape2_axis0_index1to2) {
   ConstantNode X("X", Shape(2), {0, 1});
   SubscriptRangeNode Z("Z", &X, 0, 1, 2);
-  tsr_t expected_Z = {1};
+  tsr_t expected_Z{1};
   CheckOpForward(&Z, 0, expected_Z);
 }
 
 TEST_F(SubscriptRangeForwardTest, SubscriptRange_Xshape23_axis1_index1to3) {
   ConstantNode X("X", Shape(2, 3), {0, 1, 2, 3, 4, 5});
   SubscriptRangeNode Z("Z", &X, 1, 1, 3);
-  tsr_t expected_Z = {{1, 2}, {4, 5}};
+  tsr_t expected_Z{{1, 2}, {4, 5}};
   CheckOpForward(&Z, 0, expected_Z);
 }
 
 TEST_F(SubscriptRangeForwardTest, SubscriptRange_Xshape23_axis1_index2to3) {
   ConstantNode X("X", Shape(2, 3), {0, 1, 2, 3, 4, 5});
   SubscriptRangeNode Z("Z", &X, 1, 2, 3);
-  tsr_t expected_Z = {2, 5};
+  tsr_t expected_Z{2, 5};
   expected_Z.reshape(2, 1);
   CheckOpForward(&Z, 0, expected_Z);
 }
@@ -46,12 +46,12 @@ TEST_F(SubscriptRangeForwardTest, SubscriptRange_Xshape234_axis2_index2to4) {
                                        16, 17, 18, 19,  //
                                        20, 21, 22, 23});
   SubscriptRangeNode Z("Z", &X, 2, 2, 4);
-  tsr_t expected_Z = {2,  3,   //
-                      6,  7,   //
-                      10, 11,  //
-                      14, 15,  //
-                      18, 19,  //
-                      22, 23};
+  tsr_t expected_Z{2,  3,   //
+                   6,  7,   //
+                   10, 11,  //
+                   14, 15,  //
+                   18, 19,  //
+                   22, 23};
   expected_Z.reshape(2, 3, 2);
   CheckOpForward(&Z, 0, expected_Z);
 }
@@ -64,8 +64,8 @@ TEST_F(SubscriptRangeForwardTest, SubscriptRange_Xshape234_axis2_index3to4) {
                                        16, 17, 18, 19,  //
                                        20, 21, 22, 23});
   SubscriptRangeNode Z("Z", &X, 2, 3, 4);
-  tsr_t expected_Z = {3,  7,  11,  //
-                      15, 19, 23};
+  tsr_t expected_Z{3,  7,  11,  //
+                   15, 19, 23};
   expected_Z.reshape(2, 3, 1);
   CheckOpForward(&Z, 0, expected_Z);
 }

@@ -16,8 +16,8 @@ TEST_F(AddNForwardTest, AddN_Xshape23) {
                   {0, 1, 2,  //
                    3, 4, 5});
   AddNNode Z("Z", {&X1, &X2});
-  tsr_t expected_Z = {{0, 2, 4},  //
-                      {6, 8, 10}};
+  tsr_t expected_Z{{0, 2, 4},  //
+                   {6, 8, 10}};
   CheckOpForward(&Z, 0, expected_Z);
 }
 
@@ -35,12 +35,12 @@ TEST_F(AddNForwardTest, AddN_Xshape234) {
                                          16, 17, 18, 19,  //
                                          20, 21, 22, 23});
   AddNNode Z("Z", {&X1, &X2});
-  tsr_t expected_Z = {0,  2,  4,  6,   //
-                      8,  10, 12, 14,  //
-                      16, 18, 20, 22,  //
-                      24, 26, 28, 30,  //
-                      32, 34, 36, 38,  //
-                      40, 42, 44, 46};
+  tsr_t expected_Z{0,  2,  4,  6,   //
+                   8,  10, 12, 14,  //
+                   16, 18, 20, 22,  //
+                   24, 26, 28, 30,  //
+                   32, 34, 36, 38,  //
+                   40, 42, 44, 46};
   expected_Z.reshape(2, 3, 4);
   CheckOpForward(&Z, 0, expected_Z);
 }

@@ -30,7 +30,7 @@ TEST_F(FreqStoreTest, GetIdFreqMap) {
   id_freq_map_t id_freq_map;
   FreqStore::GetIdFreqMap(inst, &id_freq_map);
 
-  id_freq_map_t expected_id_freq_map = {{1, 1}, {2, 2}, {3, 2}, {4, 2}, {5, 1}};
+  id_freq_map_t expected_id_freq_map{{1, 1}, {2, 2}, {3, 2}, {4, 2}, {5, 1}};
   EXPECT_EQ(id_freq_map, expected_id_freq_map);
 }
 

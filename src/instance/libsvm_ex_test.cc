@@ -34,12 +34,11 @@ TEST_F(LibsvmExInstanceReaderHelperTest, Parse) {
       {0, 2, 4, 6, 8}, {0, 1, 4, 5, 8, 9, 12, 13}, {1, 1, 2, 2, 1, 1, 2, 2}};
   csr_t expected_X1{
       {0, 2, 4, 6, 8}, {2, 3, 6, 7, 10, 11, 14, 15}, {1, 1, 1, 1, 1, 1, 1, 1}};
-  tsr_t expected_Y, expected_W;
-  tsrs_t expected_uuid = {"", "", "10000", "10001"};
-  expected_Y = {1, 2, 3, 4};
+  tsr_t expected_Y{1, 2, 3, 4};
   expected_Y.reshape(-1, 1);
-  expected_W = {1, 2, 1, 4};
+  tsr_t expected_W{1, 2, 1, 4};
   expected_W.reshape(-1, 1);
+  tsrs_t expected_uuid{"", "", "10000", "10001"};
   EXPECT_EQ(X0, expected_X0);
   EXPECT_EQ(X1, expected_X1);
   EXPECT_EQ(Y, expected_Y);

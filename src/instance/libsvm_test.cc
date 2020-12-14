@@ -31,12 +31,11 @@ TEST_F(LibsvmInstanceReaderHelperTest, Parse) {
   csr_t expected_X{{0, 4, 8, 12, 16},
                    {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
                    {1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1}};
-  tsr_t expected_Y, expected_W;
-  tsrs_t expected_uuid = {"", "", "10000", "10001"};
-  expected_Y = {1, 2, 3, 4};
+  tsr_t expected_Y{1, 2, 3, 4};
   expected_Y.reshape(-1, 1);
-  expected_W = {1, 2, 1, 4};
+  tsr_t expected_W{1, 2, 1, 4};
   expected_W.reshape(-1, 1);
+  tsrs_t expected_uuid{"", "", "10000", "10001"};
   EXPECT_EQ(X, expected_X);
   EXPECT_EQ(Y, expected_Y);
   EXPECT_EQ(W, expected_W);
@@ -59,16 +58,15 @@ TEST_F(LibsvmInstanceReaderHelperTest, Parse_label_size2) {
   csr_t expected_X{{0, 4, 8, 12, 16},
                    {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15},
                    {1, 1, 1, 1, 2, 2, 1, 1, 1, 1, 1, 1, 2, 2, 1, 1}};
-  tsr_t expected_Y, expected_W;
-  tsrs_t expected_uuid = {"", "", "10000", "10001"};
-  expected_Y = {{1, 10},  //
-                {2, 20},  //
-                {3, 30},  //
-                {4, 40}};
-  expected_W = {{1, 1},   //
-                {2, 20},  //
-                {1, 1},   //
-                {4, 40}};
+  tsr_t expected_Y = {{1, 10},  //
+                      {2, 20},  //
+                      {3, 30},  //
+                      {4, 40}};
+  tsr_t expected_W = {{1, 1},   //
+                      {2, 20},  //
+                      {1, 1},   //
+                      {4, 40}};
+  tsrs_t expected_uuid{"", "", "10000", "10001"};
   EXPECT_EQ(X, expected_X);
   EXPECT_EQ(Y, expected_Y);
   EXPECT_EQ(W, expected_W);

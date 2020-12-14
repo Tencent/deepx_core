@@ -41,9 +41,8 @@ TEST_F(UCHInstanceReaderHelperTest, Parse) {
       {0, 1, 1, 2, 3, 4, 5}, {2, 22, 32, 42, 52}, {1, 1, 1, 1, 1}};
   csr_t expected_X_hist1{{0, 1, 1, 1, 2, 3, 4}, {3, 33, 43, 53}, {1, 1, 1, 1}};
   csr_t expected_X_hist2{{0, 1, 1, 1, 1, 2, 3}, {4, 44, 54}, {1, 1, 1}};
-  tsr_t expected_X_hist_size = {3, 0, 1, 2, 3, 3};
-  tsr_t expected_Y;
-  expected_Y = {1, 2, 3, 4, 5, 6};
+  tsr_t expected_X_hist_size{3, 0, 1, 2, 3, 3};
+  tsr_t expected_Y{1, 2, 3, 4, 5, 6};
   expected_Y.reshape(-1, 1);
   EXPECT_EQ(X_user, expected_X_user);
   EXPECT_EQ(X_cand, expected_X_cand);
