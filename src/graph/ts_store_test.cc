@@ -13,7 +13,8 @@ namespace deepx_core {
 
 class TSStoreTest : public testing::Test, public DataType {
  protected:
-  void TestExpire(ts_t now, ts_t expire, const id_set_t& expected_expired) {
+  void TestExpire(ts_t now, ts_t expire_threshold,
+                  const id_set_t& expected_expired) {
     Graph graph;
     auto* X = new InstanceNode("X", Shape(1, 0), TENSOR_TYPE_CSR);
     auto* W = new VariableNode("W", Shape(0, 2), TENSOR_TYPE_SRM);
@@ -24,7 +25,7 @@ class TSStoreTest : public testing::Test, public DataType {
 
     {
       ts_store.set_now(0);
-      ts_store.set_expire_threshold(expire);
+      ts_store.set_expire_threshold(expire_threshold);
       ts_store.Init(&graph);
 
       TensorMap grad;
@@ -34,7 +35,7 @@ class TSStoreTest : public testing::Test, public DataType {
 
     {
       ts_store.set_now(now);
-      ts_store.set_expire_threshold(expire);
+      ts_store.set_expire_threshold(expire_threshold);
       ts_store.Init(&graph);
 
       TensorMap grad;
@@ -53,14 +54,24 @@ class TSStoreTest : public testing::Test, public DataType {
   }
 };
 
-TEST_F(TSStoreTest, Expire_now0_expire0) { TestExpire(0, 0, id_set_t({})); }
+TEST_F(TSStoreTest, Expire_now0_expire_threshold0) {
+  TestExpire(0, 0, id_set_t({}));
+}
 
-TEST_F(TSStoreTest, Expire_now0_expire2) { TestExpire(0, 2, id_set_t({})); }
+TEST_F(TSStoreTest, Expire_now0_expire_threshold2) {
+  TestExpire(0, 2, id_set_t({}));
+}
 
-TEST_F(TSStoreTest, Expire_now2_expire0) { TestExpire(2, 0, id_set_t({})); }
+TEST_F(TSStoreTest, Expire_now2_expire_threshold0) {
+  TestExpire(2, 0, id_set_t({}));
+}
 
-TEST_F(TSStoreTest, Expire_now5_expire2) { TestExpire(5, 2, id_set_t({1, 2})); }
+TEST_F(TSStoreTest, Expire_now5_expire_threshold2) {
+  TestExpire(5, 2, id_set_t({1, 2}));
+}
 
-TEST_F(TSStoreTest, Expire_now5_expire8) { TestExpire(5, 8, id_set_t({})); }
+TEST_F(TSStoreTest, Expire_now5_expire_threshold8) {
+  TestExpire(5, 8, id_set_t({}));
+}
 
 }  // namespace deepx_core
