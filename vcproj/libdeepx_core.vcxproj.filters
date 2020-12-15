@@ -97,6 +97,9 @@
     <ClCompile Include="..\src\graph\model_shard.cc">
       <Filter>graph</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\graph\ol_store.cc">
+      <Filter>graph</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\graph\optimizer\adam.cc">
       <Filter>graph\optimizer</Filter>
     </ClCompile>
@@ -387,6 +390,9 @@
       <Filter>graph</Filter>
     </ClInclude>
     <ClInclude Include="..\include\deepx_core\graph\model_shard.h">
+      <Filter>graph</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\deepx_core\graph\ol_store.h">
       <Filter>graph</Filter>
     </ClInclude>
     <ClInclude Include="..\include\deepx_core\graph\op.h">

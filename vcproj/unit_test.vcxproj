@@ -43,6 +43,7 @@
     <ClCompile Include="..\src\graph\instance_reader\libsvm_ex_instance_reader_test.cc" />
     <ClCompile Include="..\src\graph\instance_reader\libsvm_instance_reader_test.cc" />
     <ClCompile Include="..\src\graph\instance_reader\uch_instance_reader_test.cc" />
+    <ClCompile Include="..\src\graph\ol_store_test.cc" />
     <ClCompile Include="..\src\graph\op\kernel\add_n_op_test.cc" />
     <ClCompile Include="..\src\graph\op\kernel\batch_cos_op_test.cc" />
     <ClCompile Include="..\src\graph\op\kernel\batch_dot_op_test.cc" />
