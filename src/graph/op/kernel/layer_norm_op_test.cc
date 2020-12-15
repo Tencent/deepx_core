@@ -14,7 +14,7 @@ TEST_F(LayerNormBackwardTest, LayerNorm) {
   VariableNode X("X", Shape(batch, m), TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
   VariableNode gamma("gamma", Shape(m), TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
   VariableNode beta("beta", Shape(m), TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
-  LayerNormNode Z("Y", &X, &gamma, &beta);
+  LayerNormNode Z("Z", &X, &gamma, &beta);
   CheckOpBackward(&Z, 0);
 }
 
