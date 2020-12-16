@@ -511,7 +511,9 @@ void FeatureKVUtil::SparseParamParser::Parse(const std::string& key,
     buf_size -= float_size * embedding_col;
 
     if (version_ == 2) {
-      W->assign(id, (const float_t*)embedding);
+      if (!(W->col() == 1 && embedding[0] == 0)) {
+        W->assign(id, (const float_t*)embedding);
+      }
     } else if (version_ == 3) {
 #if HAVE_SAGE2 == 1
       sage2_half_convert((uint64_t)embedding_col,

@@ -54,9 +54,9 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
     W5node = GetVariable("W5", Shape(0, 3), TENSOR_TYPE_SRM,
                          TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
     W6node = GetVariable("W6", Shape(0, 4), TENSOR_TYPE_SRM,
-                         TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
-    W7node = GetVariable("W7", Shape(0, 5), TENSOR_TYPE_SRM,
-                         TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
+                         TENSOR_INITIALIZER_TYPE_ZEROS, 0, 1);
+    W7node = GetVariable("W7", Shape(0, 1), TENSOR_TYPE_SRM,
+                         TENSOR_INITIALIZER_TYPE_ZEROS, 0, 1);
     ReleaseVariable();
     graph.Compile({W1node, W2node, W3node, W4node, W5node, W6node, W7node}, 1);
   }
@@ -146,8 +146,6 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
                 parsed_param.get<srm_t>(W5node->name()));
       EXPECT_EQ(param.get<srm_t>(W6node->name()),
                 parsed_param.get<srm_t>(W6node->name()));
-      EXPECT_EQ(param.get<srm_t>(W7node->name()),
-                parsed_param.get<srm_t>(W7node->name()));
     } else if (version == 3) {
 #if HAVE_SAGE2 == 1
       EXPECT_SRM_NEAR(param.get<srm_t>(W3node->name()),
@@ -171,8 +169,14 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
     EXPECT_EQ(parsed_param.get<srm_t>(W5node->name()).size(), 5u);
     // W6: 0, 2, 4, 6, 8
     EXPECT_EQ(parsed_param.get<srm_t>(W6node->name()).size(), 5u);
-    // W7: 0, 3, 6, 9
-    EXPECT_EQ(parsed_param.get<srm_t>(W7node->name()).size(), 4u);
+    if (version == 2) {
+      EXPECT_TRUE(parsed_param.get<srm_t>(W7node->name()).empty());
+    } else if (version == 3) {
+#if HAVE_SAGE2 == 1
+      // W7: 0, 3, 6, 9
+      EXPECT_EQ(parsed_param.get<srm_t>(W7node->name()).size(), 4u);
+#endif
+    }
 
     // 0, 1, 2, 3, 4, 6, 8, 9
     EXPECT_EQ(stat.key_exist, 8);
@@ -204,8 +208,14 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
     EXPECT_EQ(parsed_param.get<srm_t>(W5node->name()).size(), 3u);
     // W6: 0, 2, 4, 6, 8
     EXPECT_EQ(parsed_param.get<srm_t>(W6node->name()).size(), 5u);
-    // W7: 0, 6
-    EXPECT_EQ(parsed_param.get<srm_t>(W7node->name()).size(), 2u);
+    if (version == 2) {
+      EXPECT_TRUE(parsed_param.get<srm_t>(W7node->name()).empty());
+    } else if (version == 3) {
+#if HAVE_SAGE2 == 1
+      // W7: 0, 6
+      EXPECT_EQ(parsed_param.get<srm_t>(W7node->name()).size(), 2u);
+#endif
+    }
 
     // 0, 2, 4, 6, 8
     EXPECT_EQ(stat.key_exist, 5);
