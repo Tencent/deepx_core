@@ -391,10 +391,12 @@ void Model::Pull(std::default_random_engine& engine,
       }
     }
   }
+
+  remote_param->RemoveEmptyValue();
 }
 
 void Model::SetParam(std::vector<std::unique_ptr<TensorMap>>* remote_params) {
-  param_.ClearValue();
+  param_.ClearSRMValue();
 
   for (auto& remote_param : *remote_params) {
     for (auto& entry : *remote_param) {
@@ -403,8 +405,8 @@ void Model::SetParam(std::vector<std::unique_ptr<TensorMap>>* remote_params) {
       if (Wany.is<tsr_t>()) {
         auto& local_W = param_.get<tsr_t>(name);
         auto& remote_W = Wany.unsafe_to_ref<tsr_t>();
-        // view, zero-copy
-        local_W = remote_W.get_view();
+        // copy, not view
+        local_W.set_data(remote_W);
       } else if (Wany.is<srm_t>()) {
         auto& local_W = param_.get<srm_t>(name);
         auto& remote_W = Wany.unsafe_to_ref<srm_t>();
