@@ -21,7 +21,6 @@ class TensorMapTest : public testing::Test, public DataType {
     auto& csr = tensor_map.insert<csr_t>("2");
     auto& tsri = tensor_map.insert<tsri_t>("3");
     auto& tsrs = tensor_map.insert<tsrs_t>("4");
-    tensor_map.insert<int>("5") = 5;
 
     tsr.resize(100).arange();
     srm = {{0, 1, 2}, {{0, 0, 0}, {1, 1, 1}, {2, 2, 2}}};
@@ -49,7 +48,6 @@ TEST_F(TensorMapTest, WriteRead) {
   EXPECT_EQ(tensor_map.get<csr_t>("2"), read_tensor_map.get<csr_t>("2"));
   EXPECT_EQ(tensor_map.get<tsri_t>("3"), read_tensor_map.get<tsri_t>("3"));
   EXPECT_EQ(tensor_map.get<tsrs_t>("4"), read_tensor_map.get<tsrs_t>("4"));
-  EXPECT_EQ(read_tensor_map.find("5"), read_tensor_map.end());
 }
 
 TEST_F(TensorMapTest, WriteReadView) {
@@ -68,7 +66,23 @@ TEST_F(TensorMapTest, WriteReadView) {
   EXPECT_EQ(tensor_map.get<csr_t>("2"), read_tensor_map.get<csr_t>("2"));
   EXPECT_EQ(tensor_map.get<tsri_t>("3"), read_tensor_map.get<tsri_t>("3"));
   EXPECT_EQ(tensor_map.get<tsrs_t>("4"), read_tensor_map.get<tsrs_t>("4"));
-  EXPECT_EQ(read_tensor_map.find("5"), read_tensor_map.end());
+}
+
+TEST_F(TensorMapTest, ClearSRMValue) {
+  tensor_map.ClearSRMValue();
+
+  auto& tsr = tensor_map.get<tsr_t>("0");
+  auto& srm = tensor_map.get<srm_t>("1");
+  auto& csr = tensor_map.get<csr_t>("2");
+  auto& tsri = tensor_map.get<tsri_t>("3");
+  auto& tsrs = tensor_map.get<tsrs_t>("4");
+
+  EXPECT_FALSE(tsr.empty());
+  EXPECT_TRUE(srm.empty());
+  EXPECT_FALSE(srm.shape().empty());
+  EXPECT_FALSE(csr.empty());
+  EXPECT_FALSE(tsri.empty());
+  EXPECT_FALSE(tsrs.empty());
 }
 
 TEST_F(TensorMapTest, ClearValue) {
@@ -103,6 +117,33 @@ TEST_F(TensorMapTest, ZerosValue) {
   EXPECT_FALSE(csr.empty());
   EXPECT_FALSE(tsri.empty());
   EXPECT_FALSE(tsrs.empty());
+}
+
+TEST_F(TensorMapTest, RemoveEmptyValue_1) {
+  tensor_map.RemoveEmptyValue();
+
+  auto& tsr = tensor_map.get<tsr_t>("0");
+  auto& srm = tensor_map.get<srm_t>("1");
+  auto& csr = tensor_map.get<csr_t>("2");
+  auto& tsri = tensor_map.get<tsri_t>("3");
+  auto& tsrs = tensor_map.get<tsrs_t>("4");
+
+  EXPECT_FALSE(tsr.empty());
+  EXPECT_FALSE(srm.empty());
+  EXPECT_FALSE(csr.empty());
+  EXPECT_FALSE(tsri.empty());
+  EXPECT_FALSE(tsrs.empty());
+}
+
+TEST_F(TensorMapTest, RemoveEmptyValue_2) {
+  tensor_map.ClearValue();
+  tensor_map.RemoveEmptyValue();
+
+  EXPECT_EQ(tensor_map.find("0"), tensor_map.end());
+  EXPECT_EQ(tensor_map.find("1"), tensor_map.end());
+  EXPECT_EQ(tensor_map.find("2"), tensor_map.end());
+  EXPECT_EQ(tensor_map.find("3"), tensor_map.end());
+  EXPECT_EQ(tensor_map.find("4"), tensor_map.end());
 }
 
 }  // namespace deepx_core

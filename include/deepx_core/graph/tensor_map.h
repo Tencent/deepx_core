@@ -31,8 +31,14 @@ class TensorMap : public AnyMap, public DataType {
                                   const TensorMap& tensor_map);
 
  public:
+  // Call 'zeros' for value type 'srm_t', so that its shape is preserved.
+  void ClearSRMValue() noexcept;
+  // Call 'clear' for value type 'tsr_t', 'csr_t', 'tsri_t', 'tsrs_t'.
+  // Call 'zeros' for value type 'srm_t', so that its shape is preserved.
   void ClearValue() noexcept;
+  // Call 'zeros' for value type: 'tsr_t', 'srm_t', 'tsri_t'.
   void ZerosValue() noexcept;
+  void RemoveEmptyValue();
 };
 
 /************************************************************************/

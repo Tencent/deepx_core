@@ -190,6 +190,16 @@ std::ostream& operator<<(std::ostream& os, const TensorMap& tensor_map) {
   return os;
 }
 
+void TensorMap::ClearSRMValue() noexcept {
+  for (auto& entry : *this) {
+    Any& Wany = entry.second;
+    if (Wany.is<srm_t>()) {
+      auto& W = Wany.unsafe_to_ref<srm_t>();
+      W.zeros();
+    }
+  }
+}
+
 void TensorMap::ClearValue() noexcept {
   for (auto& entry : *this) {
     Any& Wany = entry.second;
@@ -198,7 +208,6 @@ void TensorMap::ClearValue() noexcept {
       W.clear();
     } else if (Wany.is<srm_t>()) {
       auto& W = Wany.unsafe_to_ref<srm_t>();
-      // 'zeros' preserves the shape of 'W'.
       W.zeros();
     } else if (Wany.is<csr_t>()) {
       auto& W = Wany.unsafe_to_ref<csr_t>();
@@ -222,13 +231,40 @@ void TensorMap::ZerosValue() noexcept {
     } else if (Wany.is<srm_t>()) {
       auto& W = Wany.unsafe_to_ref<srm_t>();
       W.zeros();
-    } else if (Wany.is<csr_t>()) {
-      // 'csr_t' is not applicable.
     } else if (Wany.is<tsri_t>()) {
       auto& W = Wany.unsafe_to_ref<tsri_t>();
       W.zeros();
+    }
+  }
+}
+
+void TensorMap::RemoveEmptyValue() {
+  auto first = begin();
+  auto last = end();
+  for (; first != last;) {
+    bool empty = false;
+    Any& Wany = first->second;
+    if (Wany.is<tsr_t>()) {
+      auto& W = Wany.unsafe_to_ref<tsr_t>();
+      empty = W.empty();
+    } else if (Wany.is<srm_t>()) {
+      auto& W = Wany.unsafe_to_ref<srm_t>();
+      empty = W.empty();
+    } else if (Wany.is<csr_t>()) {
+      auto& W = Wany.unsafe_to_ref<csr_t>();
+      empty = W.empty();
+    } else if (Wany.is<tsri_t>()) {
+      auto& W = Wany.unsafe_to_ref<tsri_t>();
+      empty = W.empty();
     } else if (Wany.is<tsrs_t>()) {
-      // 'tsrs_t' is not applicable.
+      auto& W = Wany.unsafe_to_ref<tsrs_t>();
+      empty = W.empty();
+    }
+
+    if (empty) {
+      first = erase(first);
+    } else {
+      ++first;
     }
   }
 }
