@@ -9,7 +9,6 @@
 #include <deepx_core/graph/graph.h>
 #include <deepx_core/graph/graph_node.h>
 #include <deepx_core/graph/tensor_map.h>
-#include <deepx_core/graph/variable_scope.h>
 #include <cstdint>
 #include <random>
 #include <string>
@@ -22,8 +21,6 @@ namespace deepx_core {
 class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
  protected:
   std::default_random_engine engine;
-  Graph graph;
-  TensorMap param;
   VariableNode* W1node = nullptr;
   VariableNode* W2node = nullptr;
   VariableNode* W3node = nullptr;
@@ -31,6 +28,8 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
   VariableNode* W5node = nullptr;
   VariableNode* W6node = nullptr;
   VariableNode* W7node = nullptr;
+  Graph graph;
+  TensorMap param;
   std::string key, value;
   std::vector<std::string> keys, values;
   std::vector<int16_t> codes;
@@ -43,22 +42,22 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
   }
 
   void InitGraph() {
-    W1node = GetVariable("W1", Shape(2, 3), TENSOR_TYPE_TSR,
-                         TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
-    W2node = GetVariable("W2", Shape(3, 4), TENSOR_TYPE_TSR,
-                         TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
-    W3node = GetVariable("W3", Shape(0, 1), TENSOR_TYPE_SRM,
-                         TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
-    W4node = GetVariable("W4", Shape(0, 2), TENSOR_TYPE_SRM,
-                         TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
-    W5node = GetVariable("W5", Shape(0, 3), TENSOR_TYPE_SRM,
-                         TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
-    W6node = GetVariable("W6", Shape(0, 4), TENSOR_TYPE_SRM,
-                         TENSOR_INITIALIZER_TYPE_ZEROS, 0, 1);
-    W7node = GetVariable("W7", Shape(0, 1), TENSOR_TYPE_SRM,
-                         TENSOR_INITIALIZER_TYPE_ZEROS, 0, 1);
-    ReleaseVariable();
-    graph.Compile({W1node, W2node, W3node, W4node, W5node, W6node, W7node}, 1);
+    W1node = new VariableNode("W1", Shape(2, 3), TENSOR_TYPE_TSR,
+                              TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
+    W2node = new VariableNode("W2", Shape(3, 4), TENSOR_TYPE_TSR,
+                              TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
+    W3node = new VariableNode("W3", Shape(0, 2), TENSOR_TYPE_SRM,
+                              TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
+    W4node = new VariableNode("W4", Shape(0, 4), TENSOR_TYPE_SRM,
+                              TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
+    W5node = new VariableNode("W5", Shape(0, 8), TENSOR_TYPE_SRM,
+                              TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
+    W6node = new VariableNode("W6", Shape(0, 16), TENSOR_TYPE_SRM,
+                              TENSOR_INITIALIZER_TYPE_ZEROS, 0, 1);
+    W7node = new VariableNode("W7", Shape(0, 1), TENSOR_TYPE_SRM,
+                              TENSOR_INITIALIZER_TYPE_ZEROS, 0, 1);
+    ASSERT_TRUE(graph.Compile(
+        {W1node, W2node, W3node, W4node, W5node, W6node, W7node}, 1));
   }
 
   void InitParamPlaceholder(TensorMap* _param) {
