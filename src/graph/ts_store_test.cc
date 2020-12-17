@@ -27,7 +27,6 @@ class TSStoreTest : public testing::Test, public DataType {
       ts_store.set_now(0);
       ts_store.set_expire_threshold(expire_threshold);
       ts_store.Init(&graph);
-
       TensorMap grad;
       grad.insert<srm_t>("W") = srm_t{{1, 2}, {{1, 1}, {2, 2}}};
       ts_store.Update(&grad);
@@ -37,17 +36,15 @@ class TSStoreTest : public testing::Test, public DataType {
       ts_store.set_now(now);
       ts_store.set_expire_threshold(expire_threshold);
       ts_store.Init(&graph);
-
       TensorMap grad;
       grad.insert<srm_t>("W") = srm_t{{3, 4}, {{3, 3}, {4, 4}}};
       ts_store.Update(&grad);
-
-      // 'ts_store.id_ts_map_' is:
-      // 1, 0
-      // 2, 0
-      // 3, now
-      // 4, now
     }
+
+    // 1: 0
+    // 2: 0
+    // 3: now
+    // 4: now
 
     id_set_t expired = ts_store.Expire();
     EXPECT_EQ(expired, expected_expired);

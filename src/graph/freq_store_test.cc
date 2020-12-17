@@ -43,11 +43,10 @@ TEST_F(FreqStoreTest, Filter) {
     id_set_t expected_id_set{3, 4};
     EXPECT_EQ(pull_request.srm_map["W"], expected_id_set);
 
-    // 'freq_store.id_freq_map_' is:
-    // 1, LO_FREQ
-    // 2, LO_FREQ
-    // 3, HI_FREQ
-    // 4, HI_FREQ
+    // 1: LO_FREQ
+    // 2: LO_FREQ
+    // 3: HI_FREQ
+    // 4: HI_FREQ
   }
 
   {
