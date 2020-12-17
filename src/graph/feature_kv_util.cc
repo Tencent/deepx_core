@@ -399,6 +399,7 @@ void FeatureKVUtil::DenseParamParser::Parse(const std::string& key,
   const float_t* data = (const float_t*)value.data();  // NOLINT
   int total_dim = (int)(value.size() / sizeof(float_t));
   if (total_dim == W.total_dim()) {
+    // copy, not view
     W.set_data(data, total_dim);
   } else {
     ++stat->value_bad;
@@ -512,6 +513,7 @@ void FeatureKVUtil::SparseParamParser::Parse(const std::string& key,
 
     if (version_ == 2) {
       if (!(W->col() == 1 && embedding[0] == 0)) {
+        // copy, not view
         W->assign(id, (const float_t*)embedding);
       }
     } else if (version_ == 3) {
