@@ -153,7 +153,7 @@ void Trainer::Train() {
 
 void Trainer::TrainEntry(int thread_id) {
   for (;;) {
-    std::size_t file_size = 0;
+    size_t file_size = 0;
     std::string file;
     if (!file_dispatcher_.WorkerDispatchFile(&file)) {
       DXINFO("[%d] [%3.1f%%] Training completed. ", thread_id, 100.0);

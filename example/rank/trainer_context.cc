@@ -43,8 +43,8 @@ void TrainerContext::TrainFile(int thread_id, const std::string& file) {
   DXCHECK_THROW(instance_reader->InitConfig(config));
   DXCHECK_THROW(instance_reader->Open(file));
 
-  std::size_t processed_batch = 0;
-  std::size_t verbose_batch = GetVerboseBatch(verbose_);
+  size_t processed_batch = 0;
+  size_t verbose_batch = GetVerboseBatch(verbose_);
   auto begin = std::chrono::steady_clock::now();
 
   auto dump_speed = [this, thread_id, &processed_batch, &begin]() {
@@ -152,8 +152,8 @@ void TrainerContext::PredictFile(int thread_id, const std::string& file,
   AutoOutputFileStream os;
   DXCHECK_THROW(os.Open(out_file));
 
-  std::size_t processed_batch = 0;
-  std::size_t verbose_batch = GetVerboseBatch(verbose_);
+  size_t processed_batch = 0;
+  size_t verbose_batch = GetVerboseBatch(verbose_);
   auto begin = std::chrono::steady_clock::now();
 
   auto dump_speed = [this, thread_id, &processed_batch, &begin]() {

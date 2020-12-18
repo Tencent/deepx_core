@@ -59,7 +59,7 @@ int main(int argc, char** argv) {
     DXCHECK_THROW(model_server.BatchPredict(op_context.get(), batch_features,
                                             &batch_probs));
     auto& probs = batch_probs[0];
-    for (std::size_t i = 0; i < probs.size(); ++i) {
+    for (size_t i = 0; i < probs.size(); ++i) {
       std::cout << probs[i];
       if (i != probs.size() - 1) {
         std::cout << " ";

@@ -92,7 +92,7 @@ void Predictor::Predict() {
 
 void Predictor::PredictEntry(int thread_id) {
   for (;;) {
-    std::size_t file_size = 0;
+    size_t file_size = 0;
     std::string file;
     if (!file_dispatcher_.WorkerDispatchFile(&file)) {
       DXINFO("[%d] [%3.1f%%] Predicting completed. ", thread_id, 100.0);
