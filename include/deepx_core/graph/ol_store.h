@@ -55,7 +55,8 @@ class OLStore : public DataType {
                const float_t* prev_embedding) const;
 
  public:
-  bool SaveFeatureKV(const std::string& file, int feature_kv_protocol_version);
+  bool SaveFeatureKVModel(const std::string& file,
+                          int feature_kv_protocol_version);
 };
 
 }  // namespace deepx_core

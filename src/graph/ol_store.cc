@@ -101,14 +101,14 @@ bool OLStore::Collect(const State& state, int n, const float_t* embedding,
   return false;
 }
 
-bool OLStore::SaveFeatureKV(const std::string& file,
-                            int feature_kv_protocol_version) {
+bool OLStore::SaveFeatureKVModel(const std::string& file,
+                                 int feature_kv_protocol_version) {
   AutoOutputFileStream os;
   if (!os.Open(file)) {
     DXERROR("Failed to open: %s.", file.c_str());
     return false;
   }
-  DXINFO("Saving feature kv to %s...", file.c_str());
+  DXINFO("Saving feature kv model to %s...", file.c_str());
   id_set_t id_set = Collect();
   if (!FeatureKVUtil::WriteVersion(os, feature_kv_protocol_version) ||
       !FeatureKVUtil::WriteGraph(os, *graph_) ||
