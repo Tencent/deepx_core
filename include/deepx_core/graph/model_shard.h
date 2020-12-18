@@ -77,6 +77,7 @@ class ModelShard : public DataType {
   std::string GetSuffix() const;
   std::string GetModelFile(const std::string& dir) const;
   std::string GetTextModelFile(const std::string& dir) const;
+  std::string GetFeatureKVModelFile(const std::string& dir) const;
   std::string GetOptimizerFile(const std::string& dir) const;
   std::string GetTSStoreFile(const std::string& dir) const;
   std::string GetFreqStoreFile(const std::string& dir) const;
@@ -99,6 +100,8 @@ class ModelShard : public DataType {
   bool SaveTextModel(const std::string& dir) const;
   bool SaveFeatureKVModel(const std::string& dir,
                           int feature_kv_protocol_version) const;
+  bool SaveOLFeatureKVModel(const std::string& dir,
+                            int feature_kv_protocol_version) const;
   bool SaveOptimizer(const std::string& dir) const;
   bool LoadOptimizer(const std::string& dir,
                      const std::string& optimizer_config);

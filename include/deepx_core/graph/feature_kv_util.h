@@ -144,6 +144,10 @@ class FeatureKVUtil : public DataType {
                                int version);
 
  public:
+  static bool SaveModel(const std::string& file, const Graph& graph,
+                        const TensorMap& param, int version);
+
+ public:
   struct ParamParserStat {
     int key_exist = 0;
     int key_not_exist = 0;

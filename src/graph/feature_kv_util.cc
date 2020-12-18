@@ -362,6 +362,24 @@ bool FeatureKVUtil::WriteSparseParam(
   return true;
 }
 
+bool FeatureKVUtil::SaveModel(const std::string& file, const Graph& graph,
+                              const TensorMap& param, int version) {
+  AutoOutputFileStream os;
+  if (!os.Open(file)) {
+    DXERROR("Failed to open: %s.", file.c_str());
+    return false;
+  }
+  DXINFO("Saving feature kv model to %s...", file.c_str());
+  if (!FeatureKVUtil::WriteVersion(os, version) ||
+      !FeatureKVUtil::WriteGraph(os, graph) ||
+      !FeatureKVUtil::WriteDenseParam(os, param) ||
+      !FeatureKVUtil::WriteSparseParam(os, param, graph, version)) {
+    return false;
+  }
+  DXINFO("Done.");
+  return true;
+}
+
 /************************************************************************/
 /* FeatureKVUtil::DenseParamParser */
 /************************************************************************/

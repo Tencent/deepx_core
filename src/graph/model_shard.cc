@@ -5,6 +5,7 @@
 
 #include <deepx_core/common/stream.h>
 #include <deepx_core/dx_log.h>
+#include <deepx_core/graph/feature_kv_util.h>
 #include <deepx_core/graph/model_shard.h>
 
 namespace deepx_core {
@@ -82,6 +83,10 @@ std::string ModelShard::GetModelFile(const std::string& dir) const {
 
 std::string ModelShard::GetTextModelFile(const std::string& dir) const {
   return dir + "/model.txt" + GetSuffix();
+}
+
+std::string ModelShard::GetFeatureKVModelFile(const std::string& dir) const {
+  return dir + "/model.feature_kv" + GetSuffix();
 }
 
 std::string ModelShard::GetOptimizerFile(const std::string& dir) const {
@@ -189,7 +194,13 @@ bool ModelShard::SaveTextModel(const std::string& dir) const {
 
 bool ModelShard::SaveFeatureKVModel(const std::string& dir,
                                     int feature_kv_protocol_version) const {
-  return ol_store_->SaveFeatureKVModel(GetModelFile(dir),
+  return FeatureKVUtil::SaveModel(GetFeatureKVModelFile(dir), *graph_,
+                                  model_->param(), feature_kv_protocol_version);
+}
+
+bool ModelShard::SaveOLFeatureKVModel(const std::string& dir,
+                                      int feature_kv_protocol_version) const {
+  return ol_store_->SaveFeatureKVModel(GetFeatureKVModelFile(dir),
                                        feature_kv_protocol_version);
 }
 
