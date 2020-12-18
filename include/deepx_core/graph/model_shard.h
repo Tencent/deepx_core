@@ -9,6 +9,7 @@
 #include <deepx_core/graph/freq_store.h>
 #include <deepx_core/graph/graph.h>
 #include <deepx_core/graph/model.h>
+#include <deepx_core/graph/ol_store.h>
 #include <deepx_core/graph/optimizer.h>
 #include <deepx_core/graph/tensor_map.h>
 #include <deepx_core/graph/ts_store.h>
@@ -48,6 +49,7 @@ class ModelShard : public DataType {
   std::unique_ptr<Optimizer> optimizer_;
   std::unique_ptr<TSStore> ts_store_;
   std::unique_ptr<FreqStore> freq_store_;
+  std::unique_ptr<OLStore> ol_store_;
   std::unique_ptr<ThreadPool> thread_pool_;
 
  public:
@@ -68,6 +70,8 @@ class ModelShard : public DataType {
   const TSStore& ts_store() const noexcept { return *ts_store_; }
   FreqStore* mutable_freq_store() noexcept { return freq_store_.get(); }
   const FreqStore& freq_store() const noexcept { return *freq_store_; }
+  OLStore* mutable_ol_store() noexcept { return ol_store_.get(); }
+  const OLStore& ol_store() const noexcept { return *ol_store_; }
 
  private:
   std::string GetSuffix() const;
@@ -76,6 +80,7 @@ class ModelShard : public DataType {
   std::string GetOptimizerFile(const std::string& dir) const;
   std::string GetTSStoreFile(const std::string& dir) const;
   std::string GetFreqStoreFile(const std::string& dir) const;
+  std::string GetSuccessFile(const std::string& dir) const;
 
  public:
   void Init(int shard_id, const Graph* graph) noexcept;
@@ -86,19 +91,22 @@ class ModelShard : public DataType {
   bool InitOptimizerConfig(const std::string& optimizer_config);
   bool InitTSStore(ts_t now, ts_t expire_threshold);
   bool InitFreqStore(freq_t freq_filter_threshold);
+  bool InitOLStore(freq_t update_threshold, float_t distance_threshold);
   void InitLock();
 
   bool SaveModel(const std::string& dir) const;
   bool LoadModel(const std::string& dir);
   bool SaveTextModel(const std::string& dir) const;
+  bool SaveFeatureKVModel(const std::string& dir,
+                          int feature_kv_protocol_version) const;
   bool SaveOptimizer(const std::string& dir) const;
   bool LoadOptimizer(const std::string& dir,
                      const std::string& optimizer_config);
   bool SaveTSStore(const std::string& dir) const;
   bool LoadTSStore(const std::string& dir, ts_t now, ts_t expire_threshold);
   bool SaveFreqStore(const std::string& dir) const;
-  bool LoadFreqStore(const std::string& dir,
-                     freq_t freq_filter_threshold);
+  bool LoadFreqStore(const std::string& dir, freq_t freq_filter_threshold);
+  bool SaveSuccess(const std::string& dir) const;
 
   bool WarmupModel(const std::string& dir);
   bool WarmupOptimizer(const std::string& dir);

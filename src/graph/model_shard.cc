@@ -96,6 +96,10 @@ std::string ModelShard::GetFreqStoreFile(const std::string& dir) const {
   return dir + "/freq_store.bin" + GetSuffix();
 }
 
+std::string ModelShard::GetSuccessFile(const std::string& dir) const {
+  return dir + "/SUCCESS_" + GetSuffix();
+}
+
 void ModelShard::Init(int shard_id, const Graph* graph) noexcept {
   shard_id_ = shard_id;
   graph_ = graph;
@@ -149,6 +153,15 @@ bool ModelShard::InitFreqStore(freq_t freq_filter_threshold) {
   return freq_store_->InitParam(model_->param());
 }
 
+bool ModelShard::InitOLStore(freq_t update_threshold,
+                             float_t distance_threshold) {
+  ol_store_.reset(new OLStore);
+  ol_store_->set_update_threshold(update_threshold);
+  ol_store_->set_distance_threshold(distance_threshold);
+  ol_store_->Init(graph_, model_->mutable_param());
+  return ol_store_->InitParam();
+}
+
 void ModelShard::InitLock() {
   model_->InitLock();
   optimizer_->InitLock(model_->mutable_param_lock());
@@ -172,6 +185,12 @@ bool ModelShard::LoadModel(const std::string& dir) {
 
 bool ModelShard::SaveTextModel(const std::string& dir) const {
   return model_->SaveText(GetTextModelFile(dir));
+}
+
+bool ModelShard::SaveFeatureKVModel(const std::string& dir,
+                                    int feature_kv_protocol_version) const {
+  return ol_store_->SaveFeatureKVModel(GetModelFile(dir),
+                                       feature_kv_protocol_version);
 }
 
 bool ModelShard::SaveOptimizer(const std::string& dir) const {
@@ -213,6 +232,18 @@ bool ModelShard::LoadFreqStore(const std::string& dir,
   freq_store_.reset(new FreqStore);
   freq_store_->set_freq_filter_threshold(freq_filter_threshold);
   return freq_store_->Load(GetFreqStoreFile(dir));
+}
+
+bool ModelShard::SaveSuccess(const std::string& dir) const {
+  std::string file = GetSuccessFile(dir);
+  AutoOutputFileStream os;
+  if (!os.Open(file)) {
+    DXERROR("Failed to open: %s.", file.c_str());
+    return false;
+  }
+  DXINFO("Saving SUCCESS file to %s...", file.c_str());
+  DXINFO("Done.");
+  return true;
 }
 
 bool ModelShard::WarmupModel(const std::string& dir) {
@@ -261,6 +292,9 @@ void ModelShard::Pull(PullRequest* pull_request, TensorMap* param) {
 
 void ModelShard::Push(TensorMap* grad, TensorMap* overwritten_param) {
   if (!grad->empty()) {
+    if (ol_store_) {
+      ol_store_->Update(grad);
+    }
     if (freq_store_) {
       freq_store_->Filter(grad);
     }
@@ -272,6 +306,9 @@ void ModelShard::Push(TensorMap* grad, TensorMap* overwritten_param) {
 
   // 'overwritten_param' can be nullptr.
   if (overwritten_param && !overwritten_param->empty()) {
+    if (ol_store_) {
+      ol_store_->Update(overwritten_param);
+    }
     model_->Update(overwritten_param);
   }
 }
