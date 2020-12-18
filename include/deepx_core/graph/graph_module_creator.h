@@ -81,6 +81,9 @@ std::vector<GraphNode*> Split(const std::string& prefix, GraphNode* X, int axis,
                               const std::vector<int>& split_dims);
 std::vector<GraphNode*> Split(GraphNode* X, int axis,
                               const std::vector<int>& split_dims);
+// Share variables.
+GraphNode* BatchNorm(const std::string& prefix, GraphNode* X,
+                     double moving_decay = 0.9);
 
 /************************************************************************/
 /* target creator */

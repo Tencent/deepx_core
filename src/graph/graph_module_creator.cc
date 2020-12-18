@@ -477,6 +477,19 @@ std::vector<GraphNode*> Split(GraphNode* X, int axis,
   return nodes;
 }
 
+GraphNode* BatchNorm(const std::string& prefix, GraphNode* X,
+                     double moving_decay) {
+  DXCHECK_THROW(X->shape().rank() >= 2);
+  int m = X->shape().total_dim() / X->shape()[0];
+  auto* gamma = GetVariableOnes(prefix + "gamma", Shape(m));
+  auto* beta = GetVariableZeros(prefix + "beta", Shape(m));
+  auto* mean = GetVariableZeros(prefix + "mean", Shape(m));
+  mean->set_need_grad(0);
+  auto* var = GetVariableOnes(prefix + "var", Shape(m));
+  var->set_need_grad(0);
+  return new BatchNormNode("", X, gamma, beta, mean, var, moving_decay);
+}
+
 /************************************************************************/
 /* target creator */
 /************************************************************************/

@@ -1658,6 +1658,21 @@ class StopGradNode : public GraphNode {
   DEFINE_GRAPH_NODE_LIKE(StopGradNode);
 };
 
+class BatchNormNode : public GraphNode {
+ private:
+  double moving_decay_ = 0;
+  DEFINE_GRAPH_NODE_ATTR(BatchNormNode, moving_decay_);
+
+ public:
+  double moving_decay() const noexcept { return moving_decay_; }
+
+ public:
+  BatchNormNode(std::string name, GraphNode* X, GraphNode* gamma,
+                GraphNode* beta, GraphNode* mean, GraphNode* var,
+                double moving_decay = 0.9);
+  DEFINE_GRAPH_NODE_LIKE(BatchNormNode);
+};
+
 /************************************************************************/
 /* fast node creator */
 /************************************************************************/
@@ -1963,5 +1978,8 @@ inline GraphNode* Tile(std::string name, GraphNode* X,
 DEFINE_GRAPH_NODE_CREATOR(BatchCos)
 DEFINE_GRAPH_NODE_CREATOR(BatchDot)
 DEFINE_GRAPH_NODE_CREATOR(StopGrad)
+
+// DEFINE_GRAPH_NODE_CREATOR(BatchNorm)
+// use BatchNorm in graph_module_creator.h
 
 }  // namespace deepx_core

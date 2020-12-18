@@ -1102,7 +1102,7 @@ Normalize2Node(std::string name, GraphNode* X, int axis = -1);
 GraphNode* Normalize2(std::string name, GraphNode* X, int axis = -1);
 ```
 
-在X的axis轴上进行l2 norm归一化变换.
+在X的axis轴上进行l2 norm标准化变换.
 
 令$X_i$表示X的axis轴, $Z_i$表示Z的axis轴, 则有.
 
@@ -4156,7 +4156,7 @@ GraphNode* LayerNorm(std::string name, GraphNode* X, GraphNode* gamma,
                      GraphNode* beta);
 ```
 
-层归一化.
+层标准化.
 
 参数.
 
@@ -4405,3 +4405,31 @@ GraphNode* StopGrad(std::string name, GraphNode* X);
 返回.
 
 - Z, 形状和X相同的TSR.
+
+### BatchNormNode
+
+```c++
+BatchNormNode(std::string name, GraphNode* X, GraphNode* gamma, GraphNode* beta,
+              GraphNode* mean, GraphNode* var, double moving_decay = 0.9);
+GraphNode* BatchNorm(const std::string& prefix, GraphNode* X,
+                     double moving_decay = 0.9);
+```
+
+批标准化.
+
+参数.
+
+- X, 形如(batch, m1, ..., mi)的TSR.
+- gamma, 形如(m1 * ... * mi)的TSR.
+- beta, 形如(m1 * ... * mi)的TSR.
+- mean, 形如(m1 * ... * mi)的TSR.
+- var, 形如(m1 * ... * mi)的TSR.
+- moving_decay, 滑动衰减系数.
+
+返回.
+
+- Z, 形状和X相同的TSR.
+
+参考.
+
+- [Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift](http://jmlr.org/proceedings/papers/v37/ioffe15.pdf).
