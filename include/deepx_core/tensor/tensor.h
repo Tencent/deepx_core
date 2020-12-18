@@ -271,21 +271,27 @@ class Tensor {
 
  public:
   // LeCun initializer
-  // Reference: LeCun 98 (Efficient Backprop), arXiv:1706.02515
+  // Reference: LeCun, Yann A., et al. "Efficient backprop." Neural networks:
+  // Tricks of the trade. Springer, Berlin, Heidelberg, 2012. 9-48.
   template <class RandomEngine>
   Tensor& rand_lecun(RandomEngine&& engine);
   template <class RandomEngine>
   Tensor& randn_lecun(RandomEngine&& engine);
 
   // Xavier initializer (aka: Glorot)
-  // Reference: Glorot & Bengio, AISTATS 2010
+  // Reference: Glorot, Xavier, and Yoshua Bengio. "Understanding the difficulty
+  // of training deep feedforward neural networks." Proceedings of the
+  // thirteenth international conference on artificial intelligence and
+  // statistics. 2010.
   template <class RandomEngine>
   Tensor& rand_xavier(RandomEngine&& engine);
   template <class RandomEngine>
   Tensor& randn_xavier(RandomEngine&& engine);
 
   // He initializer
-  // Reference: He et al., arXiv:1502.01852
+  // Reference: He, Kaiming, et al. "Delving deep into rectifiers: Surpassing
+  // human-level performance on imagenet classification." Proceedings of the
+  // IEEE international conference on computer vision. 2015.
   template <class RandomEngine>
   Tensor& rand_he(RandomEngine&& engine);
   template <class RandomEngine>

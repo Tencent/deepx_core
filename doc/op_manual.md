@@ -4170,7 +4170,7 @@ GraphNode* LayerNorm(std::string name, GraphNode* X, GraphNode* gamma,
 
 参考.
 
-- [Layer Normalization](https://arxiv.org/abs/1607.06450).
+- Layer Normalization<sup>1</sup>.
 
 ### SequenceMaskNode
 
@@ -4432,4 +4432,9 @@ GraphNode* BatchNorm(const std::string& prefix, GraphNode* X,
 
 参考.
 
-- [Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift](http://jmlr.org/proceedings/papers/v37/ioffe15.pdf).
+- Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift<sup>2</sup>.
+
+## 参考文献
+
+1. Ba, Jimmy Lei, Jamie Ryan Kiros, and Geoffrey E. Hinton. "Layer normalization." *arXiv preprint arXiv:1607.06450* (2016).
+2. Ioffe, Sergey, and Christian Szegedy. "Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift." *International Conference on Machine Learning*. 2015.

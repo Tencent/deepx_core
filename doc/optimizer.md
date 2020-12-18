@@ -20,16 +20,16 @@
 
 name是优化器名称, 它可以是.
 
-- [adadelta](https://arxiv.org/abs/1212.5701)
-- [adagrad](https://www.jmlr.org/papers/volume12/duchi11a/duchi11a.pdf)
-- [adam](https://arxiv.org/abs/1412.6980)
-- [ftrl](https://research.google.com/pubs/archive/41159.pdf)
-- [gftrl](https://research.fb.com/wp-content/uploads/2019/09/Feature-Selection-for-Facebook-Feed-Ranking-System-via-a-Group-Sparsity-Regularized-Training-Algorithm.pdf)
-- hybrid
-- hybrid2
-- [momentum](http://proceedings.mlr.press/v28/sutskever13.html)
-- rmsprop
-- sgd
+- adadelta<sup>1</sup>.
+- adagrad<sup>2</sup>.
+- adam<sup>3</sup>.
+- ftrl<sup>4</sup>.
+- gftrl<sup>5</sup>.
+- hybrid.
+- hybrid2.
+- momentum<sup>6</sup>.
+- rmsprop.
+- sgd.
 
 config是优化器配置, 它的格式是"配置名=值;配置名=值".
 
@@ -277,3 +277,12 @@ Optimizer是优化器的基类, 它定义了以下接口.
 ### 例子
 
 参考["optimizer"](../src/graph/optimizer).
+
+## 参考文献
+
+1. Zeiler, Matthew D. "Adadelta: an adaptive learning rate method." *arXiv preprint arXiv:1212.5701* (2012).
+2. Duchi, John, Elad Hazan, and Yoram Singer. "Adaptive subgradient methods for online learning and stochastic optimization." *Journal of machine learning research* 12.7 (2011).
+3. Kingma, Diederik P., and Jimmy Ba. "Adam: A method for stochastic optimization." *arXiv preprint arXiv:1412.6980* (2014).
+4. McMahan, H. Brendan, et al. "Ad click prediction: a view from the trenches." *Proceedings of the 19th ACM SIGKDD international conference on Knowledge discovery and data mining*. 2013.
+5. Ni, Xiuyan, et al. "Feature Selection for Facebook Feed Ranking System via a Group-Sparsity-Regularized Training Algorithm." *Proceedings of the 28th ACM International Conference on Information and Knowledge Management*. 2019.
+6. Sutskever, Ilya, et al. "On the importance of initialization and momentum in deep learning." *International conference on machine learning*. 2013.
