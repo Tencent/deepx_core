@@ -72,19 +72,19 @@ class OLStoreTest : public testing::Test, public DataType {
     ol_store.InitParam();
 
     {
-      TensorMap param;
-      param.insert<srm_t>(W2node->name()) =
+      TensorMap _param;
+      _param.insert<srm_t>(W2node->name()) =
           srm_t{{0, 1, 2}, {{1, 1}, {1, 1}, {1, 1}}};
-      ol_store.Update(&param);
-      ol_store.Update(&param);
+      ol_store.Update(&_param);
+      ol_store.Update(&_param);
     }
 
     {
-      TensorMap param;
-      param.insert<srm_t>(W3node->name()) = srm_t{{2, 4}, {{1}, {1}}};
-      ol_store.Update(&param);
-      ol_store.Update(&param);
-      ol_store.Update(&param);
+      TensorMap _param;
+      _param.insert<srm_t>(W3node->name()) = srm_t{{2, 4}, {{1}, {1}}};
+      ol_store.Update(&_param);
+      ol_store.Update(&_param);
+      ol_store.Update(&_param);
     }
 
     UpdateParam();

@@ -142,6 +142,9 @@
     <ClCompile Include="..\src\graph\op\kernel\batch_dot_op.cc">
       <Filter>graph\op\kernel</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\graph\op\kernel\batch_norm_op.cc">
+      <Filter>graph\op\kernel</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\graph\op\kernel\binary_op.cc">
       <Filter>graph\op\kernel</Filter>
     </ClCompile>

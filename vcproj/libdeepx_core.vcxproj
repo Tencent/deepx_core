@@ -48,6 +48,7 @@
     <ClCompile Include="..\src\graph\op\kernel\add_n_op.cc" />
     <ClCompile Include="..\src\graph\op\kernel\batch_cos_op.cc" />
     <ClCompile Include="..\src\graph\op\kernel\batch_dot_op.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\batch_norm_op.cc" />
     <ClCompile Include="..\src\graph\op\kernel\binary_op.cc" />
     <ClCompile Include="..\src\graph\op\kernel\broadcast_op.cc" />
     <ClCompile Include="..\src\graph\op\kernel\concat_op.cc" />
