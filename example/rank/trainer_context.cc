@@ -18,7 +18,7 @@ namespace deepx_core {
 /************************************************************************/
 /* TrainerContext */
 /************************************************************************/
-void TrainerContext::DoInit(Model* local_model) {
+void TrainerContext::_Init(Model* local_model) {
   local_model_ = local_model;
   op_context_.reset(new OpContext);
   op_context_->Init(&local_model_->graph(), local_model_->mutable_param());
@@ -187,7 +187,7 @@ void TrainerContext::PredictFile(int thread_id, const std::string& file,
 /* TrainerContextNoShard */
 /************************************************************************/
 void TrainerContextNoShard::Init(ModelShard* model_shard) {
-  DoInit(model_shard->mutable_model());
+  _Init(model_shard->mutable_model());
 
   model_shard_ = model_shard;
   optimizer_ = model_shard_->mutable_optimizer();
@@ -223,7 +223,7 @@ void TrainerContextNoShard::PredictBatch() {
 /************************************************************************/
 void TrainerContextShard::Init(std::vector<ModelShard>* model_shards,
                                ModelShard* local_model_shard) {
-  DoInit(local_model_shard->mutable_model());
+  _Init(local_model_shard->mutable_model());
 
   shard_size_ = (int)model_shards->size();
   model_shards_.resize(shard_size_);

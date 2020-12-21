@@ -57,7 +57,7 @@ class TrainerContextDist : public TrainerContext {
 TrainerContextDist::TrainerContextDist() : io_(), ps_conns_(&io_) {}
 
 void TrainerContextDist::Init(ModelShard* local_model_shard) {
-  DoInit(local_model_shard->mutable_model());
+  _Init(local_model_shard->mutable_model());
 
   DXCHECK_THROW(ps_conns_.ConnectRetry(FLAGS_ps_endpoints) == 0);
 

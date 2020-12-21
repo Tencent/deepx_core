@@ -55,7 +55,7 @@ class TrainerContext : public DataType {
   double file_loss_weight() const noexcept { return file_loss_weight_; }
 
  protected:
-  void DoInit(Model* local_model);
+  void _Init(Model* local_model);
 
  public:
   virtual ~TrainerContext() = default;
