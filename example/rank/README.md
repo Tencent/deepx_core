@@ -163,11 +163,19 @@ n是正整数时, 模型使用分片模式, 分片数是n.
 ./trainer --out_model=out
 ```
 
-### 设置输出模型目录(文本)
+### 设置输出文本模型目录
 
 ```shell
-./trainer --out_model_text=out
+./trainer --out_text_model=out
 ```
+
+### 设置输出feature kv模型目录和输出feature kv协议版本
+
+```shell
+./trainer --out_feature_kv_model=out --out_feature_kv_protocol_version=n
+```
+
+n是2或3.
 
 ### 设置verbosity
 
@@ -295,7 +303,9 @@ WK负责处理训练数据, 系统启动时WK数量可以不确定, WK可以随�
 --warmup_model
 --out_model_remove_zeros
 --out_model
---out_model_text
+--out_text_model
+--out_feature_kv_model
+--out_feature_kv_protocol_version
 --verbose
 --seed
 --ts_enable

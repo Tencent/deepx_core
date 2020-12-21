@@ -6,6 +6,7 @@
 #include <deepx_core/common/any_map.h>
 #include <deepx_core/common/stream.h>
 #include <deepx_core/dx_log.h>
+#include <deepx_core/graph/feature_kv_util.h>
 #include <deepx_core/graph/graph.h>
 #include <deepx_core/graph/model_shard.h>
 #include <deepx_core/ps/file_dispatcher.h>
@@ -41,7 +42,11 @@ DEFINE_string(in_model, "", "input model dir");
 DEFINE_string(warmup_model, "", "warmup model dir");
 DEFINE_int32(out_model_remove_zeros, 0, "remove zeros from output model");
 DEFINE_string(out_model, "", "output model dir(optional)");
-DEFINE_string(out_model_text, "", "output model text dir(optional)");
+DEFINE_string(out_text_model, "", "output text model dir(optional)");
+DEFINE_string(out_feature_kv_model, "",
+              "output feature kv model dir(optional)");
+DEFINE_int32(out_feature_kv_protocol_version, 2,
+             "output feature kv protocol version");
 DEFINE_int32(verbose, 1, "verbose level: 0-10");
 DEFINE_int32(seed, 9527, "seed of random engine");
 DEFINE_int32(ts_enable, 0, "enable timestamp");
@@ -117,14 +122,25 @@ void Trainer::Init() {
     DXCHECK_THROW(AutoFileSystem::MakeDir(FLAGS_out_model));
   }
 
-  if (!FLAGS_out_model_text.empty()) {
-    if (AutoFileSystem::BackupIfExists(FLAGS_out_model_text, &new_path)) {
-      DXINFO("Backed up %s to %s.", FLAGS_out_model_text.c_str(),
+  if (!FLAGS_out_text_model.empty()) {
+    if (AutoFileSystem::BackupIfExists(FLAGS_out_text_model, &new_path)) {
+      DXINFO("Backed up %s to %s.", FLAGS_out_text_model.c_str(),
              new_path.c_str());
     }
 
-    if (!AutoFileSystem::Exists(FLAGS_out_model_text)) {
-      DXCHECK_THROW(AutoFileSystem::MakeDir(FLAGS_out_model_text));
+    if (!AutoFileSystem::Exists(FLAGS_out_text_model)) {
+      DXCHECK_THROW(AutoFileSystem::MakeDir(FLAGS_out_text_model));
+    }
+  }
+
+  if (!FLAGS_out_feature_kv_model.empty()) {
+    if (AutoFileSystem::BackupIfExists(FLAGS_out_feature_kv_model, &new_path)) {
+      DXINFO("Backed up %s to %s.", FLAGS_out_feature_kv_model.c_str(),
+             new_path.c_str());
+    }
+
+    if (!AutoFileSystem::Exists(FLAGS_out_feature_kv_model)) {
+      DXCHECK_THROW(AutoFileSystem::MakeDir(FLAGS_out_feature_kv_model));
     }
   }
 }
@@ -240,8 +256,12 @@ void TrainerNoShard::Save() {
     model_shard_.mutable_model()->RemoveZerosSRM();
   }
   DXCHECK_THROW(model_shard_.SaveModel(FLAGS_out_model));
-  if (!FLAGS_out_model_text.empty()) {
-    DXCHECK_THROW(model_shard_.SaveTextModel(FLAGS_out_model_text));
+  if (!FLAGS_out_text_model.empty()) {
+    DXCHECK_THROW(model_shard_.SaveTextModel(FLAGS_out_text_model));
+  }
+  if (!FLAGS_out_feature_kv_model.empty()) {
+    DXCHECK_THROW(model_shard_.SaveFeatureKVModel(
+        FLAGS_out_feature_kv_model, FLAGS_out_feature_kv_protocol_version));
   }
   DXCHECK_THROW(model_shard_.SaveOptimizer(FLAGS_out_model));
 }
@@ -361,8 +381,12 @@ void TrainerShard::Save() {
       model_shards_[i].ExpireTSStore();
     }
     DXCHECK_THROW(model_shards_[i].SaveModel(FLAGS_out_model));
-    if (!FLAGS_out_model_text.empty()) {
-      DXCHECK_THROW(model_shards_[i].SaveTextModel(FLAGS_out_model_text));
+    if (!FLAGS_out_text_model.empty()) {
+      DXCHECK_THROW(model_shards_[i].SaveTextModel(FLAGS_out_text_model));
+    }
+    if (!FLAGS_out_feature_kv_model.empty()) {
+      DXCHECK_THROW(model_shards_[i].SaveFeatureKVModel(
+          FLAGS_out_feature_kv_model, FLAGS_out_feature_kv_protocol_version));
     }
     DXCHECK_THROW(model_shards_[i].SaveOptimizer(FLAGS_out_model));
     if (FLAGS_ts_enable) {
@@ -439,10 +463,17 @@ void CheckFlags() {
   DXCHECK_THROW(fs.Open(FLAGS_out_model));
   DXCHECK_THROW(!IsStdinStdoutPath(FLAGS_out_model));
 
-  CanonicalizePath(&FLAGS_out_model_text);
-  if (!FLAGS_out_model_text.empty()) {
-    DXCHECK_THROW(fs.Open(FLAGS_out_model_text));
-    DXCHECK_THROW(!IsStdinStdoutPath(FLAGS_out_model_text));
+  CanonicalizePath(&FLAGS_out_text_model);
+  if (!FLAGS_out_text_model.empty()) {
+    DXCHECK_THROW(fs.Open(FLAGS_out_text_model));
+    DXCHECK_THROW(!IsStdinStdoutPath(FLAGS_out_text_model));
+  }
+
+  CanonicalizePath(&FLAGS_out_feature_kv_model);
+  if (!FLAGS_out_feature_kv_model.empty()) {
+    DXCHECK_THROW(fs.Open(FLAGS_out_feature_kv_model));
+    DXCHECK_THROW(!IsStdinStdoutPath(FLAGS_out_feature_kv_model));
+    FeatureKVUtil::CheckVersion(FLAGS_out_feature_kv_protocol_version);
   }
 
   DXCHECK_THROW(FLAGS_verbose >= 0);

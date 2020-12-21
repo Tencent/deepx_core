@@ -7,6 +7,7 @@
 #include <deepx_core/common/any_map.h>
 #include <deepx_core/common/stream.h>
 #include <deepx_core/dx_log.h>
+#include <deepx_core/graph/feature_kv_util.h>
 #include <deepx_core/tensor/data_type.h>
 #include <limits>  // std::numeric_limits
 #include <string>
@@ -33,7 +34,11 @@ DEFINE_string(in_model, "", "input model dir");
 DEFINE_string(warmup_model, "", "warmup model dir");
 DEFINE_int32(out_model_remove_zeros, 0, "remove zeros from output model");
 DEFINE_string(out_model, "", "output model dir");
-DEFINE_string(out_model_text, "", "output model text dir");
+DEFINE_string(out_text_model, "", "output text model dir(optional)");
+DEFINE_string(out_feature_kv_model, "",
+              "output feature kv model dir(optional)");
+DEFINE_int32(out_feature_kv_protocol_version, 2,
+             "output feature kv protocol version");
 DEFINE_string(out_predict, "", "output predict dir(optional)");
 DEFINE_int32(verbose, 1, "verbose level: 0-10");
 DEFINE_int32(seed, 9527, "seed of random engine");
@@ -128,11 +133,19 @@ void CheckFlags() {
     DXCHECK_THROW(!IsStdinStdoutPath(FLAGS_out_model));
     (void)AutoFileSystem::MakeDir(FLAGS_out_model);
 
-    CanonicalizePath(&FLAGS_out_model_text);
-    if (!FLAGS_out_model_text.empty()) {
-      DXCHECK_THROW(fs.Open(FLAGS_out_model_text));
-      DXCHECK_THROW(!IsStdinStdoutPath(FLAGS_out_model_text));
-      (void)AutoFileSystem::MakeDir(FLAGS_out_model_text);
+    CanonicalizePath(&FLAGS_out_text_model);
+    if (!FLAGS_out_text_model.empty()) {
+      DXCHECK_THROW(fs.Open(FLAGS_out_text_model));
+      DXCHECK_THROW(!IsStdinStdoutPath(FLAGS_out_text_model));
+      (void)AutoFileSystem::MakeDir(FLAGS_out_text_model);
+    }
+
+    CanonicalizePath(&FLAGS_out_feature_kv_model);
+    if (!FLAGS_out_feature_kv_model.empty()) {
+      DXCHECK_THROW(fs.Open(FLAGS_out_feature_kv_model));
+      DXCHECK_THROW(!IsStdinStdoutPath(FLAGS_out_feature_kv_model));
+      (void)AutoFileSystem::MakeDir(FLAGS_out_feature_kv_model);
+      FeatureKVUtil::CheckVersion(FLAGS_out_feature_kv_protocol_version);
     }
   } else {
     CanonicalizePath(&FLAGS_out_predict);
