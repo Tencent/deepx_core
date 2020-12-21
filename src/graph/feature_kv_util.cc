@@ -84,7 +84,7 @@ void FeatureKVUtil::GetDenseParamKeys(const TensorMap& param,
   }
 }
 
-void FeatureKVUtil::GetSparseParamKeys(const std::unordered_set<int_t>& id_set,
+void FeatureKVUtil::GetSparseParamKeys(const id_set_t& id_set,
                                        std::vector<std::string>* keys) {
   auto it = id_set.begin();
   keys->resize(id_set.size());
@@ -107,7 +107,7 @@ void FeatureKVUtil::GetSparseParamKeys(const std::vector<int_t>& ids,
 
 void FeatureKVUtil::GetSparseParamKeys(const PullRequest& pull_request,
                                        std::vector<std::string>* keys) {
-  std::unordered_set<int_t> id_set;
+  id_set_t id_set;
   for (const auto& entry : pull_request.srm_map) {
     id_set.insert(entry.second.begin(), entry.second.end());
   }
@@ -276,8 +276,8 @@ bool FeatureKVUtil::WriteDenseParam(OutputStream& os, const TensorMap& param) {
   return true;
 }
 
-bool FeatureKVUtil::WriteSparseParam(OutputStream& os, const TensorMap& param,
-                                     const Graph& graph, int version) {
+bool FeatureKVUtil::WriteSparseParam(OutputStream& os, const Graph& graph,
+                                     const TensorMap& param, int version) {
   CheckVersion(version);
 
   DXINFO("Collecting sparse param...");
@@ -300,10 +300,9 @@ bool FeatureKVUtil::WriteSparseParam(OutputStream& os, const TensorMap& param,
   return WriteSparseParam(os, id_2_sparse_values, version);
 }
 
-bool FeatureKVUtil::WriteSparseParam(OutputStream& os, const TensorMap& param,
-                                     const Graph& graph,
-                                     const std::unordered_set<int_t>& id_set,
-                                     int version) {
+bool FeatureKVUtil::WriteSparseParam(OutputStream& os, const Graph& graph,
+                                     const TensorMap& param,
+                                     const id_set_t& id_set, int version) {
   CheckVersion(version);
 
   DXINFO("Collecting sparse param within %zu ids...", id_set.size());
@@ -362,6 +361,21 @@ bool FeatureKVUtil::WriteSparseParam(
   return true;
 }
 
+bool FeatureKVUtil::WriteModel(OutputStream& os, const Graph& graph,
+                               const TensorMap& param, int version) {
+  return WriteVersion(os, version) && WriteGraph(os, graph) &&
+         WriteDenseParam(os, param) &&
+         WriteSparseParam(os, graph, param, version);
+}
+
+bool FeatureKVUtil::WriteModel(OutputStream& os, const Graph& graph,
+                               const TensorMap& param, const id_set_t& id_set,
+                               int version) {
+  return WriteVersion(os, version) && WriteGraph(os, graph) &&
+         WriteDenseParam(os, param) &&
+         WriteSparseParam(os, graph, param, id_set, version);
+}
+
 bool FeatureKVUtil::SaveModel(const std::string& file, const Graph& graph,
                               const TensorMap& param, int version) {
   AutoOutputFileStream os;
@@ -369,11 +383,24 @@ bool FeatureKVUtil::SaveModel(const std::string& file, const Graph& graph,
     DXERROR("Failed to open: %s.", file.c_str());
     return false;
   }
-  DXINFO("Saving feature kv model to %s...", file.c_str());
-  if (!FeatureKVUtil::WriteVersion(os, version) ||
-      !FeatureKVUtil::WriteGraph(os, graph) ||
-      !FeatureKVUtil::WriteDenseParam(os, param) ||
-      !FeatureKVUtil::WriteSparseParam(os, param, graph, version)) {
+  DXINFO("Saving model to %s...", file.c_str());
+  if (!WriteModel(os, graph, param, version)) {
+    return false;
+  }
+  DXINFO("Done.");
+  return true;
+}
+
+bool FeatureKVUtil::SaveModel(const std::string& file, const Graph& graph,
+                              const TensorMap& param, const id_set_t& id_set,
+                              int version) {
+  AutoOutputFileStream os;
+  if (!os.Open(file)) {
+    DXERROR("Failed to open: %s.", file.c_str());
+    return false;
+  }
+  DXINFO("Saving model to %s...", file.c_str());
+  if (!WriteModel(os, graph, param, id_set, version)) {
     return false;
   }
   DXINFO("Done.");
@@ -531,8 +558,13 @@ void FeatureKVUtil::SparseParamParser::Parse(const std::string& key,
 
     if (version_ == 2) {
       if (!(W->col() == 1 && embedding[0] == 0)) {
-        // copy, not view
-        W->assign(id, (const float_t*)embedding);
+        if (view_) {
+          // view, zero-copy
+          W->assign_view(id, (const float_t*)embedding);
+        } else {
+          // copy, not view
+          W->assign(id, (const float_t*)embedding);
+        }
       }
     } else if (version_ == 3) {
 #if HAVE_SAGE2 == 1

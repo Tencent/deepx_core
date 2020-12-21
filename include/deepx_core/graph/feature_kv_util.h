@@ -13,7 +13,6 @@
 #include <string>
 #include <tuple>
 #include <unordered_map>
-#include <unordered_set>
 #include <vector>
 
 namespace deepx_core {
@@ -62,6 +61,7 @@ namespace deepx_core {
 //        embedding3(half_t * embedding_col3)
 //        ...
 //
+// 'version' in this file means feature kv protocol version.
 // 'id' in this file means feature id.
 // 'embedding' in this file means feature embedding.
 // 'item' in this file is exactly the same as the one in feature kv manual.
@@ -101,7 +101,7 @@ class FeatureKVUtil : public DataType {
  public:
   static void GetDenseParamKeys(const TensorMap& param,
                                 std::vector<std::string>* keys);
-  static void GetSparseParamKeys(const std::unordered_set<int_t>& id_set,
+  static void GetSparseParamKeys(const id_set_t& id_set,
                                  std::vector<std::string>* keys);
   static void GetSparseParamKeys(const std::vector<int_t>& ids,
                                  std::vector<std::string>* keys);
@@ -124,19 +124,23 @@ class FeatureKVUtil : public DataType {
                                  std::string* item, int version);
 
  public:
+  // for unit test
   static bool WriteVersion(OutputStream& os,  // NOLINT
                            int version);
+  // for unit test
   static bool WriteGraph(OutputStream& os,  // NOLINT
                          const Graph& graph);
+  // for unit test
   static bool WriteDenseParam(OutputStream& os,  // NOLINT
                               const TensorMap& param);
+  // for unit test
   static bool WriteSparseParam(OutputStream& os,  // NOLINT
-                               const TensorMap& param, const Graph& graph,
+                               const Graph& graph, const TensorMap& param,
                                int version);
+  // for unit test
   static bool WriteSparseParam(OutputStream& os,  // NOLINT
-                               const TensorMap& param, const Graph& graph,
-                               const std::unordered_set<int_t>& id_set,
-                               int version);
+                               const Graph& graph, const TensorMap& param,
+                               const id_set_t& id_set, int version);
 
  private:
   static bool WriteSparseParam(OutputStream& os,  // NOLINT
@@ -144,8 +148,17 @@ class FeatureKVUtil : public DataType {
                                int version);
 
  public:
+  static bool WriteModel(OutputStream& os,  // NOLINT
+                         const Graph& graph, const TensorMap& param,
+                         int version);
+  static bool WriteModel(OutputStream& os,  // NOLINT
+                         const Graph& graph, const TensorMap& param,
+                         const id_set_t& id_set, int version);
   static bool SaveModel(const std::string& file, const Graph& graph,
                         const TensorMap& param, int version);
+  static bool SaveModel(const std::string& file, const Graph& graph,
+                        const TensorMap& param, const id_set_t& id_set,
+                        int version);
 
  public:
   struct ParamParserStat {
@@ -184,10 +197,15 @@ class FeatureKVUtil : public DataType {
  public:
   class SparseParamParser {
    private:
+    int view_ = 0;
     const Graph* graph_ = nullptr;
     TensorMap* param_ = nullptr;
     int version_ = 0;
     std::vector<srm_t*> W_;  // indexed by node id
+
+   public:
+    void set_view(int view) noexcept { view_ = view; }
+    int view() const noexcept { return view_; }
 
    public:
     void Init(const Graph* graph, TensorMap* param, int version);
@@ -207,14 +225,18 @@ class FeatureKVUtil : public DataType {
 
  public:
   // Get the 1st key and value.
+  // for unit test and demo
   static bool GetKeyValue(const char* item_buf, size_t item_buf_size,
                           std::string* key, std::string* value);
+  // for unit test and demo
   static bool GetKeyValue(const std::string& item, std::string* key,
                           std::string* value);
   // Get all keys and values.
+  // for unit test and demo
   static bool GetKeyValues(const char* item_buf, size_t item_buf_size,
                            std::vector<std::string>* keys,
                            std::vector<std::string>* values);
+  // for unit test and demo
   static bool GetKeyValues(const std::string& item,
                            std::vector<std::string>* keys,
                            std::vector<std::string>* values);

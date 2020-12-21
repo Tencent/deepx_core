@@ -12,7 +12,6 @@
 #include <cstdint>
 #include <random>
 #include <string>
-#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -125,7 +124,7 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
     CheckVersion(version);
 
     OutputStringStream os;
-    ASSERT_TRUE(WriteSparseParam(os, param, graph, version));
+    ASSERT_TRUE(WriteSparseParam(os, graph, param, version));
     ASSERT_TRUE(GetKeyValues(os.GetString(), &keys, &values));
     codes.assign(keys.size(), 0);
 
@@ -187,8 +186,8 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
 
   void Test_WriteSparseParam_2_SparseParamParser(int version) {
     OutputStringStream os;
-    std::unordered_set<int_t> id_set = {0, 2, 4, 6, 8};
-    ASSERT_TRUE(WriteSparseParam(os, param, graph, id_set, version));
+    id_set_t id_set = {0, 2, 4, 6, 8};
+    ASSERT_TRUE(WriteSparseParam(os, graph, param, id_set, version));
     ASSERT_TRUE(GetKeyValues(os.GetString(), &keys, &values));
     codes.assign(keys.size(), 0);
 

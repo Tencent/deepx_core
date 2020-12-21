@@ -4,7 +4,6 @@
 // Author: Shuting Guo (tinkleguo@tencent.com)
 //
 
-#include <deepx_core/common/stream.h>
 #include <deepx_core/dx_log.h>
 #include <deepx_core/graph/feature_kv_util.h>
 #include <deepx_core/graph/ol_store.h>
@@ -103,22 +102,9 @@ bool OLStore::Collect(const State& state, int n, const float_t* embedding,
 
 bool OLStore::SaveFeatureKVModel(const std::string& file,
                                  int feature_kv_protocol_version) {
-  AutoOutputFileStream os;
-  if (!os.Open(file)) {
-    DXERROR("Failed to open: %s.", file.c_str());
-    return false;
-  }
-  DXINFO("Saving feature kv model to %s...", file.c_str());
   id_set_t id_set = Collect();
-  if (!FeatureKVUtil::WriteVersion(os, feature_kv_protocol_version) ||
-      !FeatureKVUtil::WriteGraph(os, *graph_) ||
-      !FeatureKVUtil::WriteDenseParam(os, *param_) ||
-      !FeatureKVUtil::WriteSparseParam(os, *param_, *graph_, id_set,
-                                       feature_kv_protocol_version)) {
-    return false;
-  }
-  DXINFO("Done.");
-  return true;
+  return FeatureKVUtil::SaveModel(file, *graph_, *param_, id_set,
+                                  feature_kv_protocol_version);
 }
 
 }  // namespace deepx_core

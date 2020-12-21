@@ -36,9 +36,6 @@ class MockFeatureKVClient {
   std::unordered_map<std::string, std::string> kv_map_;
 
  public:
-  MockFeatureKVClient() = default;
-
- public:
   void InitMock(const std::vector<std::string>& keys,
                 const std::vector<std::string>& values) {
     kv_map_.clear();
@@ -138,11 +135,8 @@ class MockModelContext {
   void GetKeyValues(std::vector<std::string>* keys,
                     std::vector<std::string>* values) const {
     OutputStringStream os;
-    DXCHECK_THROW(FeatureKVUtil::WriteVersion(os, version_));
-    DXCHECK_THROW(FeatureKVUtil::WriteGraph(os, graph_));
-    DXCHECK_THROW(FeatureKVUtil::WriteDenseParam(os, model_.param()));
     DXCHECK_THROW(
-        FeatureKVUtil::WriteSparseParam(os, model_.param(), graph_, version_));
+        FeatureKVUtil::WriteModel(os, graph_, model_.param(), version_));
     DXCHECK_THROW(FeatureKVUtil::GetKeyValues(os.GetString(), keys, values));
   }
 };
@@ -339,6 +333,7 @@ class LocalModelContext {
     DXCHECK_THROW(client->BatchGet(keys_, &codes_, &values_));
     FeatureKVUtil::SparseParamParser parser;
     FeatureKVUtil::ParamParserStat stat;
+    parser.set_view(1);
     parser.Init(graph_, local_param_, version_);
     parser.Parse(keys_, values_, codes_, &stat);
     DXINFO("key_exist=%d", stat.key_exist);
