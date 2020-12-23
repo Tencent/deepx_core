@@ -319,10 +319,10 @@ void Model::SplitPullRequest(const PullRequest& full_pull_request,
     (*pull_requests)[shard_id].tsr_set.emplace(name);
   }
 
-  size_t srm_feature_size = full_pull_request.srm_map.size() / shard_size;
   for (const auto& entry : full_pull_request.srm_map) {
     const std::string& name = entry.first;
     const PullRequest::id_set_t& feature_id_set = entry.second;
+    size_t srm_feature_size = feature_id_set.size() / shard_size;
     for (int i = 0; i < shard_size; ++i) {
       (*aux)[i] = &(*pull_requests)[i].srm_map[name];
       (*aux)[i]->reserve(srm_feature_size);
