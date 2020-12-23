@@ -78,7 +78,7 @@ class Model : public DataType {
   void ForEachSRM(const std::function<void(const std::string&, srm_t*)>& func);
   void SplitPullRequest(const PullRequest& full_pull_request,
                         std::vector<PullRequest>* pull_requests,
-                        std::vector<PullRequest::id_set_t*>* aux) const;
+                        std::vector<id_set_t*>* aux) const;
   // thread safe after 'InitLock'
   void Pull(std::default_random_engine& engine,  // NOLINT
             const PullRequest& pull_request, TensorMap* remote_param);

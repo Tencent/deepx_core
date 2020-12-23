@@ -40,7 +40,7 @@ class TrainerContextDist : public TrainerContext {
   std::vector<std::unique_ptr<TensorMap>> params_;
   std::vector<std::unique_ptr<TensorMap>> grads_;
   std::vector<std::unique_ptr<TensorMap>> overwritten_params_;
-  std::vector<PullRequest::id_set_t*> aux1_;
+  std::vector<id_set_t*> aux1_;
   std::vector<srm_t*> aux2_;
 
  public:

@@ -166,7 +166,7 @@ void FreqStore::Filter_NoLock(PullRequest* pull_request) {
   }
 
   for (auto& entry : pull_request->srm_map) {
-    PullRequest::id_set_t& id_set = entry.second;
+    id_set_t& id_set = entry.second;
     auto first = id_set.begin();
     auto last = id_set.end();
     for (; first != last;) {
@@ -191,7 +191,7 @@ void FreqStore::Filter_Lock(PullRequest* pull_request) {
   }
 
   for (auto& entry : pull_request->srm_map) {
-    PullRequest::id_set_t& id_set = entry.second;
+    id_set_t& id_set = entry.second;
     auto first = id_set.begin();
     auto last = id_set.end();
     for (; first != last;) {

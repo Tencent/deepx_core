@@ -307,7 +307,7 @@ void Model::ForEachSRM(
 
 void Model::SplitPullRequest(const PullRequest& full_pull_request,
                              std::vector<PullRequest>* pull_requests,
-                             std::vector<PullRequest::id_set_t*>* aux) const {
+                             std::vector<id_set_t*>* aux) const {
   int shard_size = (int)pull_requests->size();
   for (PullRequest& pull_request : *pull_requests) {
     pull_request.clear();
@@ -321,7 +321,7 @@ void Model::SplitPullRequest(const PullRequest& full_pull_request,
 
   for (const auto& entry : full_pull_request.srm_map) {
     const std::string& name = entry.first;
-    const PullRequest::id_set_t& feature_id_set = entry.second;
+    const id_set_t& feature_id_set = entry.second;
     size_t srm_feature_size = feature_id_set.size() / shard_size;
     for (int i = 0; i < shard_size; ++i) {
       (*aux)[i] = &(*pull_requests)[i].srm_map[name];
@@ -335,7 +335,7 @@ void Model::SplitPullRequest(const PullRequest& full_pull_request,
 
   for (const auto& entry : full_pull_request.id_freq_map) {
     int_t feature_id = entry.first;
-    PullRequest::freq_t freq = entry.second;
+    freq_t freq = entry.second;
     int shard_id = srm_partitioner_(feature_id, shard_size);
     (*pull_requests)[shard_id].id_freq_map.emplace(feature_id, freq);
   }
@@ -354,7 +354,7 @@ void Model::Pull(std::default_random_engine& engine,
 
   for (const auto& entry : pull_request.srm_map) {
     const std::string& name = entry.first;
-    const PullRequest::id_set_t& feature_id_set = entry.second;
+    const id_set_t& feature_id_set = entry.second;
     auto& local_W = param_.get<srm_t>(name);
     const auto& const_local_W = (const srm_t&)local_W;
     auto& remote_W = remote_param->get_or_insert<srm_t>(name);

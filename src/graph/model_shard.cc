@@ -337,10 +337,9 @@ void ModelShard::ExpireTSStore() {
   model_->ForEachSRM(filter);
   optimizer_->ForEachSRM(filter);
   if (freq_store_) {
-    freq_store_->RemoveIf(
-        [&expired](const FreqStore::id_freq_map_t::value_type& entry) {
-          return expired.count(entry.first) > 0;
-        });
+    freq_store_->RemoveIf([&expired](const id_freq_map_t::value_type& entry) {
+      return expired.count(entry.first) > 0;
+    });
   }
 }
 
