@@ -186,12 +186,12 @@ void RankParamServer::OnModelSaveRequest(conn_t /*conn*/) {
     DXCHECK_THROW(model_shard_.SaveFeatureKVModel(
         FLAGS_out_feature_kv_model, FLAGS_out_feature_kv_protocol_version));
   }
-  if (FLAGS_freq_filter_threshold > 0) {
-    DXCHECK_THROW(model_shard_.SaveFreqStore(FLAGS_out_model));
-  }
   DXCHECK_THROW(model_shard_.SaveOptimizer(FLAGS_out_model));
   if (FLAGS_ts_enable) {
     DXCHECK_THROW(model_shard_.SaveTSStore(FLAGS_out_model));
+  }
+  if (FLAGS_freq_filter_threshold > 0) {
+    DXCHECK_THROW(model_shard_.SaveFreqStore(FLAGS_out_model));
   }
 }
 

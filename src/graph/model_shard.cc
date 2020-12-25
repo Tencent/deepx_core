@@ -182,12 +182,6 @@ bool ModelShard::SaveModel(const std::string& dir) const {
   return model_->Save(GetModelFile(dir));
 }
 
-bool ModelShard::LoadModel(const std::string& dir) {
-  model_.reset(new Model);
-  model_->Init(graph_);
-  return model_->Load(GetModelFile(dir));
-}
-
 bool ModelShard::SaveTextModel(const std::string& dir) const {
   return model_->SaveText(GetTextModelFile(dir));
 }
@@ -208,6 +202,32 @@ bool ModelShard::SaveOptimizer(const std::string& dir) const {
   return deepx_core::SaveOptimizer(GetOptimizerFile(dir), *optimizer_);
 }
 
+bool ModelShard::SaveTSStore(const std::string& dir) const {
+  return ts_store_->Save(GetTSStoreFile(dir));
+}
+
+bool ModelShard::SaveFreqStore(const std::string& dir) const {
+  return freq_store_->Save(GetFreqStoreFile(dir));
+}
+
+bool ModelShard::SaveSuccess(const std::string& dir) const {
+  std::string file = GetSuccessFile(dir);
+  AutoOutputFileStream os;
+  if (!os.Open(file)) {
+    DXERROR("Failed to open: %s.", file.c_str());
+    return false;
+  }
+  DXINFO("Saving SUCCESS file to %s...", file.c_str());
+  DXINFO("Done.");
+  return true;
+}
+
+bool ModelShard::LoadModel(const std::string& dir) {
+  model_.reset(new Model);
+  model_->Init(graph_);
+  return model_->Load(GetModelFile(dir));
+}
+
 bool ModelShard::LoadOptimizer(const std::string& dir,
                                const std::string& optimizer_config) {
   optimizer_ = deepx_core::LoadOptimizer(GetOptimizerFile(dir));
@@ -221,10 +241,6 @@ bool ModelShard::LoadOptimizer(const std::string& dir,
   return true;
 }
 
-bool ModelShard::SaveTSStore(const std::string& dir) const {
-  return ts_store_->Save(GetTSStoreFile(dir));
-}
-
 bool ModelShard::LoadTSStore(const std::string& dir, ts_t now,
                              ts_t expire_threshold) {
   ts_store_.reset(new TSStore);
@@ -234,27 +250,11 @@ bool ModelShard::LoadTSStore(const std::string& dir, ts_t now,
   return ts_store_->Load(GetTSStoreFile(dir));
 }
 
-bool ModelShard::SaveFreqStore(const std::string& dir) const {
-  return freq_store_->Save(GetFreqStoreFile(dir));
-}
-
 bool ModelShard::LoadFreqStore(const std::string& dir,
                                freq_t freq_filter_threshold) {
   freq_store_.reset(new FreqStore);
   freq_store_->set_freq_filter_threshold(freq_filter_threshold);
   return freq_store_->Load(GetFreqStoreFile(dir));
-}
-
-bool ModelShard::SaveSuccess(const std::string& dir) const {
-  std::string file = GetSuccessFile(dir);
-  AutoOutputFileStream os;
-  if (!os.Open(file)) {
-    DXERROR("Failed to open: %s.", file.c_str());
-    return false;
-  }
-  DXINFO("Saving SUCCESS file to %s...", file.c_str());
-  DXINFO("Done.");
-  return true;
 }
 
 bool ModelShard::WarmupModel(const std::string& dir) {

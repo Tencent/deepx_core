@@ -96,20 +96,21 @@ class ModelShard : public DataType {
   void InitLock();
 
   bool SaveModel(const std::string& dir) const;
-  bool LoadModel(const std::string& dir);
   bool SaveTextModel(const std::string& dir) const;
   bool SaveFeatureKVModel(const std::string& dir,
                           int feature_kv_protocol_version) const;
   bool SaveOLFeatureKVModel(const std::string& dir,
                             int feature_kv_protocol_version) const;
   bool SaveOptimizer(const std::string& dir) const;
+  bool SaveTSStore(const std::string& dir) const;
+  bool SaveFreqStore(const std::string& dir) const;
+  bool SaveSuccess(const std::string& dir) const;
+
+  bool LoadModel(const std::string& dir);
   bool LoadOptimizer(const std::string& dir,
                      const std::string& optimizer_config);
-  bool SaveTSStore(const std::string& dir) const;
   bool LoadTSStore(const std::string& dir, ts_t now, ts_t expire_threshold);
-  bool SaveFreqStore(const std::string& dir) const;
   bool LoadFreqStore(const std::string& dir, freq_t freq_filter_threshold);
-  bool SaveSuccess(const std::string& dir) const;
 
   bool WarmupModel(const std::string& dir);
   bool WarmupOptimizer(const std::string& dir);
