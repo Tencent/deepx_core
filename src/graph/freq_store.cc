@@ -92,6 +92,40 @@ bool FreqStore::Load(const std::string& file) {
   return true;
 }
 
+void FreqStore::Merge(FreqStore* other) {
+  DXINFO("Merging FreqStore...");
+  id_freq_map_.reserve(id_freq_map_.size() + other->id_freq_map_.size());
+  for (auto& entry : other->id_freq_map_) {
+    freq_t& freq = id_freq_map_[entry.first];
+    if (freq > std::numeric_limits<freq_t>::max() - entry.second) {
+      freq = std::numeric_limits<freq_t>::max();
+    } else {
+      freq += entry.second;
+    }
+  }
+  DXINFO("FreqStore has merged %zu entries.", other->id_freq_map_.size());
+}
+
+void FreqStore::MergeIf(
+    FreqStore* other,
+    const std::function<bool(const id_freq_map_t::value_type&)>& func) {
+  DXINFO("Merging FreqStore...");
+  size_t merged = 0;
+  id_freq_map_.reserve(id_freq_map_.size() + other->id_freq_map_.size());
+  for (auto& entry : other->id_freq_map_) {
+    if (func(entry)) {
+      freq_t& freq = id_freq_map_[entry.first];
+      if (freq > std::numeric_limits<freq_t>::max() - entry.second) {
+        freq = std::numeric_limits<freq_t>::max();
+      } else {
+        freq += entry.second;
+      }
+      ++merged;
+    }
+  }
+  DXINFO("FreqStore has merged %zu entries.", merged);
+}
+
 void FreqStore::Warmup(FreqStore* other) {
   DXINFO("Warming up FreqStore...");
   id_freq_map_.reserve(id_freq_map_.size() + other->id_freq_map_.size());

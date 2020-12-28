@@ -41,6 +41,10 @@ class FreqStore : public DataType {
   bool Read(InputStream& is);          // NOLINT
   bool Save(const std::string& file) const;
   bool Load(const std::string& file);
+  void Merge(FreqStore* other);
+  void MergeIf(
+      FreqStore* other,
+      const std::function<bool(const id_freq_map_t::value_type&)>& func);
   void Warmup(FreqStore* other);
   void RemoveIf(
       const std::function<bool(const id_freq_map_t::value_type&)>& func);
