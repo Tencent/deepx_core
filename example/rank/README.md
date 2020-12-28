@@ -447,7 +447,7 @@ m是正整数.
 
 ## 在线推理
 
-本例子提供静态库的在线推理方式.
+本例子提供静态库的在线推理方案.
 
 ### 头文件和核心类
 
@@ -483,22 +483,29 @@ class ModelServer {
   bool Predict(const features_t& features, std::vector<float>* probs) const;
   // 预测1批样本, 返回是否成功.
   // 输出batch * 1个预测值.
+  //
+  // 'batch_features'不能为空.
   bool BatchPredict(const std::vector<features_t>& batch_features,
                     std::vector<float>* batch_prob) const;
   // 预测1批样本, 返回是否成功.
   // 输出batch * n个预测值.
+  //
+  // 'batch_features'不能为空.
   bool BatchPredict(const std::vector<features_t>& batch_features,
                     std::vector<std::vector<float>>* batch_probs) const;
   // 为DTNModel预测1批样本, 返回是否成功.
   // 输出batch * n个预测值.
+  //
+  // 'batch_item_features'不能为空.
   bool DTNBatchPredict(const features_t& user_features,
                        const std::vector<features_t>& batch_item_features,
                        std::vector<std::vector<float>>* batch_probs) const;
 
  public:
-  std::unique_ptr<OpContext, void (*)(OpContext*)> NewOpContext() const;
-  // 下面的函数和上面的对应, 它们接受NewOpContext函数返回的OpContext对象.
-  // 它们通常用来复用OpContext对象, 应尽量使用它们.
+  using op_context_ptr_t = std::unique_ptr<OpContext, void (*)(OpContext*)>;
+  op_context_ptr_t NewOpContext() const;
+  // 下面的几个Predict函数和上面的对应.
+  // 它们接受'NewOpContext'返回的'OpContext'对象, 它们通常用来复用'OpContext'对象.
   bool Predict(OpContext* op_context, const features_t& features,
                float* prob) const;
   bool Predict(OpContext* op_context, const features_t& features,

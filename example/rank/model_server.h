@@ -48,7 +48,8 @@ class ModelServer {
                        std::vector<std::vector<float>>* batch_probs) const;
 
  public:
-  std::unique_ptr<OpContext, void (*)(OpContext*)> NewOpContext() const;
+  using op_context_ptr_t = std::unique_ptr<OpContext, void (*)(OpContext*)>;
+  op_context_ptr_t NewOpContext() const;
   bool Predict(OpContext* op_context, const features_t& features,
                float* prob) const;
   bool Predict(OpContext* op_context, const features_t& features,

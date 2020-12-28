@@ -149,6 +149,10 @@ bool ModelServer::Predict(const features_t& features,
 
 bool ModelServer::BatchPredict(const std::vector<features_t>& batch_features,
                                std::vector<float>* batch_prob) const {
+  if (batch_features.empty()) {
+    return false;
+  }
+
   if (!graph_ || !model_) {
     return false;
   }
@@ -183,6 +187,10 @@ bool ModelServer::BatchPredict(const std::vector<features_t>& batch_features,
 bool ModelServer::BatchPredict(
     const std::vector<features_t>& batch_features,
     std::vector<std::vector<float>>* batch_probs) const {
+  if (batch_features.empty()) {
+    return false;
+  }
+
   if (!graph_ || !model_) {
     return false;
   }
@@ -224,6 +232,10 @@ bool ModelServer::DTNBatchPredict(
     const features_t& user_features,
     const std::vector<features_t>& batch_item_features,
     std::vector<std::vector<float>>* batch_probs) const {
+  if (batch_item_features.empty()) {
+    return false;
+  }
+
   if (!graph_ || !model_) {
     return false;
   }
@@ -267,10 +279,8 @@ static void DeleteOpContext(OpContext* op_context) noexcept {
   delete op_context;
 }
 
-std::unique_ptr<OpContext, void (*)(OpContext*)> ModelServer::NewOpContext()
-    const {
-  std::unique_ptr<OpContext, void (*)(OpContext*)> op_context(new OpContext,
-                                                              DeleteOpContext);
+auto ModelServer::NewOpContext() const -> op_context_ptr_t {
+  op_context_ptr_t op_context(new OpContext, DeleteOpContext);
 
   if (!graph_ || !model_) {
     op_context.reset();
@@ -339,6 +349,10 @@ bool ModelServer::Predict(OpContext* op_context, const features_t& features,
 bool ModelServer::BatchPredict(OpContext* op_context,
                                const std::vector<features_t>& batch_features,
                                std::vector<float>* batch_prob) const {
+  if (batch_features.empty()) {
+    return false;
+  }
+
   Instance* inst = op_context->mutable_inst();
   int prev_batch = inst->batch();
 
@@ -369,6 +383,10 @@ bool ModelServer::BatchPredict(OpContext* op_context,
 bool ModelServer::BatchPredict(
     OpContext* op_context, const std::vector<features_t>& batch_features,
     std::vector<std::vector<float>>* batch_probs) const {
+  if (batch_features.empty()) {
+    return false;
+  }
+
   Instance* inst = op_context->mutable_inst();
   int prev_batch = inst->batch();
 
@@ -406,6 +424,10 @@ bool ModelServer::DTNBatchPredict(
     OpContext* op_context, const features_t& user_features,
     const std::vector<features_t>& batch_item_features,
     std::vector<std::vector<float>>* batch_probs) const {
+  if (batch_item_features.empty()) {
+    return false;
+  }
+
   Instance* inst = op_context->mutable_inst();
   int prev_batch = inst->batch();
 
