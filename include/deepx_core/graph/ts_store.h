@@ -8,6 +8,7 @@
 #include <deepx_core/graph/graph.h>
 #include <deepx_core/graph/tensor_map.h>
 #include <deepx_core/tensor/data_type.h>
+#include <functional>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -43,6 +44,9 @@ class TSStore : public DataType {
   bool Read(InputStream& is);          // NOLINT
   bool Save(const std::string& file) const;
   bool Load(const std::string& file);
+  void Merge(TSStore* other);
+  void MergeIf(TSStore* other,
+               const std::function<bool(const id_ts_map_t::value_type&)>& func);
   void Warmup(TSStore* other);
 
  public:

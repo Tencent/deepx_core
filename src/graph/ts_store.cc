@@ -92,6 +92,38 @@ bool TSStore::Load(const std::string& file) {
   return true;
 }
 
+void TSStore::Merge(TSStore* other) {
+  DXINFO("Merging TSStore...");
+  size_t merged = 0;
+  id_ts_map_.reserve(id_ts_map_.size() + other->id_ts_map_.size());
+  for (auto& entry : other->id_ts_map_) {
+    ts_t& ts = id_ts_map_[entry.first];
+    if (ts < entry.second) {
+      ts = entry.second;
+      ++merged;
+    }
+  }
+  DXINFO("TSStore has merged %zu entries.", merged);
+}
+
+void TSStore::MergeIf(
+    TSStore* other,
+    const std::function<bool(const id_ts_map_t::value_type&)>& func) {
+  DXINFO("Merging TSStore...");
+  size_t merged = 0;
+  id_ts_map_.reserve(id_ts_map_.size() + other->id_ts_map_.size());
+  for (auto& entry : other->id_ts_map_) {
+    if (func(entry)) {
+      ts_t& ts = id_ts_map_[entry.first];
+      if (ts < entry.second) {
+        ts = entry.second;
+        ++merged;
+      }
+    }
+  }
+  DXINFO("TSStore has merged %zu entries.", merged);
+}
+
 void TSStore::Warmup(TSStore* other) {
   DXINFO("Warming up TSStore...");
   id_ts_map_.reserve(id_ts_map_.size() + other->id_ts_map_.size());
