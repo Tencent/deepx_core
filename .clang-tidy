@@ -1,6 +1,5 @@
 Checks:          'clang-diagnostic-*,clang-analyzer-*,google*, modernize*, -google-readability-avoid-underscore-in-googletest-name, -google-readability-casting, -modernize-avoid-c-arrays, -modernize-make-unique, -modernize-use-equals-default, -modernize-use-equals-delete, -modernize-use-trailing-return-type'
 WarningsAsErrors: ''
-HeaderFilterRegex: '.*/deepx_core/(include|src)/.*\.h'
 AnalyzeTemporaryDtors: false
 FormatStyle:     '{BasedOnStyle: Google, DerivePointerAlignment: false, IncludeBlocks: Merge, SortIncludes: true}'
 CheckOptions:
