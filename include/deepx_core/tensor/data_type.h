@@ -9,6 +9,7 @@
 #include <deepx_core/tensor/sparse_row_matrix.h>
 #include <deepx_core/tensor/tensor.h>
 #include <cstdint>
+#include <functional>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -38,6 +39,10 @@ class DataTypeT {
   using id_freq_map_t = std::unordered_map<int_t, freq_t>;
   using ts_t = uint32_t;
   using id_ts_map_t = std::unordered_map<int_t, ts_t>;
+
+  using tsr_partitioner_t =
+      std::function<int(const std::string& name, int shard_size)>;
+  using srm_partitioner_t = std::function<int(int_t id, int shard_size)>;
 
   static constexpr int DATA_TYPE_TOKEN = TOKEN;
 };

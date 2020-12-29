@@ -21,12 +21,6 @@ namespace deepx_core {
 /* Model */
 /************************************************************************/
 class Model : public DataType {
- public:
-  using tsr_partitioner_t =
-      std::function<int(const std::string& name, int shard_size)>;
-  using srm_partitioner_t =
-      std::function<int(int_t feature_id, int shard_size)>;
-
  private:
   static int DefaultTSRPartitioner(const std::string& name,
                                    int shard_size) noexcept;
