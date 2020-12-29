@@ -348,19 +348,19 @@ TEST_F(ShapeTest, iterator) {
 
 TEST_F(ShapeTest, to_string) {
   Shape shape;
-  EXPECT_EQ(to_string(shape), "()\n");
-  EXPECT_EQ(to_string(shape.resize(1)), "(1)\n");
-  EXPECT_EQ(to_string(shape.resize(1, 2)), "(1,2)\n");
-  EXPECT_EQ(to_string(shape.resize(1, 2, 3)), "(1,2,3)\n");
-  EXPECT_EQ(to_string(shape.resize(ANY)), "(-1)\n");
-  EXPECT_EQ(to_string(shape.resize(ANY, 2)), "(-1,2)\n");
-  EXPECT_EQ(to_string(shape.resize(ANY, 2, 3)), "(-1,2,3)\n");
-  EXPECT_EQ(to_string(shape.resize(ANY)), "(-1)\n");
-  EXPECT_EQ(to_string(shape.resize(2, ANY)), "(2,-1)\n");
-  EXPECT_EQ(to_string(shape.resize(2, 3, ANY)), "(2,3,-1)\n");
-  EXPECT_EQ(to_string(shape.resize(-2)), "(-2)\n");
-  EXPECT_EQ(to_string(shape.resize(2, -3)), "(2,-3)\n");
-  EXPECT_EQ(to_string(shape.resize(2, 3, -4)), "(2,3,-4)\n");
+  EXPECT_EQ(to_string(shape), "()");
+  EXPECT_EQ(to_string(shape.resize(1)), "(1)");
+  EXPECT_EQ(to_string(shape.resize(1, 2)), "(1,2)");
+  EXPECT_EQ(to_string(shape.resize(1, 2, 3)), "(1,2,3)");
+  EXPECT_EQ(to_string(shape.resize(ANY)), "(-1)");
+  EXPECT_EQ(to_string(shape.resize(ANY, 2)), "(-1,2)");
+  EXPECT_EQ(to_string(shape.resize(ANY, 2, 3)), "(-1,2,3)");
+  EXPECT_EQ(to_string(shape.resize(ANY)), "(-1)");
+  EXPECT_EQ(to_string(shape.resize(2, ANY)), "(2,-1)");
+  EXPECT_EQ(to_string(shape.resize(2, 3, ANY)), "(2,3,-1)");
+  EXPECT_EQ(to_string(shape.resize(-2)), "(-2)");
+  EXPECT_EQ(to_string(shape.resize(2, -3)), "(2,-3)");
+  EXPECT_EQ(to_string(shape.resize(2, 3, -4)), "(2,3,-4)");
 }
 
 TEST_F(ShapeTest, Assert) {

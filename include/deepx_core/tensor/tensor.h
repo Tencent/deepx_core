@@ -546,7 +546,7 @@ void TensorWriteTextHelper<T>::InitMaxTextLength(const Tensor<T>& slice) {
 
 template <typename T>
 void TensorWriteTextHelper<T>::WriteText(std::ostream& os) {
-  os << tsr_.shape();
+  os << tsr_.shape() << std::endl;
   if (tsr_.rank() > 0) {
     WriteText(os, tsr_);
     os << std::endl;

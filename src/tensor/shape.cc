@@ -227,7 +227,6 @@ std::string to_string(const Shape& shape) {
     }
   }
   os << ")";
-  os << std::endl;
   return os.str();
 }
 
