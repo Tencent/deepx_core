@@ -125,6 +125,57 @@ bool OptimizerImpl::Read(InputStream& is) {
   return true;
 }
 
+void OptimizerImpl::Merge(Optimizer* other) {
+  auto tsr_partitioner = [](const std::string& /*name*/, int /*shard_size*/) {
+    return true;
+  };
+  auto srm_partitioner = [](int_t /*id*/, int /*shard_size*/) { return true; };
+  MergeIf(other, tsr_partitioner, srm_partitioner, -1, -1);
+}
+
+void OptimizerImpl::MergeIf(Optimizer* other,
+                            const tsr_partitioner_t& tsr_partitioner,
+                            const srm_partitioner_t& srm_partitioner,
+                            int shard_id, int shard_size) {
+  DXINFO("Merging optimizer slot...");
+  for (auto& entry : ((OptimizerImpl*)other)->tsr_slot_map_) {
+    const std::string& name = entry.first;
+    OptimizerTSRSlot& remote_slot = entry.second;
+    auto it = tsr_slot_map_.find(name);
+    if (it != tsr_slot_map_.end()) {
+      OptimizerTSRSlot& local_slot = it->second;
+      DXINFO("Merging TSR %s...", name.c_str());
+      for (size_t i = 0; i < local_slot.O.size(); ++i) {
+        local_slot.O[i] = std::move(remote_slot.O[i]);
+      }
+    } else if (tsr_partitioner(name, shard_size) == shard_id) {
+      OptimizerTSRSlot& local_slot = tsr_slot_map_[name];
+      local_slot.O.resize(remote_slot.O.size());
+      DXINFO("Merging TSR %s...", name.c_str());
+      for (size_t i = 0; i < local_slot.O.size(); ++i) {
+        local_slot.O[i] = std::move(remote_slot.O[i]);
+      }
+    }
+  }
+
+  for (auto& entry : ((OptimizerImpl*)other)->srm_slot_map_) {
+    const std::string& name = entry.first;
+    OptimizerSRMSlot& remote_slot = entry.second;
+    OptimizerSRMSlot& local_slot = srm_slot_map_[name];
+    local_slot.O.resize(remote_slot.O.size());
+    DXINFO("Merging SRM %s...", name.c_str());
+    for (size_t i = 0; i < local_slot.O.size(); ++i) {
+      local_slot.O[i].set_col(remote_slot.O[i].col());
+      local_slot.O[i].merge_if(
+          std::move(remote_slot.O[i]), [&srm_partitioner, shard_id, shard_size](
+                                           const srm_t::value_type& entry) {
+            return srm_partitioner(entry.first, shard_size) == shard_id;
+          });
+    }
+  }
+  DXINFO("Done.");
+}
+
 void OptimizerImpl::Warmup(Optimizer* other) {
   DXINFO("Warming up optimizer...");
   auto reduce_tsr = [](const std::string& name, tsr_t& local_W,

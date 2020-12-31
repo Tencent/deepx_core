@@ -9,6 +9,7 @@
 #include <deepx_core/dx_log.h>
 #include <deepx_core/graph/optimizer.h>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace deepx_core {
@@ -78,6 +79,10 @@ class OptimizerImpl : public Optimizer {
   void InitLock(AnyMap* param_lock) override;
   bool Write(OutputStream& os) const override;
   bool Read(InputStream& is) override;
+  void Merge(Optimizer* other) override;
+  void MergeIf(Optimizer* other, const tsr_partitioner_t& tsr_partitioner,
+               const srm_partitioner_t& srm_partitioner, int shard_id,
+               int shard_size) override;
   void Warmup(Optimizer* other) override;
 
  public:

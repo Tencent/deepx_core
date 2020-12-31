@@ -28,6 +28,11 @@ class Optimizer : public DataType {
   virtual void InitLock(AnyMap* param_lock) = 0;
   virtual bool Write(OutputStream& os) const = 0;  // NOLINT
   virtual bool Read(InputStream& is) = 0;          // NOLINT
+  virtual void Merge(Optimizer* other) = 0;
+  virtual void MergeIf(Optimizer* other,
+                       const tsr_partitioner_t& tsr_partitioner,
+                       const srm_partitioner_t& srm_partitioner, int shard_id,
+                       int shard_size) = 0;
   virtual void Warmup(Optimizer* other) = 0;
 
  public:
