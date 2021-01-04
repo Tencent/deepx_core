@@ -54,7 +54,7 @@ bool GraphFolding::FoldGraph(SimpItem* item) {
   std::deque<GraphNode*> to_process;
   for (auto* node : nodes) {
     if (IsFoldable(node, item)) {
-      to_process.push_back(node);
+      to_process.emplace_back(node);
     }
   }
 
@@ -69,7 +69,7 @@ bool GraphFolding::FoldGraph(SimpItem* item) {
     folded = true;
     for (auto* output : item->find_output(node->name())) {
       if (IsFoldable(output, item)) {
-        to_process.push_back(output);
+        to_process.emplace_back(output);
       }
     }
   }

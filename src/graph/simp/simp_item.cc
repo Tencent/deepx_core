@@ -142,7 +142,7 @@ void SimpItem::GetTopologicalSortedNodes(std::vector<GraphNode*>* sorted,
   for (auto& entry : name_2_node_) {
     GraphNode* node = entry.second.get();
     if (node->input_size() == 0) {
-      sorted->push_back(node);
+      sorted->emplace_back(node);
     }
   }
   std::sort(sorted->begin(), sorted->end(), comparator_by_name);
@@ -159,7 +159,7 @@ void SimpItem::GetTopologicalSortedNodes(std::vector<GraphNode*>* sorted,
         }
       }
       if (num_ready_input[output->name()] == (int)output->input_size()) {
-        ready.push_back(output);
+        ready.emplace_back(output);
       }
     }
     std::sort(ready.begin(), ready.end(), comparator_by_name);
@@ -259,7 +259,7 @@ void SimpItem::BuildName2Output() {
 bool SimpItem::IsReachable(GraphNode* from, GraphNode* to) const {
   node_set_t visited;
   std::vector<GraphNode*> to_visit;
-  to_visit.push_back(from);
+  to_visit.emplace_back(from);
   while (!to_visit.empty()) {
     const GraphNode* top = to_visit.back();
     to_visit.pop_back();
@@ -268,7 +268,7 @@ bool SimpItem::IsReachable(GraphNode* from, GraphNode* to) const {
     }
     for (auto* input : top->input()) {
       if (visited.count(input) == 0) {
-        to_visit.push_back(input);
+        to_visit.emplace_back(input);
         visited.insert(input);
       }
     }
@@ -318,7 +318,7 @@ bool SimpItem::Clone(const heap_node_map_t& from, node_map_t* to) {
   for (auto& entry : *to) {
     GraphNode* node = entry.second;
     for (auto& input_name : node->input_name_) {
-      node->input_.push_back(to->at(input_name));
+      node->input_.emplace_back(to->at(input_name));
     }
   }
 
@@ -341,7 +341,7 @@ bool SimpItem::Clone(const node_map_t& from, heap_node_map_t* to) {
   for (auto& entry : *to) {
     auto& node = entry.second;
     for (auto& input_name : node->input_name_) {
-      node->input_.push_back(to->at(input_name).get());
+      node->input_.emplace_back(to->at(input_name).get());
     }
   }
 

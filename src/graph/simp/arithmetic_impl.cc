@@ -39,7 +39,7 @@ bool RewriteGroupedNodesBase::TrySimplify(GraphNode* node) {
 void RewriteGroupedNodesBase::TryAbsorbNodeToGroup(GraphNode* node,
                                                    NodeGroup* group) {
   std::deque<GraphNode*> to_process;
-  to_process.push_back(node);
+  to_process.emplace_back(node);
   while (!to_process.empty()) {
     GraphNode* on_process = to_process.front();
     to_process.pop_front();
@@ -47,7 +47,7 @@ void RewriteGroupedNodesBase::TryAbsorbNodeToGroup(GraphNode* node,
     if (Absorbable(on_process, group)) {
       group->non_root_members.emplace_back(on_process);
       for (auto* input : on_process->input()) {
-        to_process.push_back(input);
+        to_process.emplace_back(input);
       }
     } else {
       group->inputs.emplace_back(on_process);
@@ -208,7 +208,7 @@ bool RewriteGroupedBroadcastStage::SimplifyGroup(NodeGroup* group) {
     } else {
       new_node = BroadcastMul(new_node_name, X, Y);
     }
-    new_broadcast_nodes.push_back(new_node);
+    new_broadcast_nodes.emplace_back(new_node);
     ctx_->item->Add(new_node);
     to_combine.emplace_back(new_node);
     ++new_broadcast;
@@ -423,7 +423,7 @@ bool RewriteAggregatableAddNStage::TrySimplify(GraphNode* node) {
   std::vector<GraphNode*> new_inputs;
   for (auto* input : node->input()) {
     if (aggregatable.count(input) == 0) {
-      new_inputs.push_back(input);
+      new_inputs.emplace_back(input);
     }
   }
   for (auto& entry : aggregatable) {
@@ -438,7 +438,7 @@ bool RewriteAggregatableAddNStage::TrySimplify(GraphNode* node) {
     ctx_->nodes_to_simp.PushBack(constant);
     ctx_->item->Add(broadcastmul);
     ctx_->nodes_to_simp.PushBack(broadcastmul);
-    new_inputs.push_back(broadcastmul);
+    new_inputs.emplace_back(broadcastmul);
   }
 
   GraphNode* new_node = nullptr;

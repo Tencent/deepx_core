@@ -42,7 +42,7 @@ struct SimpContext {
       if (!set_.insert(value).second) {
         return false;
       }
-      vector_.push_back(value);
+      vector_.emplace_back(value);
       return true;
     }
 
