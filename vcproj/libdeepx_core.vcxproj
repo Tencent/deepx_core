@@ -82,6 +82,7 @@
     <ClCompile Include="..\src\graph\op\kernel\where_op.cc" />
     <ClCompile Include="..\src\graph\op\op_impl.cc" />
     <ClCompile Include="..\src\graph\op_context.cc" />
+    <ClCompile Include="..\src\graph\shard.cc" />
     <ClCompile Include="..\src\graph\simp\arithmetic_impl.cc" />
     <ClCompile Include="..\src\graph\simp\cf_impl.cc" />
     <ClCompile Include="..\src\graph\simp\cse.cc" />
@@ -141,6 +142,7 @@
     <ClInclude Include="..\include\deepx_core\graph\optimizer_impl.h" />
     <ClInclude Include="..\include\deepx_core\graph\op_context.h" />
     <ClInclude Include="..\include\deepx_core\graph\op_impl.h" />
+    <ClInclude Include="..\include\deepx_core\graph\shard.h" />
     <ClInclude Include="..\include\deepx_core\graph\tensor_map.h" />
     <ClInclude Include="..\include\deepx_core\graph\ts_store.h" />
     <ClInclude Include="..\include\deepx_core\graph\variable_scope.h" />

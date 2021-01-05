@@ -244,6 +244,9 @@
     <ClCompile Include="..\src\graph\op_context.cc">
       <Filter>graph</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\graph\shard.cc">
+      <Filter>graph</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\graph\simp\arithmetic_impl.cc">
       <Filter>graph\simp</Filter>
     </ClCompile>
@@ -411,6 +414,9 @@
       <Filter>graph</Filter>
     </ClInclude>
     <ClInclude Include="..\include\deepx_core\graph\op_impl.h">
+      <Filter>graph</Filter>
+    </ClInclude>
+    <ClInclude Include="..\include\deepx_core\graph\shard.h">
       <Filter>graph</Filter>
     </ClInclude>
     <ClInclude Include="..\include\deepx_core\graph\tensor_map.h">

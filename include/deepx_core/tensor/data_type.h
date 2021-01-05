@@ -43,6 +43,9 @@ class DataTypeT {
   using tsr_partitioner_t =
       std::function<int(const std::string& name, int shard_size)>;
   using srm_partitioner_t = std::function<int(int_t id, int shard_size)>;
+  using tsr_shard_func_t =
+      std::function<int(const std::string& name, int shard_size)>;
+  using srm_shard_func_t = std::function<int(int_t id, int shard_size)>;
 
   static constexpr int DATA_TYPE_TOKEN = TOKEN;
 };
