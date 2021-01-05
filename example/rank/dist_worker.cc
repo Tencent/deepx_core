@@ -204,7 +204,7 @@ void TrainerDist::Init() {
     DXCHECK_THROW(graph_.Load(GetGraphFile(FLAGS_in_model)));
   }
 
-  local_model_shard_.Init(-1, &graph_);
+  local_model_shard_.Init(0, 1, &graph_);
   DXCHECK_THROW(local_model_shard_.InitModelPlaceholder());
 
   context_.set_instance_reader(FLAGS_instance_reader);

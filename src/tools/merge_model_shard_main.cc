@@ -62,13 +62,13 @@ int main(int argc, char** argv) {
   std::vector<std::unique_ptr<ModelShard>> model_shards(shard_size);
   for (int i = 0; i < shard_size; ++i) {
     model_shards[i].reset(new ModelShard);
-    model_shards[i]->Init(i, &graph);
+    model_shards[i]->Init(i, shard_size, &graph);
     DXCHECK_THROW(model_shards[i]->LoadModel(FLAGS_in_model));
   }
 
   std::unique_ptr<ModelShard> merged;
   merged.reset(new ModelShard);
-  merged->Init(-1, &graph);
+  merged->Init(0, 1, &graph);
   DXCHECK_THROW(merged->InitModelPlaceholder());
   for (int i = 0; i < shard_size; ++i) {
     merged->mutable_model()->Merge(model_shards[i]->mutable_model(), i,

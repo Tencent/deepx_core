@@ -44,6 +44,7 @@ class ModelShard : public DataType {
  private:
   std::default_random_engine engine_;
   int shard_id_ = 0;
+  int shard_size_ = 0;
   const Graph* graph_ = nullptr;
   std::unique_ptr<Model> model_;
   std::unique_ptr<Optimizer> optimizer_;
@@ -84,7 +85,7 @@ class ModelShard : public DataType {
   std::string GetSuccessFile(const std::string& dir) const;
 
  public:
-  void Init(int shard_id, const Graph* graph) noexcept;
+  void Init(int shard_id, int shard_size, const Graph* graph) noexcept;
   bool InitModelPlaceholder();
   bool InitModel();
   bool InitOptimizer(const std::string& optimizer,

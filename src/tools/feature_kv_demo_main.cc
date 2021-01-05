@@ -119,7 +119,7 @@ class MockModelContext {
     DXINFO("Initializing mock model...");
     std::default_random_engine engine;
     model_.Init(&graph_);
-    DXCHECK_THROW(model_.InitParam(engine));
+    DXCHECK_THROW(model_.InitParam(engine, 0, 1));
     for (auto& entry : *model_.mutable_param()) {
       Any& Wany = entry.second;
       if (Wany.is<srm_t>()) {

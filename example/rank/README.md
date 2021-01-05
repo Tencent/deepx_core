@@ -553,17 +553,17 @@ cat [计算图文件] [模型参数文件] > [模型文件]
 
 计算图文件是"graph.bin".
 
-模型参数文件是"model.bin".
+模型参数文件是"model.bin.0".
 
 ```
 计算图文件
 graph.bin
 
 模型参数文件
-model.bin
+model.bin.0
 
 优化器参数文件
-optimizer.bin
+optimizer.bin.0
 
 分片信息文件
 shard_info.bin

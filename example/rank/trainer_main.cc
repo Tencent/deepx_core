@@ -219,7 +219,7 @@ void TrainerNoShard::Init() {
   Trainer::Init();
 
   model_shard_.seed(FLAGS_seed);
-  model_shard_.Init(-1, &graph_);
+  model_shard_.Init(0, 1, &graph_);
   if (FLAGS_in_model.empty()) {
     DXCHECK_THROW(model_shard_.InitModel());
     DXCHECK_THROW(
@@ -286,7 +286,7 @@ void TrainerShard::Init() {
   model_shards_.resize(shard_size_);
   for (int i = 0; i < shard_size_; ++i) {
     model_shards_[i].seed(FLAGS_seed + i * 10099);  // magic number
-    model_shards_[i].Init(i, &graph_);
+    model_shards_[i].Init(i, shard_size_, &graph_);
     if (FLAGS_in_model.empty()) {
       DXCHECK_THROW(model_shards_[i].InitModel());
       DXCHECK_THROW(model_shards_[i].InitOptimizer(FLAGS_optimizer,
@@ -340,7 +340,7 @@ void TrainerShard::Init() {
   contexts_tls_.resize(FLAGS_thread);
   model_shards_tls_.resize(FLAGS_thread);
   for (int i = 0; i < FLAGS_thread; ++i) {
-    model_shards_tls_[i].Init(-1, &graph_);
+    model_shards_tls_[i].Init(0, 1, &graph_);
     DXCHECK_THROW(model_shards_tls_[i].InitModelPlaceholder());
     std::unique_ptr<TrainerContextShard> context(new TrainerContextShard);
     context->set_instance_reader(FLAGS_instance_reader);

@@ -54,7 +54,8 @@ bool Model::InitParamPlaceholder() {
   return true;
 }
 
-bool Model::InitParam(std::default_random_engine& engine) {
+bool Model::InitParam(std::default_random_engine& engine, int shard_id,
+                      int shard_size) {
   DXINFO("Initializing param...");
   for (const auto& entry : graph_->name_2_node()) {
     const GraphNode* node = entry.second;
@@ -69,12 +70,14 @@ bool Model::InitParam(std::default_random_engine& engine) {
 
     switch (node->tensor_type()) {
       case TENSOR_TYPE_TSR: {
-        DXINFO("Initializing TSR %s...", node->name().c_str());
-        auto& W = param_.insert<tsr_t>(node->name());
-        W.resize(node->shape());
-        W.rand_init(engine, node->initializer_type(),
-                    (float_t)node->initializer_param1(),
-                    (float_t)node->initializer_param2());
+        if (tsr_partitioner_(node->name(), shard_size) == shard_id) {
+          DXINFO("Initializing TSR %s...", node->name().c_str());
+          auto& W = param_.insert<tsr_t>(node->name());
+          W.resize(node->shape());
+          W.rand_init(engine, node->initializer_type(),
+                      (float_t)node->initializer_param1(),
+                      (float_t)node->initializer_param2());
+        }
       } break;
       case TENSOR_TYPE_SRM: {
         DXINFO("Initializing SRM %s...", node->name().c_str());
@@ -99,29 +102,38 @@ bool Model::InitParam(std::default_random_engine& engine) {
       continue;
     }
 
-    auto it = param_.find(node->name());
-    if (it == param_.end()) {
-      DXERROR("%s is missing.", node->name().c_str());
-      return false;
-    }
-
-    const Any& Wany = it->second;
     switch (node->tensor_type()) {
       case TENSOR_TYPE_TSR: {
-        if (!Wany.is<tsr_t>()) {
-          DXERROR("TSR %s has inconsistent type.", node->name().c_str());
-          return false;
-        }
+        if (tsr_partitioner_(node->name(), shard_size) == shard_id) {
+          auto it = param_.find(node->name());
+          if (it == param_.end()) {
+            DXERROR("%s is missing.", node->name().c_str());
+            return false;
+          }
 
-        auto& W = Wany.unsafe_to_ref<tsr_t>();
-        if (W.shape() != node->shape()) {
-          DXERROR("TSR %s has inconsistent shape: %s vs %s.",
-                  node->name().c_str(), to_string(node->shape()).c_str(),
-                  to_string(W.shape()).c_str());
-          return false;
+          const Any& Wany = it->second;
+          if (!Wany.is<tsr_t>()) {
+            DXERROR("TSR %s has inconsistent type.", node->name().c_str());
+            return false;
+          }
+
+          auto& W = Wany.unsafe_to_ref<tsr_t>();
+          if (W.shape() != node->shape()) {
+            DXERROR("TSR %s has inconsistent shape: %s vs %s.",
+                    node->name().c_str(), to_string(node->shape()).c_str(),
+                    to_string(W.shape()).c_str());
+            return false;
+          }
         }
       } break;
       case TENSOR_TYPE_SRM: {
+        auto it = param_.find(node->name());
+        if (it == param_.end()) {
+          DXERROR("%s is missing.", node->name().c_str());
+          return false;
+        }
+
+        const Any& Wany = it->second;
         if (!Wany.is<srm_t>()) {
           DXERROR("SRM %s has inconsistent type.", node->name().c_str());
           return false;

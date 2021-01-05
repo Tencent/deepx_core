@@ -66,7 +66,7 @@ void RankParamServer::Init() {
     }
 
     model_shard_.seed(FLAGS_seed + FLAGS_ps_id * 10099);  // magic number
-    model_shard_.Init(FLAGS_ps_id, &graph_);
+    model_shard_.Init(FLAGS_ps_id, FLAGS_ps_size, &graph_);
     if (FLAGS_in_model.empty()) {
       DXCHECK_THROW(model_shard_.InitModel());
       DXCHECK_THROW(
@@ -113,7 +113,7 @@ void RankParamServer::Init() {
     }
   } else {
     DXCHECK_THROW(graph_.Load(GetGraphFile(FLAGS_in_model)));
-    model_shard_.Init(FLAGS_ps_id, &graph_);
+    model_shard_.Init(FLAGS_ps_id, FLAGS_ps_size, &graph_);
     DXCHECK_THROW(model_shard_.LoadModel(FLAGS_in_model));
   }
 

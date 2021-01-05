@@ -56,7 +56,8 @@ class Model : public DataType {
   Model();
   void Init(const Graph* graph) noexcept;
   bool InitParamPlaceholder();
-  bool InitParam(std::default_random_engine& engine);  // NOLINT
+  bool InitParam(std::default_random_engine& engine,  // NOLINT
+                 int shard_id, int shard_size);
   void InitLock();
   bool Write(OutputStream& os) const;  // NOLINT
   bool Read(InputStream& is);          // NOLINT
