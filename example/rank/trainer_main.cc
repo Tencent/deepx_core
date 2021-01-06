@@ -9,6 +9,7 @@
 #include <deepx_core/graph/feature_kv_util.h>
 #include <deepx_core/graph/graph.h>
 #include <deepx_core/graph/model_shard.h>
+#include <deepx_core/graph/shard.h>
 #include <deepx_core/ps/file_dispatcher.h>
 #include <deepx_core/tensor/data_type.h>
 #include <gflags/gflags.h>
@@ -208,6 +209,7 @@ void Trainer::Save() {
 /************************************************************************/
 class TrainerNoShard : public Trainer {
  private:
+  Shard shard_;
   ModelShard model_shard_;
 
  public:
@@ -219,7 +221,7 @@ void TrainerNoShard::Init() {
   Trainer::Init();
 
   model_shard_.seed(FLAGS_seed);
-  model_shard_.Init(0, 1, &graph_);
+  model_shard_.Init(&graph_, &shard_);
   if (FLAGS_in_model.empty()) {
     DXCHECK_THROW(model_shard_.InitModel());
     DXCHECK_THROW(
@@ -271,6 +273,8 @@ void TrainerNoShard::Save() {
 /************************************************************************/
 class TrainerShard : public Trainer {
  private:
+  std::vector<Shard> shards_;
+  std::vector<Shard> shards_tls_;
   std::vector<ModelShard> model_shards_;
   std::vector<ModelShard> model_shards_tls_;
 
@@ -283,10 +287,12 @@ class TrainerShard : public Trainer {
 void TrainerShard::Init() {
   Trainer::Init();
 
+  shards_.resize(shard_size_);
   model_shards_.resize(shard_size_);
   for (int i = 0; i < shard_size_; ++i) {
+    shards_[i] = Shard(i, shard_size_);
     model_shards_[i].seed(FLAGS_seed + i * 10099);  // magic number
-    model_shards_[i].Init(i, shard_size_, &graph_);
+    model_shards_[i].Init(&graph_, &shards_[i]);
     if (FLAGS_in_model.empty()) {
       DXCHECK_THROW(model_shards_[i].InitModel());
       DXCHECK_THROW(model_shards_[i].InitOptimizer(FLAGS_optimizer,
@@ -338,9 +344,11 @@ void TrainerShard::Init() {
   }
 
   contexts_tls_.resize(FLAGS_thread);
+  shards_tls_.resize(FLAGS_thread);
   model_shards_tls_.resize(FLAGS_thread);
   for (int i = 0; i < FLAGS_thread; ++i) {
-    model_shards_tls_[i].Init(0, 1, &graph_);
+    shards_tls_[i] = Shard(0, shard_size_);
+    model_shards_tls_[i].Init(&graph_, &shards_tls_[i]);
     DXCHECK_THROW(model_shards_tls_[i].InitModelPlaceholder());
     std::unique_ptr<TrainerContextShard> context(new TrainerContextShard);
     context->set_instance_reader(FLAGS_instance_reader);

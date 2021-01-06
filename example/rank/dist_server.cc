@@ -9,6 +9,7 @@
 #include <deepx_core/graph/dist_proto.h>
 #include <deepx_core/graph/graph.h>
 #include <deepx_core/graph/model_shard.h>
+#include <deepx_core/graph/shard.h>
 #include <deepx_core/graph/tensor_map.h>
 #include <deepx_core/ps/coord_server.h>
 #include <deepx_core/ps/param_server.h>
@@ -39,6 +40,7 @@ class RankParamServer : public ParamServer {
 
  private:
   Graph graph_;
+  Shard shard_;
   ModelShard model_shard_;
 
  public:
@@ -65,8 +67,9 @@ void RankParamServer::Init() {
       DXCHECK_THROW(graph_.Load(GetGraphFile(FLAGS_in_model)));
     }
 
+    shard_ = Shard(FLAGS_ps_id, FLAGS_ps_size);
     model_shard_.seed(FLAGS_seed + FLAGS_ps_id * 10099);  // magic number
-    model_shard_.Init(FLAGS_ps_id, FLAGS_ps_size, &graph_);
+    model_shard_.Init(&graph_, &shard_);
     if (FLAGS_in_model.empty()) {
       DXCHECK_THROW(model_shard_.InitModel());
       DXCHECK_THROW(
@@ -113,7 +116,8 @@ void RankParamServer::Init() {
     }
   } else {
     DXCHECK_THROW(graph_.Load(GetGraphFile(FLAGS_in_model)));
-    model_shard_.Init(FLAGS_ps_id, FLAGS_ps_size, &graph_);
+    shard_ = Shard(FLAGS_ps_id, FLAGS_ps_size);
+    model_shard_.Init(&graph_, &shard_);
     DXCHECK_THROW(model_shard_.LoadModel(FLAGS_in_model));
   }
 

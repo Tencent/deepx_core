@@ -6,6 +6,7 @@
 #include <deepx_core/dx_log.h>
 #include <deepx_core/graph/graph.h>
 #include <deepx_core/graph/model_shard.h>
+#include <deepx_core/graph/shard.h>
 #include <gflags/gflags.h>
 #include <memory>
 #include <string>
@@ -59,20 +60,22 @@ int main(int argc, char** argv) {
   Graph graph;
   DXCHECK_THROW(LoadGraph(FLAGS_in_model, &graph));
 
+  std::vector<Shard> shards(shard_size);
   std::vector<std::unique_ptr<ModelShard>> model_shards(shard_size);
   for (int i = 0; i < shard_size; ++i) {
+    shards[i] = Shard(i, shard_size);
     model_shards[i].reset(new ModelShard);
-    model_shards[i]->Init(i, shard_size, &graph);
+    model_shards[i]->Init(&graph, &shards[i]);
     DXCHECK_THROW(model_shards[i]->LoadModel(FLAGS_in_model));
   }
 
+  Shard shard;
   std::unique_ptr<ModelShard> merged;
   merged.reset(new ModelShard);
-  merged->Init(0, 1, &graph);
+  merged->Init(&graph, &shard);
   DXCHECK_THROW(merged->InitModelPlaceholder());
   for (int i = 0; i < shard_size; ++i) {
-    merged->mutable_model()->Merge(model_shards[i]->mutable_model(), i,
-                                   shard_size);
+    merged->mutable_model()->Merge(model_shards[i]->mutable_model());
   }
 
   std::string new_path;

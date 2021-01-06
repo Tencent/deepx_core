@@ -70,7 +70,7 @@ ShardInfo GetShardInfo(const std::string& dir, int shard_size) {
 /* ModelShard */
 /************************************************************************/
 std::string ModelShard::GetSuffix() const {
-  return "." + std::to_string(shard_id_);
+  return "." + std::to_string(shard_->shard_id());
 }
 
 std::string ModelShard::GetModelFile(const std::string& dir) const {
@@ -101,11 +101,9 @@ std::string ModelShard::GetSuccessFile(const std::string& dir) const {
   return dir + "/SUCCESS_" + GetSuffix();
 }
 
-void ModelShard::Init(int shard_id, int shard_size,
-                      const Graph* graph) noexcept {
-  shard_id_ = shard_id;
-  shard_size_ = shard_size;
+void ModelShard::Init(const Graph* graph, const Shard* shard) noexcept {
   graph_ = graph;
+  shard_ = shard;
 }
 
 bool ModelShard::InitModelPlaceholder() {
@@ -117,7 +115,7 @@ bool ModelShard::InitModelPlaceholder() {
 bool ModelShard::InitModel() {
   model_.reset(new Model);
   model_->Init(graph_);
-  return model_->InitParam(engine_, shard_id_, shard_size_);
+  return model_->InitParam(engine_, shard_);
 }
 
 bool ModelShard::InitOptimizer(const std::string& optimizer,

@@ -238,6 +238,7 @@ class Optimizer : public DataType {
   virtual void InitLock(AnyMap* param_lock) = 0;
   virtual bool Write(OutputStream& os) const = 0;  // NOLINT
   virtual bool Read(InputStream& is) = 0;          // NOLINT
+  virtual void Merge(Optimizer* other, const Shard* shard = nullptr) = 0;
   virtual void Warmup(Optimizer* other) = 0;
 
  public:
@@ -259,6 +260,7 @@ Optimizer是优化器的基类, 它定义了以下接口.
 - InitLock, 初始化锁.
 - Write, 写入优化器, 返回是否成功.
 - Read, 读取优化器, 返回是否成功.
+- Merge, merge优化器参数.
 - Warmup, warmup优化器参数.
 - Update, 用梯度更新模型参数和优化器参数.
 - ForEachSRM, 遍历srm\_t优化器参数.

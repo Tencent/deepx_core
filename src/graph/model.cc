@@ -3,28 +3,13 @@
 // Author: Shuting Guo (tinkleguo@tencent.com)
 //
 
-#include <deepx_core/common/hash.h>
 #include <deepx_core/common/read_write_lock.h>
 #include <deepx_core/dx_log.h>
 #include <deepx_core/graph/model.h>
-#include <cstdint>
 #include <fstream>
 #include <utility>
 
 namespace deepx_core {
-
-int Model::DefaultTSRPartitioner(const std::string& name,
-                                 int shard_size) noexcept {
-  return (int)((uint32_t)MurmurHash2(name) % shard_size);
-}
-
-int Model::DefaultSRMPartitioner(int_t feature_id, int shard_size) noexcept {
-  return (int)((uint32_t)feature_id % shard_size);
-}
-
-Model::Model()
-    : tsr_partitioner_(DefaultTSRPartitioner),
-      srm_partitioner_(DefaultSRMPartitioner) {}
 
 void Model::Init(const Graph* graph) noexcept { graph_ = graph; }
 
@@ -54,8 +39,7 @@ bool Model::InitParamPlaceholder() {
   return true;
 }
 
-bool Model::InitParam(std::default_random_engine& engine, int shard_id,
-                      int shard_size) {
+bool Model::InitParam(std::default_random_engine& engine, const Shard* shard) {
   DXINFO("Initializing param...");
   for (const auto& entry : graph_->name_2_node()) {
     const GraphNode* node = entry.second;
@@ -70,7 +54,7 @@ bool Model::InitParam(std::default_random_engine& engine, int shard_id,
 
     switch (node->tensor_type()) {
       case TENSOR_TYPE_TSR: {
-        if (tsr_partitioner_(node->name(), shard_size) == shard_id) {
+        if (!shard || shard->HasTSR(node->name())) {
           DXINFO("Initializing TSR %s...", node->name().c_str());
           auto& W = param_.insert<tsr_t>(node->name());
           W.resize(node->shape());
@@ -104,7 +88,7 @@ bool Model::InitParam(std::default_random_engine& engine, int shard_id,
 
     switch (node->tensor_type()) {
       case TENSOR_TYPE_TSR: {
-        if (tsr_partitioner_(node->name(), shard_size) == shard_id) {
+        if (!shard || shard->HasTSR(node->name())) {
           auto it = param_.find(node->name());
           if (it == param_.end()) {
             DXERROR("%s is missing.", node->name().c_str());
@@ -244,22 +228,57 @@ bool Model::SaveText(const std::string& file) const {
   return true;
 }
 
-void Model::Merge(Model* other, int other_shard_id, int other_shard_size) {
-  DXINFO("Merging model %d/%d...", other_shard_id, other_shard_size);
-  auto reduce_tsr = [other, other_shard_id, other_shard_size](
-                        const std::string& name, tsr_t& local_W,
-                        tsr_t& remote_W) {
-    if (other->tsr_partitioner_(name, other_shard_size) == other_shard_id) {
-      DXINFO("Merging TSR %s...", name.c_str());
-      local_W = std::move(remote_W);
-    }
+void Model::Merge(Model* other, const Shard* shard) {
+  DXINFO("Merging model...");
+  auto merge_tsr = [](const std::string& name, tsr_t& local_W,
+                      tsr_t& remote_W) {
+    DXINFO("Merging TSR %s...", name.c_str());
+    local_W = std::move(remote_W);
   };
-  auto reduce_srm = [](const std::string& name, srm_t& local_W,
-                       srm_t& remote_W) {
+  auto merge_srm = [shard](const std::string& name, srm_t& local_W,
+                           srm_t& remote_W) {
     DXINFO("Merging SRM %s...", name.c_str());
-    local_W.merge(std::move(remote_W));
+    local_W.merge_if(std::move(remote_W),
+                     [shard](const srm_t::value_type& entry) {
+                       return !shard || shard->HasSRM(entry.first);
+                     });
   };
-  Reduce(other, reduce_tsr, reduce_srm);
+
+  for (auto& entry : other->param_) {
+    const std::string& name = entry.first;
+    Any& remote_Wany = entry.second;
+
+    if (remote_Wany.is<tsr_t>()) {
+      auto& remote_W = remote_Wany.unsafe_to_ref<tsr_t>();
+      auto it = param_.find(name);
+      if (it != param_.end()) {
+        Any& local_Wany = it->second;
+        if (!local_Wany.is<tsr_t>()) {
+          continue;
+        }
+        auto& local_W = local_Wany.unsafe_to_ref<tsr_t>();
+        merge_tsr(name, local_W, remote_W);
+      } else if (!shard || shard->HasTSR(name)) {
+        auto& local_W = param_.insert<tsr_t>(name);
+        merge_tsr(name, local_W, remote_W);
+      }
+    } else if (remote_Wany.is<srm_t>()) {
+      auto& remote_W = remote_Wany.unsafe_to_ref<srm_t>();
+      auto it = param_.find(name);
+      if (it != param_.end()) {
+        Any& local_Wany = it->second;
+        if (!local_Wany.is<srm_t>()) {
+          continue;
+        }
+        auto& local_W = local_Wany.unsafe_to_ref<srm_t>();
+        merge_srm(name, local_W, remote_W);
+      } else {
+        auto& local_W = param_.insert<srm_t>(name);
+        local_W.set_col(remote_W.col());
+        merge_srm(name, local_W, remote_W);
+      }
+    }
+  }
   DXINFO("Done.");
 }
 
@@ -314,42 +333,6 @@ void Model::ForEachSRM(
       auto& W = Wany.unsafe_to_ref<srm_t>();
       func(name, &W);
     }
-  }
-}
-
-void Model::SplitPullRequest(const PullRequest& full_pull_request,
-                             std::vector<PullRequest>* pull_requests,
-                             std::vector<id_set_t*>* aux) const {
-  int shard_size = (int)pull_requests->size();
-  for (PullRequest& pull_request : *pull_requests) {
-    pull_request.clear();
-    pull_request.is_train = full_pull_request.is_train;
-  }
-
-  for (const std::string& name : full_pull_request.tsr_set) {
-    int shard_id = tsr_partitioner_(name, shard_size);
-    (*pull_requests)[shard_id].tsr_set.emplace(name);
-  }
-
-  for (const auto& entry : full_pull_request.srm_map) {
-    const std::string& name = entry.first;
-    const id_set_t& feature_id_set = entry.second;
-    size_t srm_feature_size = feature_id_set.size() / shard_size;
-    for (int i = 0; i < shard_size; ++i) {
-      (*aux)[i] = &(*pull_requests)[i].srm_map[name];
-      (*aux)[i]->reserve(srm_feature_size);
-    }
-    for (int_t feature_id : feature_id_set) {
-      int shard_id = srm_partitioner_(feature_id, shard_size);
-      (*aux)[shard_id]->emplace(feature_id);
-    }
-  }
-
-  for (const auto& entry : full_pull_request.id_freq_map) {
-    int_t feature_id = entry.first;
-    freq_t freq = entry.second;
-    int shard_id = srm_partitioner_(feature_id, shard_size);
-    (*pull_requests)[shard_id].id_freq_map.emplace(feature_id, freq);
   }
 }
 
@@ -423,92 +406,6 @@ void Model::SetParam(std::vector<std::unique_ptr<TensorMap>>* remote_params) {
         auto& local_W = param_.get<srm_t>(name);
         auto& remote_W = Wany.unsafe_to_ref<srm_t>();
         local_W.merge(std::move(remote_W));
-      }
-    }
-  }
-}
-
-void Model::SplitGrad(const TensorMap& param, TensorMap* full_grad,
-                      std::vector<std::unique_ptr<TensorMap>>* grads,
-                      std::vector<srm_t*>* aux) const {
-  int shard_size = (int)grads->size();
-  for (auto& grad : *grads) {
-    grad->ClearValue();
-  }
-
-  for (auto& entry : *full_grad) {
-    const std::string& name = entry.first;
-    auto it = param.find(name);
-    if (it == param.end()) {
-      continue;
-    }
-
-    const Any& Wany = it->second;
-    Any& Gany = entry.second;
-    if (Wany.is<tsr_t>()) {
-      int shard_id = tsr_partitioner_(name, shard_size);
-      if (Gany.is<tsr_t>()) {
-        auto& G = Gany.unsafe_to_ref<tsr_t>();
-        // view, zero-copy
-        (*grads)[shard_id]->get_or_insert<tsr_t>(name) = G.get_view();
-      } else if (Gany.is<srm_t>()) {
-        auto& G = Gany.unsafe_to_ref<srm_t>();
-        int col = G.col();
-        (*grads)[shard_id]->get_or_insert<srm_t>(name) = std::move(G);
-        G.clear();
-        G.set_col(col);
-      }
-    } else if (Wany.is<srm_t>()) {
-      if (Gany.is<srm_t>()) {
-        auto& G = Gany.unsafe_to_ref<srm_t>();
-        size_t srm_feature_size = G.size() / shard_size;
-        for (int i = 0; i < shard_size; ++i) {
-          (*aux)[i] = &(*grads)[i]->get_or_insert<srm_t>(name);
-          (*aux)[i]->set_col(G.col());
-          (*aux)[i]->reserve(srm_feature_size);
-        }
-        for (const auto& _entry : G) {
-          int_t feature_id = _entry.first;
-          const float_t* feature_embedding = _entry.second;
-          int shard_id = srm_partitioner_(feature_id, shard_size);
-          // view, zero-copy
-          (*aux)[shard_id]->assign_view(feature_id, feature_embedding);
-        }
-      }
-    }
-  }
-}
-
-void Model::SplitParam(const TensorMap& full_param,
-                       std::vector<std::unique_ptr<TensorMap>>* params,
-                       std::vector<srm_t*>* aux) const {
-  int shard_size = (int)params->size();
-  for (auto& param : *params) {
-    param->ClearValue();
-  }
-
-  for (const auto& entry : full_param) {
-    const std::string& name = entry.first;
-    const Any& Wany = entry.second;
-    if (Wany.is<tsr_t>()) {
-      int shard_id = tsr_partitioner_(name, shard_size);
-      auto& W = Wany.unsafe_to_ref<tsr_t>();
-      // view, zero-copy
-      (*params)[shard_id]->get_or_insert<tsr_t>(name) = W.get_view();
-    } else if (Wany.is<srm_t>()) {
-      auto& W = Wany.unsafe_to_ref<srm_t>();
-      size_t srm_feature_size = W.size() / shard_size;
-      for (int i = 0; i < shard_size; ++i) {
-        (*aux)[i] = &(*params)[i]->get_or_insert<srm_t>(name);
-        (*aux)[i]->set_col(W.col());
-        (*aux)[i]->reserve(srm_feature_size);
-      }
-      for (const auto& _entry : W) {
-        int_t feature_id = _entry.first;
-        const float_t* feature_embedding = _entry.second;
-        int shard_id = srm_partitioner_(feature_id, shard_size);
-        // view, zero-copy
-        (*aux)[shard_id]->assign_view(feature_id, feature_embedding);
       }
     }
   }

@@ -7,6 +7,7 @@
 #include <deepx_core/dx_log.h>
 #include <deepx_core/graph/graph.h>
 #include <deepx_core/graph/model_shard.h>
+#include <deepx_core/graph/shard.h>
 #include <deepx_core/ps/file_dispatcher.h>
 #include <gflags/gflags.h>
 #include <memory>
@@ -117,6 +118,7 @@ void Predictor::PredictFile(int thread_id, const std::string& file,
 /************************************************************************/
 class PredictorNoShard : public Predictor {
  private:
+  Shard shard_;
   ModelShard model_shard_;
 
  public:
@@ -126,7 +128,7 @@ class PredictorNoShard : public Predictor {
 void PredictorNoShard::Init() {
   Predictor::Init();
 
-  model_shard_.Init(0, 1, &graph_);
+  model_shard_.Init(&graph_, &shard_);
   DXCHECK_THROW(model_shard_.LoadModel(FLAGS_in_model));
 
   contexts_tls_.resize(FLAGS_thread);
@@ -148,6 +150,8 @@ void PredictorNoShard::Init() {
 /************************************************************************/
 class PredictorShard : public Predictor {
  private:
+  std::vector<Shard> shards_;
+  std::vector<Shard> shards_tls_;
   std::vector<ModelShard> model_shards_;
   std::vector<ModelShard> model_shards_tls_;
 
@@ -159,16 +163,20 @@ class PredictorShard : public Predictor {
 void PredictorShard::Init() {
   Predictor::Init();
 
+  shards_.resize(shard_size_);
   model_shards_.resize(shard_size_);
   for (int i = 0; i < shard_size_; ++i) {
-    model_shards_[i].Init(i, shard_size_, &graph_);
+    shards_[i] = Shard(i, shard_size_);
+    model_shards_[i].Init(&graph_, &shards_[i]);
     DXCHECK_THROW(model_shards_[i].LoadModel(FLAGS_in_model));
   }
 
   contexts_tls_.resize(FLAGS_thread);
+  shards_tls_.resize(FLAGS_thread);
   model_shards_tls_.resize(FLAGS_thread);
   for (int i = 0; i < FLAGS_thread; ++i) {
-    model_shards_tls_[i].Init(0, 1, &graph_);
+    shards_tls_[i] = Shard(0, shard_size_);
+    model_shards_tls_[i].Init(&graph_, &shards_tls_[i]);
     DXCHECK_THROW(model_shards_tls_[i].InitModelPlaceholder());
     std::unique_ptr<TrainerContextShard> context(new TrainerContextShard);
     context->set_instance_reader(FLAGS_instance_reader);

@@ -30,7 +30,7 @@ class TrainerContext : public DataType {
   freq_t freq_filter_threshold_ = 0;
   std::string target_name_;
 
-  Model* local_model_ = nullptr;
+  ModelShard* local_model_shard_ = nullptr;
   std::unique_ptr<OpContext> op_context_;
   int op_context_batch_ = -1;
   double file_loss_ = 0;
@@ -55,7 +55,7 @@ class TrainerContext : public DataType {
   double file_loss_weight() const noexcept { return file_loss_weight_; }
 
  protected:
-  void _Init(Model* local_model);
+  void _Init(ModelShard* local_model_shard);
 
  public:
   virtual ~TrainerContext() = default;
@@ -72,7 +72,6 @@ class TrainerContext : public DataType {
 /************************************************************************/
 class TrainerContextNoShard : public TrainerContext {
  protected:
-  ModelShard* model_shard_ = nullptr;
   Optimizer* optimizer_ = nullptr;
 
  public:

@@ -18,10 +18,11 @@ namespace deepx_core {
 /************************************************************************/
 /* TrainerContext */
 /************************************************************************/
-void TrainerContext::_Init(Model* local_model) {
-  local_model_ = local_model;
+void TrainerContext::_Init(ModelShard* local_model_shard) {
+  local_model_shard_ = local_model_shard;
   op_context_.reset(new OpContext);
-  op_context_->Init(&local_model_->graph(), local_model_->mutable_param());
+  op_context_->Init(&local_model_shard_->graph(),
+                    local_model_shard_->mutable_param());
   op_context_batch_ = -1;
   file_loss_ = 0;
   file_loss_weight_ = 0;
@@ -187,10 +188,8 @@ void TrainerContext::PredictFile(int thread_id, const std::string& file,
 /* TrainerContextNoShard */
 /************************************************************************/
 void TrainerContextNoShard::Init(ModelShard* model_shard) {
-  _Init(model_shard->mutable_model());
-
-  model_shard_ = model_shard;
-  optimizer_ = model_shard_->mutable_optimizer();
+  _Init(model_shard);
+  optimizer_ = local_model_shard_->mutable_optimizer();
 }
 
 void TrainerContextNoShard::TrainBatch() {
@@ -223,7 +222,7 @@ void TrainerContextNoShard::PredictBatch() {
 /************************************************************************/
 void TrainerContextShard::Init(std::vector<ModelShard>* model_shards,
                                ModelShard* local_model_shard) {
-  _Init(local_model_shard->mutable_model());
+  _Init(local_model_shard);
 
   shard_size_ = (int)model_shards->size();
   model_shards_.resize(shard_size_);
@@ -296,7 +295,7 @@ void TrainerContextShard::Pull(int is_train) {
   if (freq_filter_threshold_ > 0 && is_train) {
     FreqStore::GetIdFreqMap(op_context_->inst(), &pull_request_.id_freq_map);
   }
-  local_model_->SplitPullRequest(pull_request_, &pull_requests_, &aux1_);
+  local_model_shard_->SplitPullRequest(pull_request_, &pull_requests_, &aux1_);
 
   pull_request_active_ = 0;
   for (int i = 0; i < shard_size_; ++i) {
@@ -319,14 +318,14 @@ void TrainerContextShard::Pull(int is_train) {
   }
   WaitForCompletion();
 
-  local_model_->SetParam(&params_);
+  local_model_shard_->mutable_model()->SetParam(&params_);
 }
 
 void TrainerContextShard::Push() {
-  local_model_->SplitGrad(local_model_->param(), op_context_->mutable_grad(),
-                          &grads_, &aux2_);
-  local_model_->SplitParam(op_context_->overwritten_param(),
-                           &overwritten_params_, &aux2_);
+  local_model_shard_->SplitGrad(local_model_shard_->param(),
+                                op_context_->mutable_grad(), &grads_, &aux2_);
+  local_model_shard_->SplitParam(op_context_->overwritten_param(),
+                                 &overwritten_params_, &aux2_);
 
   wait_token_.remain = pull_request_active_;
   for (int i = 0; i < shard_size_; ++i) {

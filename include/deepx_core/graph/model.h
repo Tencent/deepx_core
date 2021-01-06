@@ -7,6 +7,7 @@
 #include <deepx_core/common/stream.h>
 #include <deepx_core/graph/dist_proto.h>
 #include <deepx_core/graph/graph.h>
+#include <deepx_core/graph/shard.h>
 #include <deepx_core/graph/tensor_map.h>
 #include <deepx_core/tensor/data_type.h>
 #include <functional>
@@ -22,68 +23,39 @@ namespace deepx_core {
 /************************************************************************/
 class Model : public DataType {
  private:
-  static int DefaultTSRPartitioner(const std::string& name,
-                                   int shard_size) noexcept;
-  static int DefaultSRMPartitioner(int_t feature_id, int shard_size) noexcept;
-
- private:
-  tsr_partitioner_t tsr_partitioner_;
-  srm_partitioner_t srm_partitioner_;
   const Graph* graph_ = nullptr;
   TensorMap param_;
   int use_lock_ = 0;
   AnyMap param_lock_;
 
  public:
-  void set_tsr_partitioner(const tsr_partitioner_t& tsr_partitioner) {
-    tsr_partitioner_ = tsr_partitioner;
-  }
-  const tsr_partitioner_t& tsr_partitioner() const noexcept {
-    return tsr_partitioner_;
-  }
-  void set_srm_partitioner(const srm_partitioner_t& srm_partitioner) {
-    srm_partitioner_ = srm_partitioner;
-  }
-  const srm_partitioner_t& srm_partitioner() const noexcept {
-    return srm_partitioner_;
-  }
   const Graph& graph() const noexcept { return *graph_; }
   TensorMap* mutable_param() noexcept { return &param_; }
   const TensorMap& param() const noexcept { return param_; }
   AnyMap* mutable_param_lock() noexcept { return &param_lock_; }
 
  public:
-  Model();
   void Init(const Graph* graph) noexcept;
   bool InitParamPlaceholder();
   bool InitParam(std::default_random_engine& engine,  // NOLINT
-                 int shard_id, int shard_size);
+                 const Shard* shard = nullptr);
   void InitLock();
   bool Write(OutputStream& os) const;  // NOLINT
   bool Read(InputStream& is);          // NOLINT
   bool Save(const std::string& file) const;
   bool Load(const std::string& file);
   bool SaveText(const std::string& file) const;
-  void Merge(Model* other, int other_shard_id, int other_shard_size);
+  void Merge(Model* other, const Shard* shard = nullptr);
   void Warmup(Model* other);
 
  public:
   bool HasSRM() const noexcept;
   void RemoveZerosSRM();
   void ForEachSRM(const std::function<void(const std::string&, srm_t*)>& func);
-  void SplitPullRequest(const PullRequest& full_pull_request,
-                        std::vector<PullRequest>* pull_requests,
-                        std::vector<id_set_t*>* aux) const;
   // thread safe after 'InitLock'
   void Pull(std::default_random_engine& engine,  // NOLINT
             const PullRequest& pull_request, TensorMap* remote_param);
   void SetParam(std::vector<std::unique_ptr<TensorMap>>* remote_params);
-  void SplitGrad(const TensorMap& param, TensorMap* full_grad,
-                 std::vector<std::unique_ptr<TensorMap>>* grads,
-                 std::vector<srm_t*>* aux) const;
-  void SplitParam(const TensorMap& full_param,
-                  std::vector<std::unique_ptr<TensorMap>>* params,
-                  std::vector<srm_t*>* aux) const;
   // thread safe after 'InitLock'
   void Update(TensorMap* param);
 

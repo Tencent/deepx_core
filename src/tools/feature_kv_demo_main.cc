@@ -12,6 +12,7 @@
 #include <deepx_core/graph/instance_reader.h>
 #include <deepx_core/graph/model.h>
 #include <deepx_core/graph/op_context.h>
+#include <deepx_core/graph/shard.h>
 #include <deepx_core/graph/tensor_map.h>
 #include <gflags/gflags.h>
 #include <cstdint>
@@ -119,7 +120,7 @@ class MockModelContext {
     DXINFO("Initializing mock model...");
     std::default_random_engine engine;
     model_.Init(&graph_);
-    DXCHECK_THROW(model_.InitParam(engine, 0, 1));
+    DXCHECK_THROW(model_.InitParam(engine));
     for (auto& entry : *model_.mutable_param()) {
       Any& Wany = entry.second;
       if (Wany.is<srm_t>()) {

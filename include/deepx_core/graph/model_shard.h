@@ -11,6 +11,7 @@
 #include <deepx_core/graph/model.h>
 #include <deepx_core/graph/ol_store.h>
 #include <deepx_core/graph/optimizer.h>
+#include <deepx_core/graph/shard.h>
 #include <deepx_core/graph/tensor_map.h>
 #include <deepx_core/graph/ts_store.h>
 #include <deepx_core/tensor/data_type.h>
@@ -43,9 +44,8 @@ ShardInfo GetShardInfo(const std::string& dir, int shard_size);
 class ModelShard : public DataType {
  private:
   std::default_random_engine engine_;
-  int shard_id_ = 0;
-  int shard_size_ = 0;
   const Graph* graph_ = nullptr;
+  const Shard* shard_ = nullptr;
   std::unique_ptr<Model> model_;
   std::unique_ptr<Optimizer> optimizer_;
   std::unique_ptr<TSStore> ts_store_;
@@ -59,8 +59,8 @@ class ModelShard : public DataType {
     engine_.seed((std::default_random_engine::result_type)s);
   }
   std::default_random_engine& engine() noexcept { return engine_; }
-  int shard_id() const noexcept { return shard_id_; }
   const Graph& graph() const noexcept { return *graph_; }
+  const Shard& shard() const noexcept { return *shard_; }
   Model* mutable_model() noexcept { return model_.get(); }
   const Model& model() const noexcept { return *model_; }
   TensorMap* mutable_param() noexcept { return model_->mutable_param(); }
@@ -85,7 +85,7 @@ class ModelShard : public DataType {
   std::string GetSuccessFile(const std::string& dir) const;
 
  public:
-  void Init(int shard_id, int shard_size, const Graph* graph) noexcept;
+  void Init(const Graph* graph, const Shard* shard) noexcept;
   bool InitModelPlaceholder();
   bool InitModel();
   bool InitOptimizer(const std::string& optimizer,
@@ -133,6 +133,23 @@ class ModelShard : public DataType {
                  const std::function<void()>& completion_handler);
   void AsyncPush(TensorMap* grad, TensorMap* overwritten_param,
                  const std::function<void()>& completion_handler);
+
+ public:
+  void SplitPullRequest(const PullRequest& full_pull_request,
+                        std::vector<PullRequest>* pull_requests,
+                        std::vector<id_set_t*>* aux) const {
+    shard_->SplitPullRequest(full_pull_request, pull_requests, aux);
+  }
+  void SplitGrad(const TensorMap& param, TensorMap* full_grad,
+                 std::vector<std::unique_ptr<TensorMap>>* grads,
+                 std::vector<srm_t*>* aux) const {
+    shard_->SplitGrad(param, full_grad, grads, aux);
+  }
+  void SplitParam(const TensorMap& full_param,
+                  std::vector<std::unique_ptr<TensorMap>>* params,
+                  std::vector<srm_t*>* aux) const {
+    shard_->SplitParam(full_param, params, aux);
+  }
 };
 
 }  // namespace deepx_core

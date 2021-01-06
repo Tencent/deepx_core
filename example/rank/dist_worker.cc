@@ -10,6 +10,7 @@
 #include <deepx_core/graph/dist_proto.h>
 #include <deepx_core/graph/graph.h>
 #include <deepx_core/graph/model_shard.h>
+#include <deepx_core/graph/shard.h>
 #include <deepx_core/graph/tensor_map.h>
 #include <deepx_core/ps/tcp_connection.h>
 #include <chrono>
@@ -57,7 +58,7 @@ class TrainerContextDist : public TrainerContext {
 TrainerContextDist::TrainerContextDist() : io_(), ps_conns_(&io_) {}
 
 void TrainerContextDist::Init(ModelShard* local_model_shard) {
-  _Init(local_model_shard->mutable_model());
+  _Init(local_model_shard);
 
   DXCHECK_THROW(ps_conns_.ConnectRetry(FLAGS_ps_endpoints) == 0);
 
@@ -109,7 +110,7 @@ void TrainerContextDist::Pull() {
     FreqStore::GetIdFreqMap(op_context_->inst(), &pull_request_.id_freq_map);
   }
   pull_request_.is_train = FLAGS_is_train;
-  local_model_->SplitPullRequest(pull_request_, &pull_requests_, &aux1_);
+  local_model_shard_->SplitPullRequest(pull_request_, &pull_requests_, &aux1_);
 
   for (int i = 0; i < shard_size_; ++i) {
     if (pull_requests_[i].empty()) {
@@ -145,14 +146,14 @@ void TrainerContextDist::Pull() {
     }
   }
 
-  local_model_->SetParam(&params_);
+  local_model_shard_->mutable_model()->SetParam(&params_);
 }
 
 void TrainerContextDist::Push() {
-  local_model_->SplitGrad(local_model_->param(), op_context_->mutable_grad(),
-                          &grads_, &aux2_);
-  local_model_->SplitParam(op_context_->overwritten_param(),
-                           &overwritten_params_, &aux2_);
+  local_model_shard_->SplitGrad(local_model_shard_->param(),
+                                op_context_->mutable_grad(), &grads_, &aux2_);
+  local_model_shard_->SplitParam(op_context_->overwritten_param(),
+                                 &overwritten_params_, &aux2_);
 
   for (int i = 0; i < shard_size_; ++i) {
     if (pull_request_masks_[i]) {
@@ -176,6 +177,7 @@ class TrainerDist {
   IoContext io_;
   TcpConnection cs_conn_;
   Graph graph_;
+  Shard shard_;
   ModelShard local_model_shard_;
   TrainerContextDist context_;
 
@@ -204,7 +206,8 @@ void TrainerDist::Init() {
     DXCHECK_THROW(graph_.Load(GetGraphFile(FLAGS_in_model)));
   }
 
-  local_model_shard_.Init(0, 1, &graph_);
+  shard_ = Shard(0, FLAGS_ps_size);
+  local_model_shard_.Init(&graph_, &shard_);
   DXCHECK_THROW(local_model_shard_.InitModelPlaceholder());
 
   context_.set_instance_reader(FLAGS_instance_reader);
