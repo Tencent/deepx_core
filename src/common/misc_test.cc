@@ -18,6 +18,7 @@ TEST_F(MiscTest, GetOutputPredictFile) {
   EXPECT_EQ(GetOutputPredictFile("dir", "hdfs://file"), "dir/file");
   EXPECT_EQ(GetOutputPredictFile("dir", "file.gz"), "dir/file");
   EXPECT_EQ(GetOutputPredictFile("dir", "hdfs://file.gz"), "dir/file");
+  EXPECT_EQ(GetOutputPredictFile("dir", "a/b/file"), "dir/a_b_file");
 }
 
 TEST_F(MiscTest, ParseDeepDims) {
