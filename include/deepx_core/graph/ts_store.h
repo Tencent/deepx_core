@@ -44,9 +44,9 @@ class TSStore : public DataType {
   bool Read(InputStream& is);          // NOLINT
   bool Save(const std::string& file) const;
   bool Load(const std::string& file);
-  void Merge(TSStore* other);
-  void MergeIf(TSStore* other,
-               const std::function<bool(const id_ts_map_t::value_type&)>& func);
+  void Merge(TSStore* other,
+             const std::function<bool(const id_ts_map_t::value_type&)>& func =
+                 nullptr);
   void Warmup(TSStore* other);
 
  public:
