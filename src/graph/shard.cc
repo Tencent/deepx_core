@@ -33,8 +33,8 @@ Shard::Shard(int shard_id, int shard_size,
       shard_size_(shard_size),
       tsr_shard_func_(tsr_shard_func ? tsr_shard_func : &DefaultTSRShardFunc),
       srm_shard_func_(srm_shard_func ? srm_shard_func : &DefaultSRMShardFunc) {
-  DXCHECK(shard_id >= 0);
-  DXCHECK(shard_id < shard_size);
+  DXCHECK_THROW(shard_id_ >= 0);
+  DXCHECK_THROW(shard_id_ < shard_size_);
 }
 
 void Shard::SplitPullRequest(const PullRequest& full_pull_request,
