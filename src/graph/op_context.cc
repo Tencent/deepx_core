@@ -49,8 +49,8 @@ void OpContext::DumpProfile() const {
   char buf2[256];
   std::ostringstream os;
   os << std::endl;
-  snprintf(buf2, sizeof(buf2), "%-16s %-40s %12s %13s", "name", "method",
-                unit, "percentage");
+  snprintf(buf2, sizeof(buf2), "%-16s %-40s %12s %13s", "name", "method", unit,
+           "percentage");
   os << buf2 << std::endl;
   os << std::string(16 + 40 + 12 + 13 + 3, '-') << std::endl;
 
@@ -61,21 +61,20 @@ void OpContext::DumpProfile() const {
 #endif
   auto dump_profile = [ total, scale, &buf1, &buf2, &os ](
       const OpProfile& op_profile, const char* class_name) noexcept {
-#define DUMP_PROFILE_MEMBER(member_name, member)                             \
-  do {                                                                       \
-    const char* name;                                                        \
-    if (op_profile.node) {                                                   \
-      name = op_profile.node->name().c_str();                                \
-    } else {                                                                 \
-      name = "global";                                                       \
-    }                                                                        \
-    if (op_profile.member > 0) {                                             \
-      snprintf(buf1, sizeof(buf1), "%s::%s", class_name, member_name);  \
-      snprintf(buf2, sizeof(buf2), "%-16s %-40s %12.3f %12.3f%%", name, \
-                    buf1, op_profile.member / scale,                         \
-                    op_profile.member / total * 100);                        \
-      os << buf2 << std::endl;                                               \
-    }                                                                        \
+#define DUMP_PROFILE_MEMBER(member_name, member)                              \
+  do {                                                                        \
+    const char* name;                                                         \
+    if (op_profile.node) {                                                    \
+      name = op_profile.node->name().c_str();                                 \
+    } else {                                                                  \
+      name = "global";                                                        \
+    }                                                                         \
+    if (op_profile.member > 0) {                                              \
+      snprintf(buf1, sizeof(buf1), "%s::%s", class_name, member_name);        \
+      snprintf(buf2, sizeof(buf2), "%-16s %-40s %12.3f %12.3f%%", name, buf1, \
+               op_profile.member / scale, op_profile.member / total * 100);   \
+      os << buf2 << std::endl;                                                \
+    }                                                                         \
   } while (0)
     DUMP_PROFILE_MEMBER("InitForward", init_forward);
     DUMP_PROFILE_MEMBER("InitPredict", init_predict);
