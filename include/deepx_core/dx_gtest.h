@@ -26,23 +26,24 @@
     }                                                    \
   } while (0)
 
-#define EXPECT_VECTOR_NEAR_EPS(left, right, eps)       \
-  do {                                                 \
-    const auto& __lv = (left);                         \
-    const auto& __rv = (right);                        \
-    auto __lsize = __lv.size();                        \
-    auto __rsize = __rv.size();                        \
-    EXPECT_EQ(__lsize, __rsize);                       \
-    if (__lsize == __rsize) {                          \
-      EXPECT_ARRAY_NEAR_EPS(__lv, __rv, __lsize, eps); \
-    }                                                  \
+#define EXPECT_VECTOR_NEAR_EPS(left, right, eps)                 \
+  do {                                                           \
+    const auto& __lv = (left);                                   \
+    const auto& __rv = (right);                                  \
+    auto __lsize = __lv.size();                                  \
+    auto __rsize = __rv.size();                                  \
+    EXPECT_EQ(__lsize, __rsize) << __lsize << " != " << __rsize; \
+    if (__lsize == __rsize) {                                    \
+      EXPECT_ARRAY_NEAR_EPS(__lv, __rv, __lsize, eps);           \
+    }                                                            \
   } while (0)
 
 #define EXPECT_TSR_NEAR_EPS(left, right, eps)                           \
   do {                                                                  \
     const auto& _l = (left);                                            \
     const auto& _r = (right);                                           \
-    EXPECT_EQ(_l.shape(), _r.shape());                                  \
+    EXPECT_EQ(_l.shape(), _r.shape())                                   \
+        << to_string(_l.shape()) << " != " << to_string(_r.shape());    \
     if (_l.shape() != _r.shape()) {                                     \
       break;                                                            \
     }                                                                   \
@@ -52,32 +53,32 @@
     }                                                                   \
   } while (0)
 
-#define EXPECT_SRM_NEAR_EPS(left, right, eps)                   \
-  do {                                                          \
-    const auto& _l = (left);                                    \
-    const auto& _r = (right);                                   \
-    EXPECT_EQ(_l.col(), _r.col());                              \
-    if (_l.col() != _r.col()) {                                 \
-      break;                                                    \
-    }                                                           \
-                                                                \
-    auto _lsize = _l.size();                                    \
-    auto _rsize = _r.size();                                    \
-    EXPECT_EQ(_lsize, _rsize);                                  \
-    if (_lsize != _rsize) {                                     \
-      break;                                                    \
-    }                                                           \
-                                                                \
-    for (const auto& _entry : _l) {                             \
-      auto _id = _entry.first;                                  \
-      auto _it = _r.find(_id);                                  \
-      EXPECT_TRUE(_it != _r.end());                             \
-      if (_it != _r.end()) {                                    \
-        const auto* _lvalue = _entry.second;                    \
-        const auto* _rvalue = _it->second;                      \
-        EXPECT_ARRAY_NEAR_EPS(_lvalue, _rvalue, _l.col(), eps); \
-      }                                                         \
-    }                                                           \
+#define EXPECT_SRM_NEAR_EPS(left, right, eps)                        \
+  do {                                                               \
+    const auto& _l = (left);                                         \
+    const auto& _r = (right);                                        \
+    EXPECT_EQ(_l.col(), _r.col()) << _l.col() << " != " << _r.col(); \
+    if (_l.col() != _r.col()) {                                      \
+      break;                                                         \
+    }                                                                \
+                                                                     \
+    auto _lsize = _l.size();                                         \
+    auto _rsize = _r.size();                                         \
+    EXPECT_EQ(_lsize, _rsize) << _lsize << " != " << _rsize;         \
+    if (_lsize != _rsize) {                                          \
+      break;                                                         \
+    }                                                                \
+                                                                     \
+    for (const auto& _entry : _l) {                                  \
+      auto _id = _entry.first;                                       \
+      auto _it = _r.find(_id);                                       \
+      EXPECT_TRUE(_it != _r.end());                                  \
+      if (_it != _r.end()) {                                         \
+        const auto* _lvalue = _entry.second;                         \
+        const auto* _rvalue = _it->second;                           \
+        EXPECT_ARRAY_NEAR_EPS(_lvalue, _rvalue, _l.col(), eps);      \
+      }                                                              \
+    }                                                                \
   } while (0)
 
 #define EXPECT_DOUBLE_EPS (1e-3)
