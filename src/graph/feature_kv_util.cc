@@ -472,7 +472,6 @@ void FeatureKVUtil::SparseParamParser::Init(const Graph* graph,
       DXASSERT(node_id < node_size);
       auto& W = Wany.unsafe_to_ref<srm_t>();
       W.zeros();
-      W.reserve(512);  // magic numner
       W_[node_id] = &W;
     }
   }
