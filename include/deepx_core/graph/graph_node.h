@@ -1501,6 +1501,7 @@ class Reshape2FastNode : public GraphNodeUnaryBase {
   Reshape2FastNode(std::string name, GraphNode* X, const Shape& shape);
   DEFINE_GRAPH_NODE_LIKE(Reshape2FastNode);
 };
+using ReshapeZeroCopyNode = Reshape2FastNode;
 
 class ExpandDimNode : public GraphNodeUnaryBase {
  private:
@@ -1527,6 +1528,7 @@ class ExpandDimFastNode : public GraphNodeUnaryBase {
   ExpandDimFastNode(std::string name, GraphNode* X, int axis);
   DEFINE_GRAPH_NODE_LIKE(ExpandDimFastNode);
 };
+using ExpandDimZeroCopyNode = ExpandDimFastNode;
 
 class SqueezeNode : public GraphNodeUnaryBase {
  private:
@@ -1553,6 +1555,7 @@ class SqueezeFastNode : public GraphNodeUnaryBase {
   SqueezeFastNode(std::string name, GraphNode* X, int axis);
   DEFINE_GRAPH_NODE_LIKE(SqueezeFastNode);
 };
+using SqueezeZeroCopyNode = SqueezeFastNode;
 
 class TransposeNode : public GraphNodeUnaryBase {
  private:
@@ -1628,15 +1631,15 @@ class WhereNode : public GraphNode {
 
 class TileNode : public GraphNodeUnaryBase {
  private:
-  std::vector<int> replicates_;
-  DEFINE_GRAPH_NODE_ATTR(TileNode, replicates_);
+  std::vector<int> reps_;
+  DEFINE_GRAPH_NODE_ATTR(TileNode, reps_);
 
  public:
-  const std::vector<int>& replicates() const noexcept { return replicates_; }
+  const std::vector<int>& reps() const noexcept { return reps_; }
 
  public:
-  TileNode(std::string name, GraphNode* X, int replicate);
-  TileNode(std::string name, GraphNode* X, std::vector<int> replicates);
+  TileNode(std::string name, GraphNode* X, int rep);
+  TileNode(std::string name, GraphNode* X, std::vector<int> reps);
   DEFINE_GRAPH_NODE_LIKE(TileNode);
 };
 
@@ -1955,10 +1958,13 @@ inline GraphNode* ReshapeFast(std::string name, GraphNode* X,
 
 DEFINE_GRAPH_NODE_CREATOR(Reshape2)
 DEFINE_GRAPH_NODE_CREATOR(Reshape2Fast)
+DEFINE_GRAPH_NODE_CREATOR(ReshapeZeroCopy)
 DEFINE_GRAPH_NODE_CREATOR(ExpandDim)
 DEFINE_GRAPH_NODE_CREATOR(ExpandDimFast)
+DEFINE_GRAPH_NODE_CREATOR(ExpandDimZeroCopy)
 DEFINE_GRAPH_NODE_CREATOR(Squeeze)
 DEFINE_GRAPH_NODE_CREATOR(SqueezeFast)
+DEFINE_GRAPH_NODE_CREATOR(SqueezeZeroCopy)
 DEFINE_GRAPH_NODE_CREATOR(Transpose)
 DEFINE_GRAPH_NODE_CREATOR(Subscript)
 DEFINE_GRAPH_NODE_CREATOR(SubscriptRange)
@@ -1967,12 +1973,11 @@ DEFINE_GRAPH_NODE_CREATOR(SequenceMask)
 DEFINE_GRAPH_NODE_CREATOR(Where)
 
 // DEFINE_GRAPH_NODE_CREATOR(Tile)
-inline GraphNode* Tile(std::string name, GraphNode* X, int replicate) {
-  return new TileNode(std::move(name), X, replicate);
+inline GraphNode* Tile(std::string name, GraphNode* X, int rep) {
+  return new TileNode(std::move(name), X, rep);
 }
-inline GraphNode* Tile(std::string name, GraphNode* X,
-                       std::vector<int> replicates) {
-  return new TileNode(std::move(name), X, std::move(replicates));
+inline GraphNode* Tile(std::string name, GraphNode* X, std::vector<int> reps) {
+  return new TileNode(std::move(name), X, std::move(reps));
 }
 
 DEFINE_GRAPH_NODE_CREATOR(BatchCos)

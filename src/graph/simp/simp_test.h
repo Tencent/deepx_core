@@ -38,8 +38,7 @@ class SimpStageTestBase : public SimpTestBase {
 
  protected:
   void Simplify() override;
-  std::string ScopedName(const std::string& name, int replicate = 1) const
-      noexcept;
+  std::string ScopedName(const std::string& name, int rep = 1) const noexcept;
 };
 
 }  // namespace deepx_core

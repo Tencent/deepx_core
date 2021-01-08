@@ -557,7 +557,7 @@ class LLMath {
     return s;
   }
 
-  // Compute l1 norm of x.
+  // Compute L1 norm of x.
   static float_t norm1(int n, cptr_t x) noexcept {
     float_t s = 0;
     for (int i = 0; i < n; ++i) {
@@ -566,7 +566,7 @@ class LLMath {
     return s;
   }
 
-  // Compute l2 norm of x.
+  // Compute L2 norm of x.
   static float_t norm2(int n, cptr_t x) noexcept {
     return std::sqrt(dot(n, x, x));
   }

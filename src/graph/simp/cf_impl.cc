@@ -143,8 +143,8 @@ bool RemoveIdenticalTileStage::MaySimplify(const GraphNode* node) const
     return false;
   }
   const auto* tile = (const TileNode*)node;
-  for (auto replicate : tile->replicates()) {
-    if (replicate != 1) {
+  for (auto rep : tile->reps()) {
+    if (rep != 1) {
       return false;
     }
   }

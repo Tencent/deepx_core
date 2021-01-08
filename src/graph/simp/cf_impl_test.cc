@@ -34,10 +34,9 @@ class GraphFoldingTest : public SimpTestBase {
     } while (simplified);
   }
 
-  std::string ScopedName(const std::string& name, int replicate = 1) const
-      noexcept {
+  std::string ScopedName(const std::string& name, int rep = 1) const noexcept {
     std::string scope;
-    while (replicate-- > 0) {
+    while (rep-- > 0) {
       scope += simp_name + "/" + "fold_graph" + "/";
     }
     return scope + name;

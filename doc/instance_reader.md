@@ -4,7 +4,7 @@
 
 样本解析器是连接原始文件和计算图的桥梁, 它源源不断从原始文件解析出样本.
 
-计算图中, 由InstanceNode接收样本中的张量.
+计算图中, InstanceNode表示样本中的张量.
 
 ![arch](pic/instance_reader_arch.png)
 
@@ -123,7 +123,7 @@ config是样本解析器配置, 它的格式是"配置名=值;配置名=值".
 | 配置名 | 默认值 | 含义 |
 | - | - | - |
 | batch | 32 | batch size |
-| label\_size | 1 | 标签系列包含"标签"或者"&lt;标签, 权重&gt;对"的数量 |
+| label\_size | 1 | 标签系列包含"标签"或"&lt;标签, 权重&gt;对"的数量 |
 | w | 0 | 是否解析标签系列的权重 |
 | uuid | 0 | 是否解析uuid |
 
@@ -158,7 +158,7 @@ config是样本解析器配置, 它的格式是"配置名=值;配置名=值".
 | 配置名 | 默认值 | 含义 |
 | - | - | - |
 | batch | 32 | batch size |
-| label\_size | 1 | 标签系列包含"标签"或者"&lt;标签, 权重&gt;对"的数量 |
+| label\_size | 1 | 标签系列包含"标签"或"&lt;标签, 权重&gt;对"的数量 |
 | w | 0 | 是否解析标签系列的权重 |
 | uuid | 0 | 是否解析uuid |
 | x\_size | 无, 必须传入 | 特征系列的数量 |
@@ -190,7 +190,7 @@ config是样本解析器配置, 它的格式是"配置名=值;配置名=值".
 | 配置名 | 默认值 | 含义 |
 | - | - | - |
 | batch | 32 | batch size |
-| label\_size | 1 | 标签系列包含"标签"或者"&lt;标签, 权重&gt;对"的数量 |
+| label\_size | 1 | 标签系列包含"标签"或"&lt;标签, 权重&gt;对"的数量 |
 | w | 0 | 是否解析标签系列的权重 |
 | uuid | 0 | 是否解析uuid |
 | x\_hist\_item\_size | 无, 必须传入 | history特征系列的数量 |
@@ -222,7 +222,7 @@ X\_HIST\_SIZE\_NAME未在图中画出.
 
 ## 样本解析器开发
 
-通过继承来增加新样本解析器.
+通过继承增加新样本解析器.
 
 样本解析器的头文件是["instance\_reader.h"](../include/deepx_core/graph/instance_reader.h)和["instance\_reader\_impl.h"](../include/deepx_core/graph/instance_reader_impl.h).
 
@@ -255,11 +255,11 @@ InstanceReader是样本解析器的基类, 它定义了以下接口.
 - 优先考虑继承InstanceReaderImpl.
 - 文件输入流使用AutoInputFileStream.
 - GetBatch通常实现成batch模式.
-  - 如果解析出batch size个样本, 为之后的GetBatch做好准备, 返回true.
-  - 如果遇到文件末尾等错误时, 无法解析出batch size个样本, 返回false.
+  - 一直解析样本, 直到凑够batch size个样本, 返回true.
+  - 如果无法解析样本且无法凑够batch size个样本, 返回false.
 - GetBatch也可以不实现成batch模式.
-  - 如果解析出样本, 为之后的GetBatch做好准备, 返回true.
-  - 如果没有解析出样本, 返回false.
+  - 如果解析出样本, 返回true.
+  - 如果无法解析样本, 返回false.
 
 用INSTANCE\_READER\_REGISTER宏注册样本解析器类和样本解析器名称.
 

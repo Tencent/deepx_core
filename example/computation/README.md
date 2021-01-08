@@ -79,7 +79,7 @@ W, B是参数, 输入X, 输出Z.
   ```c++
   auto& _W = param.insert<tsr_t>(W.name());
   _W.resize(W.shape());
-  // 硬编码. 生产环境中, 通常从文件或者网络加载参数.
+  // 硬编码. 生产环境中, 通常从文件或网络加载参数.
   _W.data(0) = 2;
   auto& _B = param.insert<tsr_t>(B.name());
   _B.resize(B.shape());

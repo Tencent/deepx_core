@@ -2,11 +2,9 @@
 
 [TOC]
 
-本文档面向使用者.
+本文档面向使用者, 将尽可能屏蔽实现细节.
 
-本文档将淡化概念相同但实现细节不同的东西.
-
-除了标题使用"算子"外, 本文档使用"节点"表示节点和算子这个概念, 使用"计算图"表示计算图的表示层.
+除了标题使用"算子"外, 本文档使用"节点"表示节点和算子, 使用"计算图"表示计算图的表示层.
 
 ## 节点类型
 
@@ -43,7 +41,7 @@ GraphNode* Relu(std::string name, GraphNode* X);
 | - | - | - | - |
 | TENSOR\_TYPE\_TSR | TSR | 浮点型稠密张量 | PARAM, INSTANCE, HIDDEN |
 | TENSOR\_TYPE\_SRM | SRM | 稀疏行矩阵 | PARAM |
-| TENSOR\_TYPE\_CSR | CSR | CSR矩阵 | INSTANCE |
+| TENSOR\_TYPE\_CSR | CSR | 压缩稀疏行矩阵 | INSTANCE |
 | TENSOR\_TYPE\_TSRI | TSRI | 整型稠密张量 | INSTANCE |
 | TENSOR\_TYPE\_TSRS | TSRS | 字符串型稠密张量 | INSTANCE |
 
@@ -90,12 +88,12 @@ int initializer_type, double initializer_param1, double initializer_param2
 
 大部分节点的构造方式有2种.
 
-以relu为例.
+例如.
 
 ```c++
 // 使用者既可以在栈上, 也可以在堆上构造节点.
 ReluNode(std::string name, GraphNode* X);
-// 在堆上构造节点, 并返回给使用者.
+// 在堆上构造节点, 并返回给使用者, 所有权属于使用者.
 GraphNode* Relu(std::string name, GraphNode* X);
 ```
 
@@ -153,7 +151,7 @@ $$
 Z_i = \left\{
 \begin{aligned}
 & X_i & & \text{if } X_i > 0 \\
-& 0 & & \text{if } X_i \le 0
+& 0 & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -175,7 +173,7 @@ $$
 Z_i = \left\{
 \begin{aligned}
 & X_i & & \text{if } X_i > 0 \\
-& \alpha X_i & & \text{if }X_i \le 0
+& \alpha X_i & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -202,7 +200,7 @@ $$
 Z_i = \left\{
 \begin{aligned}
 & X_i & & \text{if } X_i > 0 \\
-& \alpha (\exp(X_i) - 1 ) & & \text{if } X_i \le 0
+& \alpha (\exp(X_i) - 1 ) & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -229,7 +227,7 @@ $$
 Z_i = \left\{
 \begin{aligned}
 & \lambda X_i & & \text{if } X_i > 0 \\
-& \lambda \alpha (\exp(X_i) - 1 ) & & \text{if } X_i \le 0
+& \lambda \alpha (\exp(X_i) - 1 ) & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -302,7 +300,7 @@ ExpNode(std::string name, GraphNode* X);
 GraphNode* Exp(std::string name, GraphNode* X);
 ```
 
-逐元素计算X的自然指数.
+逐元素计算X的exp.
 
 参数和返回.
 
@@ -315,7 +313,7 @@ LogNode(std::string name, GraphNode* X);
 GraphNode* Log(std::string name, GraphNode* X);
 ```
 
-逐元素计算X的自然对数.
+逐元素计算X的log.
 
 参数和返回.
 
@@ -334,11 +332,13 @@ GraphNode* Negate(std::string name, GraphNode* X);
 
 - 参考SigmoidNode.
 
-### InvNode
+### InvNode/ReciprocalNode
 
 ```c++
 InvNode(std::string name, GraphNode* X);
+ReciprocalNode(std::string name, GraphNode* X);
 GraphNode* Inv(std::string name, GraphNode* X);
+GraphNode* Reciprocal(std::string name, GraphNode* X);
 ```
 
 逐元素计算X的倒数.
@@ -346,17 +346,6 @@ GraphNode* Inv(std::string name, GraphNode* X);
 参数和返回.
 
 - 参考SigmoidNode.
-
-### ReciprocalNode
-
-```c++
-ReciprocalNode(std::string name, GraphNode* X);
-GraphNode* Reciprocal(std::string name, GraphNode* X);
-```
-
-逐元素计算X的倒数.
-
-同InvNode.
 
 ### SqrtNode
 
@@ -423,7 +412,7 @@ $$
 Z_i = \left\{
 \begin{aligned}
 & 0 & & \text{with probability 1 - keep\_prob} \\
-& \frac{X_i}{\text{keep\_prob}} & & \text{with probability keep\_prob}
+& \frac{X_i}{\text{keep\_prob}} & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -435,7 +424,7 @@ $$
 
 返回.
 
-- Z, 形状和X相同的TSR.
+- Z, 形状和X相同的TSR, 有随机性.
 
 ### SignNode
 
@@ -451,7 +440,7 @@ Z_i = \left\{
 \begin{aligned}
 & 1 & & \text{if } X_i > 0 \\
 & 0 & & \text{if } X_i = 0 \\
-& -1 & & \text{if } X_i < 0
+& -1 & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -491,9 +480,9 @@ GraphNode* ClipByValue(std::string name, GraphNode* X, double clip_value_min,
 $$
 Z_i = \left\{
 \begin{aligned}
-& clip\_value\_min & & X_i < clip\_value\_min \\
-& X_i & & clip\_value\_min \leq X_i \leq clip\_value\_max \\
-& clip\_value\_max & & X_i > clip\_value\_min
+& \text{clip\_value\_min} & & \text{if } X_i \lt \text{clip\_value\_min} \\
+& \text{clip\_value\_max} & & \text{if } X_i \gt \text{clip\_value\_max} \\
+& X_i & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -517,7 +506,7 @@ GraphNode* MatrixBandPart(std::string name, GraphNode* X, int num_lower,
                           int num_upper);
 ```
 
-复制张量, 将每个最内层矩阵中心区域外的所有元素设置为零.
+复制张量, 将每个最内层矩阵中心区域外的所有元素设置为0.
 
 参数.
 
@@ -672,7 +661,7 @@ $$
 Z_i = \left\{
 \begin{aligned}
 & 1 & & \text{if } X_i = Y_i \\
-& 0 & & \text{if } X_i \ne Y_i
+& 0 & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -694,7 +683,7 @@ $$
 Z_i = \left\{
 \begin{aligned}
 & 1 & & \text{if } X_i > Y_i \\
-& 0 & & \text{if } X_i \le Y_i
+& 0 & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -716,7 +705,7 @@ $$
 Z_i = \left\{
 \begin{aligned}
 & 1 & & \text{if } X_i \ge Y_i \\
-& 0 & & \text{if } X_i < Y_i
+& 0 & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -738,7 +727,7 @@ $$
 Z_i = \left\{
 \begin{aligned}
 & 1 & & \text{if } X_i < Y_i \\
-& 0 & & \text{if } X_i \ge Y_i
+& 0 & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -760,7 +749,7 @@ $$
 Z_i = \left\{
 \begin{aligned}
 & 1 & & \text{if } X_i \le Y_i \\
-& 0 & & \text{if } X_i > Y_i
+& 0 & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -778,11 +767,12 @@ GraphNode* BroadcastAdd(std::string name, GraphNode* X, GraphNode* Y);
 
 广播计算X加Y.
 
+参考广播规则<sup>1,2</sup>.
+
 参数.
 
 - X, TSR.
 - Y, TSR.
-  - X和Y的形状必须满足[numpy广播规则](https://docs.scipy.org/doc/numpy/user/basics.broadcasting.html).
 
 返回.
 
@@ -836,6 +826,8 @@ GraphNode* BroadcastSub(std::string name, GraphNode* X, GraphNode* Y);
 
 广播计算X减Y.
 
+参考广播规则<sup>1,2</sup>.
+
 参数和返回.
 
 - 参考BroadcastAddNode.
@@ -848,6 +840,8 @@ GraphNode* BroadcastMul(std::string name, GraphNode* X, GraphNode* Y);
 ```
 
 广播计算X乘Y.
+
+参考广播规则<sup>1,2</sup>.
 
 参数和返回.
 
@@ -862,6 +856,8 @@ GraphNode* BroadcastDiv(std::string name, GraphNode* X, GraphNode* Y);
 
 广播计算X除Y.
 
+参考广播规则<sup>1,2</sup>.
+
 参数和返回.
 
 - 参考BroadcastAddNode.
@@ -874,6 +870,8 @@ GraphNode* BroadcastPow(std::string name, GraphNode* X, GraphNode* Y);
 ```
 
 广播计算X的Y次方.
+
+参考广播规则<sup>1,2</sup>.
 
 参数和返回.
 
@@ -888,6 +886,8 @@ GraphNode* BroadcastMax(std::string name, GraphNode* X, GraphNode* Y);
 
 广播计算X和Y的较大值.
 
+参考广播规则<sup>1,2</sup>.
+
 参数和返回.
 
 - 参考BroadcastAddNode.
@@ -900,6 +900,8 @@ GraphNode* BroadcastMin(std::string name, GraphNode* X, GraphNode* Y);
 ```
 
 广播计算X和Y的较小值.
+
+参考广播规则<sup>1,2</sup>.
 
 参数和返回.
 
@@ -914,18 +916,11 @@ GraphNode* BroadcastEqual(std::string name, GraphNode* X, GraphNode* Y);
 
 广播计算X是否等于Y.
 
-$$
-Z_i = \left\{
-\begin{aligned}
-& 1 & & \text{if } X_i = Y_i \\
-& 0 & & \text{if } X_i \ne Y_i
-\end{aligned}
-\right.
-$$
+参考广播规则<sup>1,2</sup>.
 
 参数和返回.
 
-- 参考BroadcastAddNode.
+- 参考EqualNode和BroadcastAddNode.
 
 ### BroadcastGreaterNode
 
@@ -936,18 +931,11 @@ GraphNode* BroadcastGreater(std::string name, GraphNode* X, GraphNode* Y);
 
 广播计算X是否大于Y.
 
-$$
-Z_i = \left\{
-\begin{aligned}
-& 1 & & \text{if } X_i > Y_i \\
-& 0 & & \text{if } X_i \le Y_i
-\end{aligned}
-\right.
-$$
+参考广播规则<sup>1,2</sup>.
 
 参数和返回.
 
-- 参考BroadcastAddNode.
+- 参考GreaterNode和BroadcastAddNode.
 
 ### BroadcastGreaterEqualNode
 
@@ -958,18 +946,11 @@ GraphNode* BroadcastGreaterEqual(std::string name, GraphNode* X, GraphNode* Y);
 
 广播计算X是否大于等于Y.
 
-$$
-Z_i = \left\{
-\begin{aligned}
-& 1 & & \text{if } X_i \ge Y_i \\
-& 0 & & \text{if } X_i < Y_i
-\end{aligned}
-\right.
-$$
+参考广播规则<sup>1,2</sup>.
 
 参数和返回.
 
-- 参考BroadcastAddNode.
+- 参考GreaterEqualNode和BroadcastAddNode.
 
 ### BroadcastLessNode
 
@@ -980,18 +961,11 @@ GraphNode* BroadcastLess(std::string name, GraphNode* X, GraphNode* Y);
 
 广播计算X是否小于Y.
 
-$$
-Z_i = \left\{
-\begin{aligned}
-& 1 & & \text{if } X_i < Y_i \\
-& 0 & & \text{if } X_i \ge Y_i
-\end{aligned}
-\right.
-$$
+参考广播规则<sup>1,2</sup>.
 
 参数和返回.
 
-- 参考BroadcastAddNode.
+- 参考LessNode和BroadcastAddNode.
 
 ### BroadcastLessEqualNode
 
@@ -1002,18 +976,11 @@ GraphNode* BroadcastLessEqual(std::string name, GraphNode* X, GraphNode* Y);
 
 广播计算X是否小于等于Y.
 
-$$
-Z_i = \left\{
-\begin{aligned}
-& 1 & & \text{if } X_i \le Y_i \\
-& 0 & & \text{if } X_i > Y_i
-\end{aligned}
-\right.
-$$
+参考广播规则<sup>1,2</sup>.
 
 参数和返回.
 
-- 参考BroadcastAddNode.
+- 参考LessEqualNode和BroadcastAddNode.
 
 ### BroadcastToNode
 
@@ -1023,6 +990,8 @@ GraphNode* BroadcastTo(std::string name, GraphNode* X, const Shape& shape);
 ```
 
 将X单向广播到新形状.
+
+参考单向广播规则<sup>3</sup>.
 
 参数.
 
@@ -1041,6 +1010,8 @@ GraphNode* BroadcastToLike(std::string name, GraphNode* X, GraphNode* Y);
 ```
 
 将X单向广播到Y.
+
+参考单向广播规则<sup>3</sup>.
 
 参数.
 
@@ -1089,7 +1060,7 @@ LogSoftmaxNode(std::string name, GraphNode* X, int axis = -1);
 GraphNode* LogSoftmax(std::string name, GraphNode* X, int axis = -1);
 ```
 
-在X的axis轴上进行softmax变换, 再计算自然对数.
+在X的axis轴上进行softmax变换, 再计算log.
 
 参数和返回.
 
@@ -1102,7 +1073,7 @@ Normalize2Node(std::string name, GraphNode* X, int axis = -1);
 GraphNode* Normalize2(std::string name, GraphNode* X, int axis = -1);
 ```
 
-在X的axis轴上进行l2 norm标准化变换.
+在X的axis轴上进行L2 norm标准化变换.
 
 令$X_i$表示X的axis轴, $Z_i$表示Z的axis轴, 则有.
 
@@ -1140,7 +1111,7 @@ ReduceMeanNode(std::string name, GraphNode* X);
 GraphNode* ReduceMean(std::string name, GraphNode* X);
 ```
 
-对X进行均值规约.
+对X的所有元素进行均值规约.
 
 参数.
 
@@ -1169,7 +1140,7 @@ ReduceSumNode(std::string name, GraphNode* X);
 GraphNode* ReduceSum(std::string name, GraphNode* X);
 ```
 
-对X进行和规约.
+对X的所有元素进行和规约.
 
 参数和返回.
 
@@ -1193,7 +1164,7 @@ ReduceMaxNode(std::string name, GraphNode* X);
 GraphNode* ReduceMax(std::string name, GraphNode* X);
 ```
 
-对X进行最大值规约.
+对X的所有元素进行最大值规约.
 
 参数和返回.
 
@@ -1217,7 +1188,7 @@ ReduceMinNode(std::string name, GraphNode* X);
 GraphNode* ReduceMin(std::string name, GraphNode* X);
 ```
 
-对X进行最小值规约.
+对X的所有元素进行最小值规约.
 
 参数和返回.
 
@@ -1247,7 +1218,7 @@ ReduceL1Node(std::string name, GraphNode* X);
 GraphNode* ReduceL1(std::string name, GraphNode* X);
 ```
 
-对X进行L1 norm规约.
+对X的所有元素进行L1 norm规约.
 
 $$
 Z = \sum_j|X_j|
@@ -1281,7 +1252,7 @@ ReduceL2Node(std::string name, GraphNode* X);
 GraphNode* ReduceL2(std::string name, GraphNode* X);
 ```
 
-对X进行L2 norm规约.
+对X的所有元素进行L2 norm规约.
 
 $$
 Z = \sqrt{\sum_j X_j^2}
@@ -1378,7 +1349,7 @@ BatchFMInteractionNode(std::string name, GraphNode* X);
 GraphNode* BatchFMInteraction(std::string name, GraphNode* X);
 ```
 
-以batch方式对X中m个长度是n的向量两两组合(相乘), 得到m*(m - 1)/2个长度是n的向量.
+以batch方式对X中m个长度是n的向量两两相乘, 得到m*(m - 1)/2个长度是n的向量.
 
 参数.
 
@@ -1424,7 +1395,7 @@ BatchFMInteraction2Node(std::string name, GraphNode* X, GraphNode* Y);
 GraphNode* BatchFMInteraction2(std::string name, GraphNode* X, GraphNode* Y);
 ```
 
-以batch方式对X中m1个长度是n的向量和Y中m2个长度是n的向量两两组合(相乘), 得到m1*m2个长度是n的向量.
+以batch方式对X中m1个长度是n的向量和Y中m2个长度是n的向量两两相乘, 得到m1*m2个长度是n的向量.
 
 参数.
 
@@ -1564,10 +1535,10 @@ GraphNode* Conv1d(std::string name, GraphNode* X, GraphNode* K,
     - Z形如(batch, Z\_width, out\_channel).
   - 令W轴表示X\_width, K\_width, Z\_width轴.
 - stride, 核在W轴上的步伐.
-- dilation, 核在W轴上的扩张因子.
-- padding\_mode, 填充算法.
-  - PADDING\_MODE\_SAME, same填充算法.
-  - PADDING\_MODE\_VALID, valid填充算法.
+- dilation, 核在W轴上的扩张.
+- padding\_mode, 填充模式.
+  - PADDING\_MODE\_SAME, same填充.
+  - PADDING\_MODE\_VALID, valid填充.
   - PADDING\_MODE\_USE\_PADDINGS, 在W轴两侧各填充padding个0.
   - 没有padding_mode的版本, 同上.
 - padding, 在W轴填充0的个数.
@@ -1612,10 +1583,10 @@ GraphNode* Conv2d(std::string name, GraphNode* X, GraphNode* K,
   - 令H轴表示X\_height, K\_height, Z\_height轴.
   - 令W轴表示X\_width, K\_width, Z\_width轴.
 - strides, 核在H/W轴上的步伐.
-- dilations, 核在H/W轴上的扩张因子.
-- padding\_mode, 填充算法.
-  - PADDING\_MODE\_SAME, same填充算法.
-  - PADDING\_MODE\_VALID, valid填充算法.
+- dilations, 核在H/W轴上的扩张.
+- padding\_mode, 填充模式.
+  - PADDING\_MODE\_SAME, same填充.
+  - PADDING\_MODE\_VALID, valid填充.
   - PADDING\_MODE\_USE\_PADDINGS, 在H/W轴两侧各填充paddings个0.
   - 没有padding_mode的版本, 同上.
 - paddings, 在H/W轴填充0的个数.
@@ -1661,10 +1632,10 @@ GraphNode* Conv3d(std::string name, GraphNode* X, GraphNode* K,
   - 令H轴表示X\_height, K\_height, Z\_height轴.
   - 令W轴表示X\_width, K\_width, Z\_width轴.
 - strides, 核在D/H/W轴上的步伐.
-- dilations, 核在D/H/W轴上的扩张因子.
-- padding\_mode, 填充算法.
-  - PADDING\_MODE\_SAME, same填充算法.
-  - PADDING\_MODE\_VALID, valid填充算法.
+- dilations, 核在D/H/W轴上的扩张.
+- padding\_mode, 填充模式.
+  - PADDING\_MODE\_SAME, same填充.
+  - PADDING\_MODE\_VALID, valid填充.
   - PADDING\_MODE\_USE\_PADDINGS, 在D/H/W轴两侧各填充paddings个0.
   - 没有padding_mode的版本, 同上.
 - paddings, 在D/H/W轴填充0的个数.
@@ -1704,14 +1675,14 @@ GraphNode* MaxPool1d(std::string name, GraphNode* X, int data_format,
   - 令W轴表示X\_width, Z\_width轴.
 - kernel\_size, 核大小.
 - stride, 核在W轴上的步伐.
-- dilation, 核在W轴上的扩张因子.
-- padding\_mode, 填充算法.
-  - PADDING\_MODE\_SAME, same填充算法, ceil\_mode必须是0.
-  - PADDING\_MODE\_VALID, valid填充算法, ceil\_mode必须是0.
-  - PADDING\_MODE\_USE\_PADDINGS, 在W轴两侧各填充padding个0, ceil\_mode规定了取整方式.
+- dilation, 核在W轴上的扩张.
+- padding\_mode, 填充模式.
+  - PADDING\_MODE\_SAME, same填充, ceil\_mode必须是0.
+  - PADDING\_MODE\_VALID, valid填充, ceil\_mode必须是0.
+  - PADDING\_MODE\_USE\_PADDINGS, 在W轴两侧各填充padding个0, ceil\_mode决定了取整模式.
   - 没有padding_mode的版本, 同上.
 - padding, 在W轴填充0的个数.
-- ceil\_mode, 取整方式.
+- ceil\_mode, 取整模式.
   - 0, 计算Z\_width时向下取整.
   - 1, 计算Z\_width时向上取整.
 
@@ -1757,14 +1728,14 @@ GraphNode* MaxPool2d(std::string name, GraphNode* X, int data_format,
   - 令W轴表示X\_width, Z\_width轴.
 - kernel\_sizes, 核大小.
 - strides, 核在H/W轴上的步伐.
-- dilations, 核在H/W轴上的扩张因子.
-- padding\_mode, 填充算法.
-  - PADDING\_MODE\_SAME, same填充算法, ceil\_mode必须是0.
-  - PADDING\_MODE\_VALID, valid填充算法, ceil\_mode必须是0.
-  - PADDING\_MODE\_USE\_PADDINGS, 在H/W轴两侧各填充paddings个0, ceil\_mode规定了取整方式.
+- dilations, 核在H/W轴上的扩张.
+- padding\_mode, 填充模式.
+  - PADDING\_MODE\_SAME, same填充, ceil\_mode必须是0.
+  - PADDING\_MODE\_VALID, valid填充, ceil\_mode必须是0.
+  - PADDING\_MODE\_USE\_PADDINGS, 在H/W轴两侧各填充paddings个0, ceil\_mode决定了取整模式.
   - 没有padding_mode的版本, 同上.
 - paddings, 在H/W轴填充0的个数.
-- ceil\_mode, 取整方式.
+- ceil\_mode, 取整模式.
   - 0, 计算Z\_width时向下取整.
   - 1, 计算Z\_width时向上取整.
 
@@ -1810,14 +1781,14 @@ GraphNode* MaxPool3d(std::string name, GraphNode* X, int data_format,
   - 令W轴表示X\_width, Z\_width轴.
 - kernel\_sizes, 核大小.
 - strides, 核在D/H/W轴上的步伐.
-- dilations, 核在D/H/W轴上的扩张因子.
-- padding\_mode, 填充算法.
-  - PADDING\_MODE\_SAME, same填充算法, ceil\_mode必须是0.
-  - PADDING\_MODE\_VALID, valid填充算法, ceil\_mode必须是0.
-  - PADDING\_MODE\_USE\_PADDINGS, 在D/H/W轴两侧各填充paddings个0, ceil\_mode规定了取整方式.
+- dilations, 核在D/H/W轴上的扩张.
+- padding\_mode, 填充模式.
+  - PADDING\_MODE\_SAME, same填充, ceil\_mode必须是0.
+  - PADDING\_MODE\_VALID, valid填充, ceil\_mode必须是0.
+  - PADDING\_MODE\_USE\_PADDINGS, 在D/H/W轴两侧各填充paddings个0, ceil\_mode决定了取整模式.
   - 没有padding_mode的版本, 同上.
 - paddings, 在D/H/W轴填充0的个数.
-- ceil\_mode, 取整方式.
+- ceil\_mode, 取整模式.
   - 0, 计算Z\_width时向下取整.
   - 1, 计算Z\_width时向上取整.
 
@@ -1856,18 +1827,18 @@ GraphNode* AvgPool1d(std::string name, GraphNode* X, int data_format,
   - 令W轴表示X\_width, Z\_width轴.
 - kernel\_size, 核大小.
 - stride, 核在W轴上的步伐.
-- padding\_mode, 填充算法.
-  - PADDING\_MODE\_SAME, same填充算法, ceil\_mode必须是0.
-  - PADDING\_MODE\_VALID, valid填充算法, ceil\_mode必须是0.
-  - PADDING\_MODE\_USE\_PADDINGS, 在W轴两侧各填充padding个0, ceil\_mode规定了取整方式.
+- padding\_mode, 填充模式.
+  - PADDING\_MODE\_SAME, same填充, ceil\_mode必须是0.
+  - PADDING\_MODE\_VALID, valid填充, ceil\_mode必须是0.
+  - PADDING\_MODE\_USE\_PADDINGS, 在W轴两侧各填充padding个0, ceil\_mode决定了取整模式.
   - 没有padding_mode的版本, 同上.
 - padding, 在W轴填充0的个数.
-- ceil\_mode, 取整方式.
+- ceil\_mode, 取整模式.
   - 0, 计算Z\_width时向下取整.
   - 1, 计算Z\_width时向上取整.
-- count\_include\_pad, 计算均值方式.
-  - 0, 计算均值时不包括padding部分.
-  - 1, 计算均值时包括padding部分.
+- count\_include\_pad.
+  - 0, 计算均值时不包含padding部分.
+  - 1, 计算均值时包含padding部分.
 
 返回.
 
@@ -1910,18 +1881,18 @@ GraphNode* AvgPool2d(std::string name, GraphNode* X, int data_format,
   - 令W轴表示X\_width, Z\_width轴.
 - kernel\_sizes, 核大小.
 - strides, 核在H/W轴上的步伐.
-- padding\_mode, 填充算法.
-  - PADDING\_MODE\_SAME, same填充算法, ceil\_mode必须是0.
-  - PADDING\_MODE\_VALID, valid填充算法, ceil\_mode必须是0.
-  - PADDING\_MODE\_USE\_PADDINGS, 在H/W轴两侧各填充paddings个0, ceil\_mode规定了取整方式.
+- padding\_mode, 填充模式.
+  - PADDING\_MODE\_SAME, same填充, ceil\_mode必须是0.
+  - PADDING\_MODE\_VALID, valid填充, ceil\_mode必须是0.
+  - PADDING\_MODE\_USE\_PADDINGS, 在H/W轴两侧各填充paddings个0, ceil\_mode决定了取整模式.
   - 没有padding_mode的版本, 同上.
 - paddings, 在H/W轴填充0的个数.
-- ceil\_mode, 取整方式.
+- ceil\_mode, 取整模式.
   - 0, 计算Z\_width时向下取整.
   - 1, 计算Z\_width时向上取整.
-- count\_include\_pad, 计算均值方式.
-  - 0, 计算均值时不包括padding部分.
-  - 1, 计算均值时包括padding部分.
+- count\_include\_pad.
+  - 0, 计算均值时不包含padding部分.
+  - 1, 计算均值时包含padding部分.
 
 返回.
 
@@ -1965,18 +1936,18 @@ GraphNode* AvgPool3d(std::string name, GraphNode* X, int data_format,
   - 令W轴表示X\_width, Z\_width轴.
 - kernel\_sizes, 核大小.
 - strides, 核在D/H/W轴上的步伐.
-- padding\_mode, 填充算法.
-  - PADDING\_MODE\_SAME, same填充算法, ceil\_mode必须是0.
-  - PADDING\_MODE\_VALID, valid填充算法, ceil\_mode必须是0.
-  - PADDING\_MODE\_USE\_PADDINGS, 在D/H/W轴两侧各填充paddings个0, ceil\_mode规定了取整方式.
+- padding\_mode, 填充模式.
+  - PADDING\_MODE\_SAME, same填充, ceil\_mode必须是0.
+  - PADDING\_MODE\_VALID, valid填充, ceil\_mode必须是0.
+  - PADDING\_MODE\_USE\_PADDINGS, 在D/H/W轴两侧各填充paddings个0, ceil\_mode决定了取整模式.
   - 没有padding_mode的版本, 同上.
 - paddings, 在D/H/W轴填充0的个数.
-- ceil\_mode, 取整方式.
+- ceil\_mode, 取整模式.
   - 0, 计算Z\_width时向下取整.
   - 1, 计算Z\_width时向上取整.
-- count\_include\_pad, 计算均值方式.
-  - 0, 计算均值时不包括padding部分.
-  - 1, 计算均值时包括padding部分.
+- count\_include\_pad.
+  - 0, 计算均值时不包含padding部分.
+  - 1, 计算均值时包含padding部分.
 
 返回.
 
@@ -2034,7 +2005,7 @@ $$
 Z_i = \left\{
 \begin{aligned}
 & -\log(X_i) & & \text{if } Y_i > 0 \\
-& -\log(1 - X_i) & & \text{if } Y_i \le 0
+& -\log(1 - X_i) & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -2073,7 +2044,7 @@ $$
 Z_i = \left\{
 \begin{aligned}
 & -\log(\text{sigmoid}(X_i)) & & \text{if } Y_i > 0 \\
-& -\log(1 - \text{sigmoid}(X_i)) & & \text{if } Y_i \le 0
+& -\log(1 - \text{sigmoid}(X_i)) & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -2208,7 +2179,7 @@ $$
 Z_i = \left\{
 \begin{aligned}
 & - \alpha (1 - X_i)^\gamma log(X_i) & & \text{if } Y_i > 0 \\
-& - (1 - \alpha) X_i^\gamma log(1 - X_i) & & \text{if } Y_i \le 0
+& - (1 - \alpha) X_i^\gamma log(1 - X_i) & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -2217,8 +2188,8 @@ $$
 
 - X, TSR.
 - Y, 形状和X相同的TSR.
-- alpha, $alpha$.
-- gamma, $gamma$.
+- alpha, $\alpha$.
+- gamma, $\gamma$.
 
 返回.
 
@@ -2239,7 +2210,7 @@ $$
 Z_i = \left\{
 \begin{aligned}
 & - \alpha (1 - \text{sigmoid}(X_i))^\gamma log(\text{sigmoid}(X_i)) & & \text{if } Y_i > 0 \\
-& - (1 - \alpha) \text{sigmoid}(X_i)^\gamma log(1 - \text{sigmoid}(X_i)) & & \text{if } Y_i \le 0
+& - (1 - \alpha) \text{sigmoid}(X_i)^\gamma log(1 - \text{sigmoid}(X_i)) & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -2254,7 +2225,7 @@ $$
 InstanceNode(std::string name, const Shape& shape, int tensor_type);
 ```
 
-样本节点.
+样本.
 
 参数.
 
@@ -2285,7 +2256,7 @@ VariableNode(std::string name, const Shape& shape, int initializer_type,
              double initializer_param1, double initializer_param2);
 ```
 
-变量节点.
+变量.
 
 参数.
 
@@ -2306,9 +2277,9 @@ VariableNode(std::string name, const Shape& shape, int initializer_type,
 
 - 占位符, 表示模型参数中的张量.
 
-#### 变量作用域(variable scope)
+#### 变量作用域
 
-变量作用域实现了变量节点共享等功能, 它有助于计算图模块化开发.
+变量作用域实现了变量节点共享等功能, 它有助于模块化开发.
 
 推荐使用变量作用域API代替VariableNode.
 
@@ -2337,6 +2308,8 @@ VariableScopeEnterer可以更安全的进入/离开变量作用域, 它的构造
 void ClearVariable();
 void ReleaseVariable();
 ```
+
+变量作用域中所有变量的所有权属于变量作用域.
 
 ClearVariable清理变量作用域中所有变量.
 
@@ -2374,7 +2347,7 @@ VariableNode* GetVariableRandHe(const std::string& name, const Shape& shape);
 VariableNode* GetVariableRandnHe(const std::string& name, const Shape& shape);
 ```
 
-GetVariable创建变量节点.
+GetVariable和GetVariableXXX创建变量节点.
 
 name是变量作用域下的节点名称.
 
@@ -2391,24 +2364,23 @@ auto* X2 = GetVariable("X", Shape(1));
 // X1和X2是相同节点, 名称是"X".
 
 {
-  // 变量作用域 a
+  // 变量作用域a
   VariableScopeEnterer a("a");
   auto* a_X1 = GetVariable("X", Shape(2));
   auto* a_X2 = GetVariable("X", Shape(2));
   // a_X1和a_X2是相同节点, 名称是"a/X".
 
   {
-    // 变量作用域 a/b
+    // 变量作用域a/b
     VariableScopeEnterer b("b");
     auto* a_b_X1 = GetVariable("X", Shape(3));
     auto* a_b_X2 = GetVariable("X", Shape(3));
     // a_b_X1和a_b_X2是相同节点, 名称是"a/b/X".
   }
-
-  // 变量作用域 a
+  // 变量作用域a
 }
-
 // 全局变量作用域
+
 ClearVariable();
 ```
 
@@ -2526,7 +2498,7 @@ GraphNode* RandomNormal(std::string name, const Shape& shape, double mean,
 
 返回.
 
-- Z, 形状是shape的常量TSR.
+- Z, 形状是shape的常量TSR, 有随机性.
 
 ### RandomUniformNode
 
@@ -2547,7 +2519,7 @@ GraphNode* RandomUniform(std::string name, const Shape& shape, double min,
 
 返回.
 
-- Z, 形状是shape的常量TSR.
+- Z, 形状是shape的常量TSR, 有随机性.
 
 ### ConstantLikeNode
 
@@ -2627,7 +2599,7 @@ GraphNode* RandomNormalLike(std::string name, GraphNode* X, double mean,
 
 返回.
 
-- Z, 形状和X相同的TSR.
+- Z, 形状和X相同的TSR, 有随机性.
 
 ### RandomUniformLikeNode
 
@@ -2648,7 +2620,7 @@ GraphNode* RandomUniformLike(std::string name, GraphNode* X, double min,
 
 返回.
 
-- Z, 形状和X相同的TSR.
+- Z, 形状和X相同的TSR, 有随机性.
 
 ### TFEmbeddingLookupNode
 
@@ -2988,7 +2960,7 @@ Z = \left\{
 & X Y & & \text{if transX = 0 and transY = 0} \\
 & X Y^T & & \text{if transX = 0 and transY = 1} \\
 & X^T Y & & \text{if transX = 1 and transY = 0} \\
-& X^T Y^T & & \text{if transX = 1 and transY = 1}
+& X^T Y^T & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -3050,7 +3022,7 @@ Z_i = \left\{
 & X_i Y_i & & \text{if transX = 0 and transY = 0} \\
 & X_i Y_i^T & & \text{if transX = 0 and transY = 1} \\
 & X_i^T Y_i & & \text{if transX = 1 and transY = 0} \\
-& X_i^T Y_i^T & & \text{if transX = 1 and transY = 1}
+& X_i^T Y_i^T & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -3256,7 +3228,7 @@ GraphNode* Matmul2(std::string name, GraphNode* X, GraphNode* Y,
 
 - X, TSR.
 - Y, TSR.
-  - X和Y的维度处理及计算规则, 参考MatmulNode.
+  - X和Y的计算规则, 参考MatmulNode.
 - transX.
 - transY.
   - transX和transY的取值及作用, 参考GEMMNode.
@@ -3764,33 +3736,11 @@ Concat(X, -1) = TSR(
 
 ### ReshapeNode
 
-```c++
-// ReshapeNode已废弃, 请使用Reshape2Node.
-ReshapeNode(std::string name, GraphNode* X, const Shape& shape);
-// Reshape将重定向到Reshape2.
-GraphNode* Reshape(std::string name, GraphNode* X, const Shape& shape);
-```
-
-改变X的形状, 不改变X的数据.
-
-参数和返回.
-
-- 参考Reshape2Node.
+已废弃, 请使用Reshape2Node.
 
 ### ReshapeFastNode
 
-```c++
-// ReshapeFastNode已废弃, 请使用Reshape2FastNode.
-ReshapeFastNode(std::string name, GraphNode* X, const Shape& shape);
-// ReshapeFast将重定向到Reshape2Fast.
-GraphNode* ReshapeFast(std::string name, GraphNode* X, const Shape& shape);
-```
-
-改变X的形状, 不改变X的数据. 零拷贝.
-
-参数和返回.
-
-- 参考Reshape2FastNode.
+已废弃, 请使用Reshape2FastNode.
 
 ### Reshape2Node
 
@@ -3830,11 +3780,13 @@ Reshape2(X, Shape(-1, 3, 8));  // (batch, 3, 8)
 Reshape2(X, Shape(-1, 4, 6));  // (batch, 4, 6)
 ```
 
-### Reshape2FastNode
+### Reshape2FastNode/ReshapeZeroCopyNode
 
 ```c++
 Reshape2FastNode(std::string name, GraphNode* X, const Shape& shape);
+ReshapeZeroCopyNode(std::string name, GraphNode* X, const Shape& shape);
 GraphNode* Reshape2Fast(std::string name, GraphNode* X, const Shape& shape);
+GraphNode* ReshapeZeroCopy(std::string name, GraphNode* X, const Shape& shape);
 ```
 
 改变X的形状, 不改变X的数据. 零拷贝.
@@ -3882,11 +3834,13 @@ ExpandDim(X, -3);  // (2, 1, 3, 4)
 ExpandDim(X, -4);  // (1, 2, 3, 4)
 ```
 
-### ExpandDimFastNode
+### ExpandDimFastNode/ExpandDimZeroCopyNode
 
 ```c++
 ExpandDimFastNode(std::string name, GraphNode* X, int axis);
+ExpandDimZeroCopyNode(std::string name, GraphNode* X, int axis);
 GraphNode* ExpandDimFast(std::string name, GraphNode* X, int axis);
+GraphNode* ExpandDimZeroCopy(std::string name, GraphNode* X, int axis);
 ```
 
 在X的axis轴处插入维度是1的轴, 不改变X的数据. 零拷贝.
@@ -3934,11 +3888,13 @@ Squeeze(X, -5);  // (1, 2, 3, 1, 4, 1)
 Squeeze(X, -7);  // (2, 1, 3, 1, 4, 1)
 ```
 
-### SqueezeFastNode
+### SqueezeFastNode/SqueezeZeroCopyNode
 
 ```c++
 SqueezeFastNode(std::string name, GraphNode* X, int axis);
+SqueezeZeroCopyNode(std::string name, GraphNode* X, int axis);
 GraphNode* SqueezeFast(std::string name, GraphNode* X, int axis);
+GraphNode* SqueezeZeroCopy(std::string name, GraphNode* X, int axis);
 ```
 
 剪除X的axis轴, 不改变X的数据. 零拷贝.
@@ -4156,7 +4112,7 @@ GraphNode* LayerNorm(std::string name, GraphNode* X, GraphNode* gamma,
                      GraphNode* beta);
 ```
 
-层标准化.
+层标准化<sup>4</sup>.
 
 参数.
 
@@ -4167,10 +4123,6 @@ GraphNode* LayerNorm(std::string name, GraphNode* X, GraphNode* gamma,
 返回.
 
 - Z, 形状和X相同的TSR.
-
-参考.
-
-- Layer Normalization<sup>1</sup>.
 
 ### SequenceMaskNode
 
@@ -4185,7 +4137,7 @@ $$
 Z_{ij} = \left\{
 \begin{aligned}
 & 1 & & \text{if } j < \min(X_i, \text{max\_size}) \\
-& 0 & & \text{if } j \ge \min(X_i, \text{max\_size})
+& 0 & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -4228,7 +4180,7 @@ $$
 Z_i = \left\{
 \begin{aligned}
 & X_i & & \text{if } C_i \ne 0 \\
-& Y_i & & \text{if } C_i = 0
+& Y_i & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -4257,8 +4209,8 @@ Where(C, X, Y) = TSR(
 ### TileNode
 
 ```c++
-TileNode(std::string name, GraphNode* X, int replicate);
-GraphNode* Tile(std::string name, GraphNode* X, int replicate);
+TileNode(std::string name, GraphNode* X, int rep);
+GraphNode* Tile(std::string name, GraphNode* X, int rep);
 ```
 
 堆叠.
@@ -4266,11 +4218,11 @@ GraphNode* Tile(std::string name, GraphNode* X, int replicate);
 参数.
 
 - X, 形如(m0)的TSR.
-- replicate, 复制份数.
+- rep, 复制份数.
 
 返回.
 
-- Z, 形如(m0 * replicate)的TSR.
+- Z, 形如(m0 * rep)的TSR.
 
 例子(类python伪码).
 
@@ -4288,8 +4240,8 @@ Tile(X, 3) = TSR(
 ```
 
 ```c++
-TileNode(std::string name, GraphNode* X, std::vector<int> replicates);
-GraphNode* Tile(std::string name, GraphNode* X, std::vector<int> replicates);
+TileNode(std::string name, GraphNode* X, std::vector<int> reps);
+GraphNode* Tile(std::string name, GraphNode* X, std::vector<int> reps);
 ```
 
 堆叠.
@@ -4297,11 +4249,11 @@ GraphNode* Tile(std::string name, GraphNode* X, std::vector<int> replicates);
 参数.
 
 - X, 形如(m0, m1, ..., mi)的TSR.
-- replicates, 复制份数.
+- reps, 复制份数.
 
 返回.
 
-- Z, 形如(m0 * replicates[0], m1 * replicates[1], ..., mi * replicates[n])的TSR.
+- Z, 形如(m0 * reps[0], m1 * reps[1], ..., mi * reps[n])的TSR.
 
 例子(类python伪码).
 
@@ -4359,7 +4311,7 @@ $$
 参数.
 
 - X, 形如(batch, m)的TSR.
-- Y, 形状和X相同的TSR.
+- Y, 形如(batch, m)的TSR.
 
 返回.
 
@@ -4381,7 +4333,7 @@ $$
 参数.
 
 - X, 形如(batch, m)的TSR.
-- Y, 形状和X相同的TSR.
+- Y, 形如(batch, m)的TSR.
 
 返回.
 
@@ -4394,9 +4346,9 @@ StopGradNode(std::string name, GraphNode* X);
 GraphNode* StopGrad(std::string name, GraphNode* X);
 ```
 
-前向计算时, 透传, 即Z等于X.
+截断Z到X的后向计算.
 
-后向计算时, 掐断Z到X的梯度.
+实现上, 将X的梯度设置为全0.
 
 参数.
 
@@ -4415,7 +4367,7 @@ GraphNode* BatchNorm(const std::string& prefix, GraphNode* X,
                      double moving_decay = 0.9);
 ```
 
-批标准化.
+批标准化<sup>5</sup>.
 
 参数.
 
@@ -4430,11 +4382,10 @@ GraphNode* BatchNorm(const std::string& prefix, GraphNode* X,
 
 - Z, 形状和X相同的TSR.
 
-参考.
+## 参考
 
-- Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift<sup>2</sup>.
-
-## 参考文献
-
-1. Ba, Jimmy Lei, Jamie Ryan Kiros, and Geoffrey E. Hinton. "Layer normalization." *arXiv preprint arXiv:1607.06450* (2016).
-2. Ioffe, Sergey, and Christian Szegedy. "Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift." *International Conference on Machine Learning*. 2015.
+1. numpy的通用广播规则, <https://numpy.org/doc/stable/user/basics.broadcasting.html#general-broadcasting-rules>.
+2. ONNX的多向广播规则, <https://github.com/onnx/onnx/blob/master/docs/Broadcasting.md#multidirectional-broadcasting>.
+3. ONNX的单向广播规则, <https://github.com/onnx/onnx/blob/master/docs/Broadcasting.md#unidirectional-broadcasting>.
+4. Ba, Jimmy Lei, Jamie Ryan Kiros, and Geoffrey E. Hinton. "Layer normalization." *arXiv preprint arXiv:1607.06450* (2016).
+5. Ioffe, Sergey, and Christian Szegedy. "Batch Normalization: Accelerating Deep Network Training by Reducing Internal Covariate Shift." *International Conference on Machine Learning*. 2015.

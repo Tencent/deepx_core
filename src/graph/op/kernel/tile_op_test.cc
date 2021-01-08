@@ -8,14 +8,14 @@ namespace deepx_core {
 
 class TileForwardTest : public testing::Test, public DataType {};
 
-TEST_F(TileForwardTest, Tile_Xshape2_replicates2) {
+TEST_F(TileForwardTest, Tile_Xshape2_reps2) {
   ConstantNode X("X", Shape(2), {0, 1});
   TileNode Z("Z", &X, 2);
   tsr_t expected_Z{0, 1, 0, 1};
   CheckOpForward(&Z, 0, expected_Z);
 }
 
-TEST_F(TileForwardTest, Tile_Xshape23_replicates22) {
+TEST_F(TileForwardTest, Tile_Xshape23_reps22) {
   ConstantNode X("X", Shape(2, 3), {0, 1, 2, 3, 4, 5});
   TileNode Z("Z", &X, {2, 2});
   tsr_t expected_Z{{0, 1, 2, 0, 1, 2},  //
@@ -25,7 +25,7 @@ TEST_F(TileForwardTest, Tile_Xshape23_replicates22) {
   CheckOpForward(&Z, 0, expected_Z);
 }
 
-TEST_F(TileForwardTest, Tile_Xshape234_replicates222) {
+TEST_F(TileForwardTest, Tile_Xshape234_reps222) {
   ConstantNode X("X", Shape(2, 3, 4), {0,  1,  2,  3,   //
                                        4,  5,  6,  7,   //
                                        8,  9,  10, 11,  //
@@ -63,24 +63,24 @@ TEST_F(TileForwardTest, Tile_Xshape234_replicates222) {
 
 class TileBackwardTest : public testing::Test {
  protected:
-  const std::vector<std::pair<Shape, std::vector<int>>> SHAPE_REPLICATES_PAIRS =
-      {{Shape(2), {1}},
-       {Shape(2), {2}},
-       {Shape(2, 3), {1, 1}},
-       {Shape(2, 3), {1, 2}},
-       {Shape(2, 3), {2, 1}},
-       {Shape(2, 3), {2, 2}},
-       {Shape(2, 3), {2, 3}},
-       {Shape(2, 3, 4), {1, 1, 1}},
-       {Shape(2, 3, 4), {1, 1, 2}},
-       {Shape(2, 3, 4), {1, 2, 1}},
-       {Shape(2, 3, 4), {2, 1, 1}},
-       {Shape(2, 3, 4), {2, 2, 2}},
-       {Shape(2, 3, 4), {2, 3, 4}}};
+  const std::vector<std::pair<Shape, std::vector<int>>> SHAPE_REPS_PAIRS = {
+      {Shape(2), {1}},
+      {Shape(2), {2}},
+      {Shape(2, 3), {1, 1}},
+      {Shape(2, 3), {1, 2}},
+      {Shape(2, 3), {2, 1}},
+      {Shape(2, 3), {2, 2}},
+      {Shape(2, 3), {2, 3}},
+      {Shape(2, 3, 4), {1, 1, 1}},
+      {Shape(2, 3, 4), {1, 1, 2}},
+      {Shape(2, 3, 4), {1, 2, 1}},
+      {Shape(2, 3, 4), {2, 1, 1}},
+      {Shape(2, 3, 4), {2, 2, 2}},
+      {Shape(2, 3, 4), {2, 3, 4}}};
 };
 
 TEST_F(TileBackwardTest, Tile) {
-  for (const auto& entry : SHAPE_REPLICATES_PAIRS) {
+  for (const auto& entry : SHAPE_REPS_PAIRS) {
     VariableNode X("X", entry.first, TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
     TileNode Z("Z", &X, entry.second);
     CheckOpBackward(&Z, 0);

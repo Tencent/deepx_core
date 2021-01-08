@@ -8,13 +8,12 @@
 make -j8 SIMD=1
 ```
 
-SIMD=1将会添加以下编译参数, 请了解它们的作用和副作用.
+SIMD=1将添加以下编译参数, 用AVX/FMA/AVX2指令集生成向量化代码.
 
-- -ftree-vectorize
-- -ffast-math
-- -mavx
-- -mfma
-- -mavx2
+```
+CFLAGS       += -ftree-vectorize -ffast-math -mavx -mfma -mavx2
+CXXFLAGS     += -ftree-vectorize -ffast-math -mavx -mfma -mavx2
+```
 
 ## 使用sage2
 
@@ -38,10 +37,6 @@ make -j8 SAGE2_SGEMM=1
 
 单精度矩阵乘法(sgemm)将使用sage2\_sgemm.
 
-sage2\_sgemm动态加载"libmkl\_sage2.so", 使用sage2\_sgemm的程序要和"libmkl\_sage2.so"一起发布并放在同一目录.
-
-请从[prebuilt](https://git.code.oa.com/mmrecommend/prebuilt)获取"libmkl\_sage2.so".
-
 ## 使用sage2\_sgemm\_jit
 
 ```shell
@@ -53,11 +48,32 @@ make -j8 SAGE2_SGEMM_JIT=1
 
 若干op内的单精度矩阵乘法(sgemm)将使用sage2\_sgemm\_jit系列函数.
 
-sage2\_sgemm\_jit动态加载"libmkl\_sage2.so", 使用sage2\_sgemm\_jit的程序要和"libmkl\_sage2.so"一起发布并放在同一目录.
+## 使用MKL
 
-请从[prebuilt](https://git.code.oa.com/mmrecommend/prebuilt)获取"libmkl\_sage2.so".
+在Intel CPU上, MKL可以加速sage2\_sgemm和sage2\_sgemm\_jit.
 
-## 使用SIMD + sage2 + sage2\_sgemm + sage2\_sgemm\_jit(推荐)
+请从[prebuilt](https://git.code.oa.com/mmrecommend/prebuilt)获取"libmkl\_sage2.so"并和deepx程序一起发布.
+
+deepx程序启动时, 将尝试动态加载"libmkl\_sage2.so".
+
+如果加载失败, 将看到以下日志.
+
+```
+sage2_sgemm is using default kernel.
+```
+
+请检查.
+
+1. "libmkl\_sage2.so"是否可以被加载到.
+2. 是否是Intel CPU.
+
+如果加载成功, 将看到以下日志.
+
+```
+sage2_sgemm is using MKL kernel.
+```
+
+## 推荐使用SIMD + sage2 + sage2\_sgemm + sage2\_sgemm\_jit + MKL
 
 ```shell
 # 在项目根目录执行
@@ -65,3 +81,5 @@ git clone https://git.code.oa.com/mmrecommend/sage2.git
 cd sage2 && make -j8 && cd ..
 make -j8 SIMD=1 SAGE2=1 SAGE2_SGEMM=1 SAGE2_SGEMM_JIT=1
 ```
+
+参考"使用MKL".

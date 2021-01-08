@@ -58,9 +58,9 @@ void SimpStageTestBase::Simplify() {
 }
 
 std::string SimpStageTestBase::ScopedName(const std::string& name,
-                                          int replicate) const noexcept {
+                                          int rep) const noexcept {
   std::string scope;
-  while (replicate-- > 0) {
+  while (rep-- > 0) {
     scope += stage->simp_name() + "/" + stage->stage_name() + "/";
   }
   return scope + name;
