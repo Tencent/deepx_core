@@ -4,7 +4,7 @@
 
 #pragma once
 #include <memory>
-#include <type_traits>  // std::enable_if, ...
+#include <type_traits>  // std::decay, ...
 #include <typeindex>
 #include <typeinfo>
 #include <utility>
@@ -157,21 +157,6 @@ class Any {
 
   template <typename T>
   const T& unsafe_to_ref() const noexcept {
-    return ((const Container<T>*)p_.get())->value_;
-  }
-
-  template <typename T,
-            typename = typename std::enable_if<std::is_pod<T>::value>::type>
-  T to_value() const {
-    if (is<T>()) {
-      return ((const Container<T>*)p_.get())->value_;
-    }
-    throw std::bad_cast();
-  }
-
-  template <typename T,
-            typename = typename std::enable_if<std::is_pod<T>::value>::type>
-  T unsafe_to_value() const noexcept {
     return ((const Container<T>*)p_.get())->value_;
   }
 };
