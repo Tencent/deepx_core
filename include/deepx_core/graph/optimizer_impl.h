@@ -79,8 +79,8 @@ class OptimizerImpl : public Optimizer {
   void InitLock(AnyMap* param_lock) override;
   bool Write(OutputStream& os) const override;
   bool Read(InputStream& is) override;
-  void Merge(Optimizer* other, const Shard* shard) override;
-  void Warmup(Optimizer* other) override;
+  bool Merge(Optimizer* other, const Shard* shard) override;
+  bool Warmup(Optimizer* other) override;
 
  public:
   void Update(TensorMap* grad) override;

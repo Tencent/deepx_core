@@ -268,8 +268,7 @@ bool ModelShard::WarmupOptimizer(const std::string& dir) {
   if (!other) {
     return false;
   }
-  optimizer_->Warmup(other.get());
-  return true;
+  return optimizer_->Warmup(other.get());
 }
 
 bool ModelShard::WarmupTSStore(const std::string& dir) {

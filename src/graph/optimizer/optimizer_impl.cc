@@ -125,8 +125,17 @@ bool OptimizerImpl::Read(InputStream& is) {
   return true;
 }
 
-void OptimizerImpl::Merge(Optimizer* other, const Shard* shard) {
-  DXINFO("Merging optimizer slot...");
+bool OptimizerImpl::Merge(Optimizer* other, const Shard* shard) {
+  DXINFO("Merging optimizer...");
+  if (std::string(class_name()) != other->class_name()) {
+    DXERROR("Invalid optimizer: inconsistent class name %s vs %s.",
+            class_name(), other->class_name());
+    return false;
+  }
+
+  config_ = ((OptimizerImpl*)other)->config_;
+  (void)InitConfig(config_);
+
   auto merge_tsr_slot = [](const std::string& name,
                            OptimizerTSRSlot& local_slot,
                            OptimizerTSRSlot& remote_slot) {
@@ -170,10 +179,20 @@ void OptimizerImpl::Merge(Optimizer* other, const Shard* shard) {
     merge_srm_slot(name, local_slot, remote_slot);
   }
   DXINFO("Done.");
+  return true;
 }
 
-void OptimizerImpl::Warmup(Optimizer* other) {
+bool OptimizerImpl::Warmup(Optimizer* other) {
   DXINFO("Warming up optimizer...");
+  if (std::string(class_name()) != other->class_name()) {
+    DXERROR("Invalid optimizer: inconsistent class name %s vs %s.",
+            class_name(), other->class_name());
+    return false;
+  }
+
+  config_ = ((OptimizerImpl*)other)->config_;
+  (void)InitConfig(config_);
+
   auto reduce_tsr = [](const std::string& name, tsr_t& local_W,
                        tsr_t& remote_W) {
     DXINFO("Warming up TSR %s...", name.c_str());
@@ -186,6 +205,7 @@ void OptimizerImpl::Warmup(Optimizer* other) {
   };
   Reduce(other, reduce_tsr, reduce_srm);
   DXINFO("Done.");
+  return true;
 }
 
 void OptimizerImpl::Update(TensorMap* grad) {

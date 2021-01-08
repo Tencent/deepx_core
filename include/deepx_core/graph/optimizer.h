@@ -29,8 +29,8 @@ class Optimizer : public DataType {
   virtual void InitLock(AnyMap* param_lock) = 0;
   virtual bool Write(OutputStream& os) const = 0;  // NOLINT
   virtual bool Read(InputStream& is) = 0;          // NOLINT
-  virtual void Merge(Optimizer* other, const Shard* shard = nullptr) = 0;
-  virtual void Warmup(Optimizer* other) = 0;
+  virtual bool Merge(Optimizer* other, const Shard* shard = nullptr) = 0;
+  virtual bool Warmup(Optimizer* other) = 0;
 
  public:
   // thread safe after 'InitLock'
