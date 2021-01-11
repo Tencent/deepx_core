@@ -349,39 +349,37 @@ void Model::Pull(std::default_random_engine& engine,
 
   for (const auto& entry : pull_request.srm_map) {
     const std::string& name = entry.first;
-    const id_set_t& feature_id_set = entry.second;
+    const id_set_t& id_set = entry.second;
     auto& local_W = param_.get<srm_t>(name);
     const auto& const_local_W = (const srm_t&)local_W;
     auto& remote_W = remote_param->get_or_insert<srm_t>(name);
     remote_W.set_col(local_W.col());
-    remote_W.reserve(feature_id_set.size());
+    remote_W.reserve(id_set.size());
     if (pull_request.is_train) {
       // get random values for missing keys
       if (use_lock_) {
         auto& lock =
             param_lock_.unsafe_get<std::shared_ptr<ReadWriteLock>>(name);
-        for (int_t feature_id : feature_id_set) {
+        for (int_t id : id_set) {
           const float_t* feature_embedding =
-              local_W.get_row(engine, feature_id, lock.get());
+              local_W.get_row(engine, id, lock.get());
           // view, zero-copy
-          remote_W.assign_view(feature_id, feature_embedding);
+          remote_W.assign_view(id, feature_embedding);
         }
       } else {
-        for (int_t feature_id : feature_id_set) {
-          const float_t* feature_embedding =
-              local_W.get_row(engine, feature_id);
+        for (int_t id : id_set) {
+          const float_t* feature_embedding = local_W.get_row(engine, id);
           // view, zero-copy
-          remote_W.assign_view(feature_id, feature_embedding);
+          remote_W.assign_view(id, feature_embedding);
         }
       }
     } else {
       // get nothing for missing keys
-      for (int_t feature_id : feature_id_set) {
-        const float_t* feature_embedding =
-            const_local_W.get_row_no_init(feature_id);
+      for (int_t id : id_set) {
+        const float_t* feature_embedding = const_local_W.get_row_no_init(id);
         if (feature_embedding) {
           // view, zero-copy
-          remote_W.assign_view(feature_id, feature_embedding);
+          remote_W.assign_view(id, feature_embedding);
         }
       }
     }
