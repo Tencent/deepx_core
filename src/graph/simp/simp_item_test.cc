@@ -17,7 +17,7 @@ class SimpItemTest : public testing::Test {
 
  protected:
   void SetUp() override {
-    shape = Shape(2, 3);
+    shape.resize(2, 3);
 
     auto* X1 = Constant("X1", shape, 1);
     auto* X2 = ReduceMean("X2", X1, 0, 1);
