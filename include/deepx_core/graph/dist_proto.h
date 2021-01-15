@@ -17,7 +17,9 @@ namespace deepx_core {
 /************************************************************************/
 struct PullRequest : DataType {
  public:
-  int is_train = 0;  // 1: train, 0: predict
+  // 1, train
+  // 0, predict
+  int is_train = 0;
   std::unordered_set<std::string> tsr_set;
   std::unordered_map<std::string, id_set_t> srm_map;
   id_freq_map_t id_freq_map;

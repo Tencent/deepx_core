@@ -36,8 +36,10 @@ constexpr int RPC_TYPE_PS_ADDR_REQUEST = 0x04a1e6c3;  // magic number
 /* PSAddrRequest */
 /************************************************************************/
 struct PSAddrRequest {
-  int is_ps = 0;         // 1: from ps, 0: from wk
-  int ps_id = 0;         // only for ps
+  // 1, from ps
+  // 0, from wk
+  int is_ps = 0;
+  int ps_id = 0;
   uint16_t ps_port = 0;  // only for ps
 };
 
