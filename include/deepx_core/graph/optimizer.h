@@ -29,8 +29,8 @@ class Optimizer : public DataType {
   virtual void InitLock(AnyMap* param_lock) = 0;
   virtual bool Write(OutputStream& os) const = 0;  // NOLINT
   virtual bool Read(InputStream& is) = 0;          // NOLINT
-  virtual bool Merge(Optimizer* other, const Shard* shard = nullptr) = 0;
-  virtual bool Warmup(Optimizer* other) = 0;
+  virtual bool Merge(Optimizer* other, const Shard* shard = nullptr,
+                     int shard_id = 0) = 0;
 
  public:
   // thread safe after 'InitLock'
@@ -45,5 +45,6 @@ class Optimizer : public DataType {
 std::unique_ptr<Optimizer> NewOptimizer(const std::string& name);
 bool SaveOptimizer(const std::string& file, const Optimizer& optimizer);
 std::unique_ptr<Optimizer> LoadOptimizer(const std::string& file);
+bool LoadOptimizerName(const std::string& file, std::string* name);
 
 }  // namespace deepx_core

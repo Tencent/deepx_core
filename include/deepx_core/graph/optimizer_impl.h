@@ -79,8 +79,7 @@ class OptimizerImpl : public Optimizer {
   void InitLock(AnyMap* param_lock) override;
   bool Write(OutputStream& os) const override;
   bool Read(InputStream& is) override;
-  bool Merge(Optimizer* other, const Shard* shard) override;
-  bool Warmup(Optimizer* other) override;
+  bool Merge(Optimizer* other, const Shard* shard, int shard_id) override;
 
  public:
   void Update(TensorMap* grad) override;
@@ -106,45 +105,15 @@ class OptimizerImpl : public Optimizer {
                              OptimizerSRMSlot* slot) const = 0;
 
  private:
-  template <class ReduceTSR, class ReduceSRM>
-  void Reduce(Optimizer* other, ReduceTSR&& reduce_tsr,
-              ReduceSRM&& reduce_srm) {
-    for (auto& entry : ((OptimizerImpl*)other)->tsr_slot_map_) {
-      const std::string& name = entry.first;
-      auto it = tsr_slot_map_.find(name);
-      if (it == tsr_slot_map_.end()) {
-        continue;
-      }
-
-      OptimizerTSRSlot& local_slot = it->second;
-      OptimizerTSRSlot& remote_slot = entry.second;
-      if (!local_slot.O.empty() &&
-          local_slot.O.size() == remote_slot.O.size() &&
-          local_slot.O[0].same_shape(remote_slot.O[0])) {
-        for (size_t i = 0; i < local_slot.O.size(); ++i) {
-          reduce_tsr(name, local_slot.O[i], remote_slot.O[i]);
-        }
-      }
-    }
-
-    for (auto& entry : ((OptimizerImpl*)other)->srm_slot_map_) {
-      const std::string& name = entry.first;
-      auto it = srm_slot_map_.find(name);
-      if (it == srm_slot_map_.end()) {
-        continue;
-      }
-
-      OptimizerSRMSlot& local_slot = it->second;
-      OptimizerSRMSlot& remote_slot = entry.second;
-      if (!local_slot.O.empty() &&
-          local_slot.O.size() == remote_slot.O.size() &&
-          local_slot.O[0].col() == remote_slot.O[0].col()) {
-        for (size_t i = 0; i < local_slot.O.size(); ++i) {
-          reduce_srm(name, local_slot.O[i], remote_slot.O[i]);
-        }
-      }
-    }
-  }
+  using config_reduce_func_t = std::function<void(StringMap&, StringMap&)>;
+  using tsr_reduce_func_t =
+      std::function<void(const std::string&, tsr_t&, tsr_t&)>;
+  using srm_reduce_func_t =
+      std::function<void(const std::string&, srm_t&, srm_t&)>;
+  bool Reduce(Optimizer* other, const config_reduce_func_t& config_reduce_func,
+              const tsr_reduce_func_t& tsr_reduce_func,
+              const srm_reduce_func_t& srm_reduce_func,
+              const Shard* shard = nullptr, int shard_id = 0);
 };
 
 /************************************************************************/

@@ -125,85 +125,30 @@ bool OptimizerImpl::Read(InputStream& is) {
   return true;
 }
 
-bool OptimizerImpl::Merge(Optimizer* other, const Shard* shard) {
+bool OptimizerImpl::Merge(Optimizer* other, const Shard* shard, int shard_id) {
   DXINFO("Merging optimizer...");
-  if (std::string(class_name()) != other->class_name()) {
-    DXERROR("Invalid optimizer: inconsistent class name %s vs %s.",
-            class_name(), other->class_name());
-    return false;
-  }
-
-  config_ = ((OptimizerImpl*)other)->config_;
-  (void)InitConfig(config_);
-
-  auto merge_tsr_slot = [](const std::string& name,
-                           OptimizerTSRSlot& local_slot,
-                           OptimizerTSRSlot& remote_slot) {
+  auto config_reduce_func = [this](StringMap& /*local_config*/,
+                                   StringMap& remote_config) {
+    DXINFO("Merging config...");
+    (void)InitConfig(remote_config);
+  };
+  auto tsr_reduce_func = [](const std::string& name, tsr_t& local_W,
+                            tsr_t& remote_W) {
     DXINFO("Merging TSR %s...", name.c_str());
-    for (size_t i = 0; i < local_slot.O.size(); ++i) {
-      local_slot.O[i] = std::move(remote_slot.O[i]);
-    }
-  };
-  auto merge_srm_slot = [shard](const std::string& name,
-                                OptimizerSRMSlot& local_slot,
-                                OptimizerSRMSlot& remote_slot) {
-    DXINFO("Merging SRM %s...", name.c_str());
-    for (size_t i = 0; i < local_slot.O.size(); ++i) {
-      local_slot.O[i].set_col(remote_slot.O[i].col());
-      local_slot.O[i].merge_if(std::move(remote_slot.O[i]),
-                               [shard](const srm_t::value_type& entry) {
-                                 return !shard || shard->HasSRM(entry.first);
-                               });
-    }
-  };
-
-  for (auto& entry : ((OptimizerImpl*)other)->tsr_slot_map_) {
-    const std::string& name = entry.first;
-    OptimizerTSRSlot& remote_slot = entry.second;
-    auto it = tsr_slot_map_.find(name);
-    if (it != tsr_slot_map_.end()) {
-      OptimizerTSRSlot& local_slot = it->second;
-      merge_tsr_slot(name, local_slot, remote_slot);
-    } else if (!shard || shard->HasTSR(name)) {
-      OptimizerTSRSlot& local_slot = tsr_slot_map_[name];
-      local_slot.O.resize(remote_slot.O.size());
-      merge_tsr_slot(name, local_slot, remote_slot);
-    }
-  }
-
-  for (auto& entry : ((OptimizerImpl*)other)->srm_slot_map_) {
-    const std::string& name = entry.first;
-    OptimizerSRMSlot& remote_slot = entry.second;
-    OptimizerSRMSlot& local_slot = srm_slot_map_[name];
-    local_slot.O.resize(remote_slot.O.size());
-    merge_srm_slot(name, local_slot, remote_slot);
-  }
-  DXINFO("Done.");
-  return true;
-}
-
-bool OptimizerImpl::Warmup(Optimizer* other) {
-  DXINFO("Warming up optimizer...");
-  if (std::string(class_name()) != other->class_name()) {
-    DXERROR("Invalid optimizer: inconsistent class name %s vs %s.",
-            class_name(), other->class_name());
-    return false;
-  }
-
-  config_ = ((OptimizerImpl*)other)->config_;
-  (void)InitConfig(config_);
-
-  auto reduce_tsr = [](const std::string& name, tsr_t& local_W,
-                       tsr_t& remote_W) {
-    DXINFO("Warming up TSR %s...", name.c_str());
     local_W = std::move(remote_W);
   };
-  auto reduce_srm = [](const std::string& name, srm_t& local_W,
-                       srm_t& remote_W) {
-    DXINFO("Warming up SRM %s...", name.c_str());
-    local_W.merge(std::move(remote_W));
+  auto srm_reduce_func = [shard, shard_id](const std::string& name,
+                                           srm_t& local_W, srm_t& remote_W) {
+    DXINFO("Merging SRM %s...", name.c_str());
+    local_W.merge_if(
+        std::move(remote_W), [shard, shard_id](const srm_t::value_type& entry) {
+          return shard == nullptr || shard->HasSRM(shard_id, entry.first);
+        });
   };
-  Reduce(other, reduce_tsr, reduce_srm);
+  if (!Reduce(other, config_reduce_func, tsr_reduce_func, srm_reduce_func,
+              shard, shard_id)) {
+    return false;
+  }
   DXINFO("Done.");
   return true;
 }
@@ -257,6 +202,58 @@ void OptimizerImpl::UpdateParam(const std::string& name, Any* Gany, Any* Wany) {
       UpdateSRM2SRM(name, G, &W, &srm_slot_map_[name]);
     }
   }
+}
+
+bool OptimizerImpl::Reduce(Optimizer* other,
+                           const config_reduce_func_t& config_reduce_func,
+                           const tsr_reduce_func_t& tsr_reduce_func,
+                           const srm_reduce_func_t& srm_reduce_func,
+                           const Shard* shard, int shard_id) {
+  if (std::string(class_name()) != other->class_name()) {
+    DXERROR("Inconsistent class name: %s vs %s.", class_name(),
+            other->class_name());
+    return false;
+  }
+
+  config_reduce_func(config_, ((OptimizerImpl*)other)->config_);
+
+  for (auto& entry : ((OptimizerImpl*)other)->tsr_slot_map_) {
+    const std::string& name = entry.first;
+    auto it = tsr_slot_map_.find(name);
+    if (it == tsr_slot_map_.end()) {
+      continue;
+    }
+
+    OptimizerTSRSlot& local_slot = it->second;
+    OptimizerTSRSlot& remote_slot = entry.second;
+    if (local_slot.O.size() == remote_slot.O.size() &&
+        (shard == nullptr || shard->HasTSR(shard_id, name))) {
+      for (size_t i = 0; i < local_slot.O.size(); ++i) {
+        if (local_slot.O[i].same_shape(remote_slot.O[i])) {
+          tsr_reduce_func(name, local_slot.O[i], remote_slot.O[i]);
+        }
+      }
+    }
+  }
+
+  for (auto& entry : ((OptimizerImpl*)other)->srm_slot_map_) {
+    const std::string& name = entry.first;
+    auto it = srm_slot_map_.find(name);
+    if (it == srm_slot_map_.end()) {
+      continue;
+    }
+
+    OptimizerSRMSlot& local_slot = it->second;
+    OptimizerSRMSlot& remote_slot = entry.second;
+    if (local_slot.O.size() == remote_slot.O.size()) {
+      for (size_t i = 0; i < local_slot.O.size(); ++i) {
+        if (local_slot.O[i].col() == remote_slot.O[i].col()) {
+          srm_reduce_func(name, local_slot.O[i], remote_slot.O[i]);
+        }
+      }
+    }
+  }
+  return true;
 }
 
 /************************************************************************/
@@ -353,7 +350,7 @@ std::unique_ptr<Optimizer> LoadOptimizer(const std::string& file) {
     return nullptr;
   }
 
-  std::unique_ptr<Optimizer> optimizer = NewOptimizer(name);
+  std::unique_ptr<Optimizer> optimizer(NewOptimizer(name));
   if (!optimizer) {
     return nullptr;
   }
@@ -364,6 +361,22 @@ std::unique_ptr<Optimizer> LoadOptimizer(const std::string& file) {
 
   DXINFO("Done.");
   return optimizer;
+}
+
+bool LoadOptimizerName(const std::string& file, std::string* name) {
+  AutoInputFileStream is;
+  if (!is.Open(file)) {
+    DXERROR("Failed to open: %s.", file.c_str());
+    return false;
+  }
+
+  DXINFO("Loading optimizer name from %s...", file.c_str());
+  is >> *name;
+  if (!is) {
+    DXERROR("Failed to read optimizer name.");
+    return false;
+  }
+  return true;
 }
 
 }  // namespace deepx_core
