@@ -19,24 +19,9 @@
 #include <memory>
 #include <random>
 #include <string>
+#include <vector>
 
 namespace deepx_core {
-
-/************************************************************************/
-/* ShardInfo */
-/************************************************************************/
-struct ShardInfo {
-  int shard_size = 0;
-};
-
-/************************************************************************/
-/* ShardInfo functions */
-/************************************************************************/
-std::string GetShardInfoFile(const std::string& dir);
-bool HasShardInfo(const std::string& dir);
-bool SaveShardInfo(const std::string& dir, const ShardInfo& shard_info);
-bool LoadShardInfo(const std::string& dir, ShardInfo* shard_info);
-ShardInfo GetShardInfo(const std::string& dir, int shard_size);
 
 /************************************************************************/
 /* ModelShard */
@@ -44,8 +29,9 @@ ShardInfo GetShardInfo(const std::string& dir, int shard_size);
 class ModelShard : public DataType {
  private:
   std::default_random_engine engine_;
-  const Graph* graph_ = nullptr;
   const Shard* shard_ = nullptr;
+  int shard_id_ = 0;
+  const Graph* graph_ = nullptr;
   std::unique_ptr<Model> model_;
   std::unique_ptr<Optimizer> optimizer_;
   std::unique_ptr<TSStore> ts_store_;
@@ -59,8 +45,9 @@ class ModelShard : public DataType {
     engine_.seed((std::default_random_engine::result_type)s);
   }
   std::default_random_engine& engine() noexcept { return engine_; }
-  const Graph& graph() const noexcept { return *graph_; }
   const Shard& shard() const noexcept { return *shard_; }
+  int shard_id() const noexcept { return shard_id_; }
+  const Graph& graph() const noexcept { return *graph_; }
   Model* mutable_model() noexcept { return model_.get(); }
   const Model& model() const noexcept { return *model_; }
   TensorMap* mutable_param() noexcept { return model_->mutable_param(); }
@@ -75,7 +62,23 @@ class ModelShard : public DataType {
   const OLStore& ol_store() const noexcept { return *ol_store_; }
 
  private:
-  std::string GetSuffix() const;
+  static std::string GetSuffix(const Shard* shard, int shard_id);
+  static std::string GetModelFile(const std::string& dir, const Shard* shard,
+                                  int shard_id);
+  static std::string GetTextModelFile(const std::string& dir,
+                                      const Shard* shard, int shard_id);
+  static std::string GetFeatureKVModelFile(const std::string& dir,
+                                           const Shard* shard, int shard_id);
+  static std::string GetOptimizerFile(const std::string& dir,
+                                      const Shard* shard, int shard_id);
+  static std::string GetTSStoreFile(const std::string& dir, const Shard* shard,
+                                    int shard_id);
+  static std::string GetFreqStoreFile(const std::string& dir,
+                                      const Shard* shard, int shard_id);
+  static std::string GetSuccessFile(const std::string& dir, const Shard* shard,
+                                    int shard_id);
+
+ private:
   std::string GetModelFile(const std::string& dir) const;
   std::string GetTextModelFile(const std::string& dir) const;
   std::string GetFeatureKVModelFile(const std::string& dir) const;
@@ -85,7 +88,8 @@ class ModelShard : public DataType {
   std::string GetSuccessFile(const std::string& dir) const;
 
  public:
-  void Init(const Graph* graph, const Shard* shard) noexcept;
+  void InitShard(const Shard* shard, int shard_id) noexcept;
+  void InitGraph(const Graph* graph) noexcept;
   bool InitModelPlaceholder();
   bool InitModel();
   bool InitOptimizer(const std::string& optimizer,
@@ -94,7 +98,7 @@ class ModelShard : public DataType {
   bool InitTSStore(ts_t now, ts_t expire_threshold);
   bool InitFreqStore(freq_t freq_filter_threshold);
   bool InitOLStore(freq_t update_threshold, float_t distance_threshold);
-  void InitLock();
+  bool InitLock();
 
   bool SaveModel(const std::string& dir) const;
   bool SaveTextModel(const std::string& dir) const;
@@ -107,6 +111,15 @@ class ModelShard : public DataType {
   bool SaveFreqStore(const std::string& dir) const;
   bool SaveSuccess(const std::string& dir) const;
 
+ private:
+  // Load 'remote_shard' from 'dir'.
+  //
+  // Return 1, 'shard_' and 'remote_shard' are the same.
+  // Return 0, 'shard_' and 'remote_shard' differ in shard size or shard func.
+  // Return -1, error.
+  int GetShardStatus(const std::string& dir, Shard* remote_shard) const;
+
+ public:
   bool LoadModel(const std::string& dir);
   bool LoadOptimizer(const std::string& dir,
                      const std::string& optimizer_config);
@@ -122,6 +135,7 @@ class ModelShard : public DataType {
   // thread safe after 'InitLock'
   void Pull(PullRequest* pull_request, TensorMap* param);
   // thread safe after 'InitLock'
+  // 'overwritten_param' can be nullptr.
   void Push(TensorMap* grad, TensorMap* overwritten_param);
   void ExpireTSStore();
 
@@ -131,25 +145,20 @@ class ModelShard : public DataType {
   void StopThreadPool();
   void AsyncPull(PullRequest* pull_request, TensorMap* param,
                  const std::function<void()>& completion_handler);
+  // 'overwritten_param' can be nullptr.
   void AsyncPush(TensorMap* grad, TensorMap* overwritten_param,
                  const std::function<void()>& completion_handler);
 
  public:
   void SplitPullRequest(const PullRequest& full_pull_request,
                         std::vector<PullRequest>* pull_requests,
-                        std::vector<id_set_t*>* aux) const {
-    shard_->SplitPullRequest(full_pull_request, pull_requests, aux);
-  }
+                        std::vector<id_set_t*>* aux) const;
   void SplitGrad(const TensorMap& param, TensorMap* full_grad,
                  std::vector<std::unique_ptr<TensorMap>>* grads,
-                 std::vector<srm_t*>* aux) const {
-    shard_->SplitGrad(param, full_grad, grads, aux);
-  }
+                 std::vector<srm_t*>* aux) const;
   void SplitParam(const TensorMap& full_param,
                   std::vector<std::unique_ptr<TensorMap>>* params,
-                  std::vector<srm_t*>* aux) const {
-    shard_->SplitParam(full_param, params, aux);
-  }
+                  std::vector<srm_t*>* aux) const;
 };
 
 }  // namespace deepx_core

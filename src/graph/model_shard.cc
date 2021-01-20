@@ -5,106 +5,85 @@
 
 #include <deepx_core/common/stream.h>
 #include <deepx_core/dx_log.h>
-#include <deepx_core/graph/feature_kv_util.h>
 #include <deepx_core/graph/model_shard.h>
+#include <utility>
 
 namespace deepx_core {
 
-/************************************************************************/
-/* ShardInfo functions */
-/************************************************************************/
-std::string GetShardInfoFile(const std::string& dir) {
-  return dir + "/shard_info.bin";
+std::string ModelShard::GetSuffix(const Shard* shard, int shard_id) {
+  return shard->shard_mode() == 0 ? "" : "." + std::to_string(shard_id);
 }
 
-bool HasShardInfo(const std::string& dir) {
-  std::string file = GetShardInfoFile(dir);
-  AutoFileSystem fs;
-  return fs.Open(file) && fs.IsFile(file);
+std::string ModelShard::GetModelFile(const std::string& dir, const Shard* shard,
+                                     int shard_id) {
+  return dir + "/model.bin" + GetSuffix(shard, shard_id);
 }
 
-bool SaveShardInfo(const std::string& dir, const ShardInfo& shard_info) {
-  std::string file = GetShardInfoFile(dir);
-  AutoOutputFileStream os;
-  if (!os.Open(file)) {
-    DXERROR("Failed to open: %s.", file.c_str());
-    return false;
-  }
-  DXINFO("Saving shard info to %s...", file.c_str());
-  os << shard_info.shard_size;
-  if (!os) {
-    DXERROR("Failed to write shard info.");
-    return false;
-  }
-  DXINFO("Done.");
-  return true;
+std::string ModelShard::GetTextModelFile(const std::string& dir,
+                                         const Shard* shard, int shard_id) {
+  return dir + "/model.txt" + GetSuffix(shard, shard_id);
 }
 
-bool LoadShardInfo(const std::string& dir, ShardInfo* shard_info) {
-  std::string file = GetShardInfoFile(dir);
-  AutoInputFileStream is;
-  if (!is.Open(file)) {
-    DXERROR("Failed to open: %s.", file.c_str());
-    return false;
-  }
-  DXINFO("Loading shard info from %s...", file.c_str());
-  is >> shard_info->shard_size;
-  if (!is) {
-    DXERROR("Failed to read shard info.");
-    return false;
-  }
-  DXINFO("Done.");
-  return true;
+std::string ModelShard::GetFeatureKVModelFile(const std::string& dir,
+                                              const Shard* shard,
+                                              int shard_id) {
+  return dir + "/model.feature_kv" + GetSuffix(shard, shard_id);
 }
 
-ShardInfo GetShardInfo(const std::string& dir, int shard_size) {
-  ShardInfo shard_info;
-  if (!dir.empty() && HasShardInfo(dir) && LoadShardInfo(dir, &shard_info)) {
-    return shard_info;
-  }
-  shard_info.shard_size = shard_size;
-  return shard_info;
+std::string ModelShard::GetOptimizerFile(const std::string& dir,
+                                         const Shard* shard, int shard_id) {
+  return dir + "/optimizer.bin" + GetSuffix(shard, shard_id);
 }
 
-/************************************************************************/
-/* ModelShard */
-/************************************************************************/
-std::string ModelShard::GetSuffix() const {
-  return "." + std::to_string(shard_->shard_id());
+std::string ModelShard::GetTSStoreFile(const std::string& dir,
+                                       const Shard* shard, int shard_id) {
+  return dir + "/ts_store.bin" + GetSuffix(shard, shard_id);
+}
+
+std::string ModelShard::GetFreqStoreFile(const std::string& dir,
+                                         const Shard* shard, int shard_id) {
+  return dir + "/freq_store.bin" + GetSuffix(shard, shard_id);
+}
+
+std::string ModelShard::GetSuccessFile(const std::string& dir,
+                                       const Shard* shard, int shard_id) {
+  return dir + "/SUCCESS_" + GetSuffix(shard, shard_id);
 }
 
 std::string ModelShard::GetModelFile(const std::string& dir) const {
-  return dir + "/model.bin" + GetSuffix();
+  return GetModelFile(dir, shard_, shard_id_);
 }
 
 std::string ModelShard::GetTextModelFile(const std::string& dir) const {
-  return dir + "/model.txt" + GetSuffix();
+  return GetTextModelFile(dir, shard_, shard_id_);
 }
 
 std::string ModelShard::GetFeatureKVModelFile(const std::string& dir) const {
-  return dir + "/model.feature_kv" + GetSuffix();
+  return GetFeatureKVModelFile(dir, shard_, shard_id_);
 }
 
 std::string ModelShard::GetOptimizerFile(const std::string& dir) const {
-  return dir + "/optimizer.bin" + GetSuffix();
+  return GetOptimizerFile(dir, shard_, shard_id_);
 }
 
 std::string ModelShard::GetTSStoreFile(const std::string& dir) const {
-  return dir + "/ts_store.bin" + GetSuffix();
+  return GetTSStoreFile(dir, shard_, shard_id_);
 }
 
 std::string ModelShard::GetFreqStoreFile(const std::string& dir) const {
-  return dir + "/freq_store.bin" + GetSuffix();
+  return GetFreqStoreFile(dir, shard_, shard_id_);
 }
 
 std::string ModelShard::GetSuccessFile(const std::string& dir) const {
-  return dir + "/SUCCESS_" + GetSuffix();
+  return GetSuccessFile(dir, shard_, shard_id_);
 }
 
-void ModelShard::Init(const Graph* graph, const Shard* shard) noexcept {
-  graph_ = graph;
+void ModelShard::InitShard(const Shard* shard, int shard_id) noexcept {
   shard_ = shard;
+  shard_id_ = shard_id;
 }
+
+void ModelShard::InitGraph(const Graph* graph) noexcept { graph_ = graph; }
 
 bool ModelShard::InitModelPlaceholder() {
   model_.reset(new Model);
@@ -115,7 +94,7 @@ bool ModelShard::InitModelPlaceholder() {
 bool ModelShard::InitModel() {
   model_.reset(new Model);
   model_->Init(graph_);
-  return model_->InitParam(engine_, shard_);
+  return model_->InitParam(engine_, shard_, shard_id_);
 }
 
 bool ModelShard::InitOptimizer(const std::string& optimizer,
@@ -128,7 +107,10 @@ bool ModelShard::InitOptimizer(const std::string& optimizer,
   if (!optimizer_->InitParam()) {
     return false;
   }
-  return InitOptimizerConfig(optimizer_config);
+  if (!optimizer_config.empty()) {
+    return InitOptimizerConfig(optimizer_config);
+  }
+  return true;
 }
 
 bool ModelShard::InitOptimizerConfig(const std::string& optimizer_config) {
@@ -144,14 +126,15 @@ bool ModelShard::InitTSStore(ts_t now, ts_t expire_threshold) {
   ts_store_.reset(new TSStore);
   ts_store_->set_now(now);
   ts_store_->set_expire_threshold(expire_threshold);
-  ts_store_->Init(graph_);
-  return ts_store_->InitParam(model_->param());
+  ts_store_->Init(model_->mutable_param());
+  return ts_store_->InitParam();
 }
 
 bool ModelShard::InitFreqStore(freq_t freq_filter_threshold) {
   freq_store_.reset(new FreqStore);
   freq_store_->set_freq_filter_threshold(freq_filter_threshold);
-  return freq_store_->InitParam(model_->param());
+  freq_store_->Init(model_->mutable_param());
+  return freq_store_->InitParam();
 }
 
 bool ModelShard::InitOLStore(freq_t update_threshold,
@@ -163,15 +146,23 @@ bool ModelShard::InitOLStore(freq_t update_threshold,
   return ol_store_->InitParam();
 }
 
-void ModelShard::InitLock() {
+bool ModelShard::InitLock() {
+  if (ol_store_) {
+    DXERROR("OLStore does not support InitLock.");
+    return false;
+  }
+
   model_->InitLock();
-  optimizer_->InitLock(model_->mutable_param_lock());
+  if (optimizer_) {
+    optimizer_->InitLock(model_->mutable_param_lock());
+  }
   if (ts_store_) {
     ts_store_->InitLock();
   }
   if (freq_store_) {
     freq_store_->InitLock();
   }
+  return true;
 }
 
 bool ModelShard::SaveModel(const std::string& dir) const {
@@ -184,8 +175,8 @@ bool ModelShard::SaveTextModel(const std::string& dir) const {
 
 bool ModelShard::SaveFeatureKVModel(const std::string& dir,
                                     int feature_kv_protocol_version) const {
-  return FeatureKVUtil::SaveModel(GetFeatureKVModelFile(dir), *graph_,
-                                  model_->param(), feature_kv_protocol_version);
+  return model_->SaveFeatureKV(GetFeatureKVModelFile(dir),
+                               feature_kv_protocol_version);
 }
 
 bool ModelShard::SaveOLFeatureKVModel(const std::string& dir,
@@ -213,24 +204,100 @@ bool ModelShard::SaveSuccess(const std::string& dir) const {
     DXERROR("Failed to open: %s.", file.c_str());
     return false;
   }
-  DXINFO("Saving SUCCESS file to %s...", file.c_str());
+  DXINFO("Saving SUCCESS to %s...", file.c_str());
   DXINFO("Done.");
   return true;
 }
 
+int ModelShard::GetShardStatus(const std::string& dir,
+                               Shard* remote_shard) const {
+  if (!LoadShard(dir, remote_shard)) {
+    return -1;
+  }
+
+  if (shard_->shard_mode() != remote_shard->shard_mode()) {
+    DXERROR("Inconsistent shard mode: %d vs %d.", shard_->shard_mode(),
+            remote_shard->shard_mode());
+    return -1;
+  }
+
+  if (shard_->shard_size() != remote_shard->shard_size() ||
+      shard_->shard_func_name() != remote_shard->shard_func_name()) {
+    return 0;
+  }
+  return 1;
+}
+
 bool ModelShard::LoadModel(const std::string& dir) {
+  Shard remote_shard;
+  int status = GetShardStatus(dir, &remote_shard);
+  if (status == -1) {
+    return false;
+  }
+
   model_.reset(new Model);
   model_->Init(graph_);
-  return model_->Load(GetModelFile(dir));
+
+  if (status == 0) {
+    if (!model_->InitParam(engine_, shard_, shard_id_)) {
+      return false;
+    }
+
+    for (int i = 0; i < remote_shard.shard_size(); ++i) {
+      Model remote_model;
+      remote_model.Init(graph_);
+      if (!remote_model.Load(GetModelFile(dir, &remote_shard, i))) {
+        return false;
+      }
+      model_->Merge(&remote_model, shard_, shard_id_);
+    }
+    return true;
+  } else {
+    return model_->Load(GetModelFile(dir));
+  }
 }
 
 bool ModelShard::LoadOptimizer(const std::string& dir,
                                const std::string& optimizer_config) {
-  optimizer_ = deepx_core::LoadOptimizer(GetOptimizerFile(dir));
-  if (!optimizer_) {
+  Shard remote_shard;
+  int status = GetShardStatus(dir, &remote_shard);
+  if (status == -1) {
     return false;
   }
-  optimizer_->Init(graph_, model_->mutable_param());
+
+  if (status == 0) {
+    std::string name;
+    if (!LoadOptimizerName(GetOptimizerFile(dir, &remote_shard, 0), &name)) {
+      return false;
+    }
+    optimizer_ = NewOptimizer(name);
+    if (!optimizer_) {
+      return false;
+    }
+    optimizer_->Init(graph_, model_->mutable_param());
+    if (!optimizer_->InitParam()) {
+      return false;
+    }
+
+    for (int i = 0; i < remote_shard.shard_size(); ++i) {
+      std::unique_ptr<Optimizer> remote_optimizer(
+          deepx_core::LoadOptimizer(GetOptimizerFile(dir, &remote_shard, i)));
+      if (!remote_optimizer) {
+        return false;
+      }
+      remote_optimizer->Init(graph_, model_->mutable_param());
+      if (!optimizer_->Merge(remote_optimizer.get(), shard_, shard_id_)) {
+        return false;
+      }
+    }
+  } else {
+    optimizer_ = deepx_core::LoadOptimizer(GetOptimizerFile(dir));
+    if (!optimizer_) {
+      return false;
+    }
+    optimizer_->Init(graph_, model_->mutable_param());
+  }
+
   if (!optimizer_config.empty()) {
     return InitOptimizerConfig(optimizer_config);
   }
@@ -239,53 +306,181 @@ bool ModelShard::LoadOptimizer(const std::string& dir,
 
 bool ModelShard::LoadTSStore(const std::string& dir, ts_t now,
                              ts_t expire_threshold) {
+  Shard remote_shard;
+  int status = GetShardStatus(dir, &remote_shard);
+  if (status == -1) {
+    return false;
+  }
+
   ts_store_.reset(new TSStore);
   ts_store_->set_now(now);
   ts_store_->set_expire_threshold(expire_threshold);
-  ts_store_->Init(graph_);
-  return ts_store_->Load(GetTSStoreFile(dir));
+  ts_store_->Init(model_->mutable_param());
+
+  if (status == 0) {
+    for (int i = 0; i < remote_shard.shard_size(); ++i) {
+      TSStore remote_ts_store;
+      remote_ts_store.set_now(now);
+      remote_ts_store.set_expire_threshold(expire_threshold);
+      remote_ts_store.Init(model_->mutable_param());
+      if (!remote_ts_store.Load(GetTSStoreFile(dir, &remote_shard, i))) {
+        return false;
+      }
+      ts_store_->Merge(&remote_ts_store, shard_, shard_id_);
+    }
+    return true;
+  } else {
+    return ts_store_->Load(GetTSStoreFile(dir));
+  }
 }
 
 bool ModelShard::LoadFreqStore(const std::string& dir,
                                freq_t freq_filter_threshold) {
+  Shard remote_shard;
+  int status = GetShardStatus(dir, &remote_shard);
+  if (status == -1) {
+    return false;
+  }
+
   freq_store_.reset(new FreqStore);
   freq_store_->set_freq_filter_threshold(freq_filter_threshold);
-  return freq_store_->Load(GetFreqStoreFile(dir));
+  freq_store_->Init(model_->mutable_param());
+
+  if (status == 0) {
+    for (int i = 0; i < remote_shard.shard_size(); ++i) {
+      FreqStore remote_freq_store;
+      remote_freq_store.set_freq_filter_threshold(freq_filter_threshold);
+      remote_freq_store.Init(model_->mutable_param());
+      if (!remote_freq_store.Load(GetFreqStoreFile(dir, &remote_shard, i))) {
+        return false;
+      }
+      freq_store_->Merge(&remote_freq_store, shard_, shard_id_);
+    }
+    return true;
+  } else {
+    return freq_store_->Load(GetFreqStoreFile(dir));
+  }
 }
 
 bool ModelShard::WarmupModel(const std::string& dir) {
-  Model other;
-  if (!other.Load(GetModelFile(dir))) {
+  Shard remote_shard;
+  int status = GetShardStatus(dir, &remote_shard);
+  if (status == -1) {
     return false;
   }
-  model_->Warmup(&other);
+
+  if (status == 0) {
+    for (int i = 0; i < remote_shard.shard_size(); ++i) {
+      Model remote_model;
+      remote_model.Init(graph_);
+      if (!remote_model.Load(GetModelFile(dir, &remote_shard, i))) {
+        return false;
+      }
+      model_->Merge(&remote_model, shard_, shard_id_);
+    }
+  } else {
+    Model remote_model;
+    remote_model.Init(graph_);
+    if (!remote_model.Load(GetModelFile(dir))) {
+      return false;
+    }
+    model_->Merge(&remote_model);
+  }
   return true;
 }
 
 bool ModelShard::WarmupOptimizer(const std::string& dir) {
-  std::unique_ptr<Optimizer> other =
-      deepx_core::LoadOptimizer(GetOptimizerFile(dir));
-  if (!other) {
+  Shard remote_shard;
+  int status = GetShardStatus(dir, &remote_shard);
+  if (status == -1) {
     return false;
   }
-  return optimizer_->Warmup(other.get());
+
+  if (status == 0) {
+    for (int i = 0; i < remote_shard.shard_size(); ++i) {
+      std::unique_ptr<Optimizer> remote_optimizer(
+          deepx_core::LoadOptimizer(GetOptimizerFile(dir, &remote_shard, i)));
+      if (!remote_optimizer) {
+        return false;
+      }
+      remote_optimizer->Init(graph_, model_->mutable_param());
+      if (!optimizer_->Merge(remote_optimizer.get(), shard_, shard_id_)) {
+        return false;
+      }
+    }
+  } else {
+    std::unique_ptr<Optimizer> remote_optimizer(
+        deepx_core::LoadOptimizer(GetOptimizerFile(dir)));
+    if (!remote_optimizer) {
+      return false;
+    }
+    remote_optimizer->Init(graph_, model_->mutable_param());
+    if (!optimizer_->Merge(remote_optimizer.get())) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool ModelShard::WarmupTSStore(const std::string& dir) {
-  TSStore other;
-  if (!other.Load(GetTSStoreFile(dir))) {
+  Shard remote_shard;
+  int status = GetShardStatus(dir, &remote_shard);
+  if (status == -1) {
     return false;
   }
-  ts_store_->Warmup(&other);
+
+  if (status == 0) {
+    for (int i = 0; i < remote_shard.shard_size(); ++i) {
+      TSStore remote_ts_store;
+      remote_ts_store.set_now(ts_store_->now());
+      remote_ts_store.set_expire_threshold(ts_store_->expire_threshold());
+      remote_ts_store.Init(model_->mutable_param());
+      if (!remote_ts_store.Load(GetTSStoreFile(dir, &remote_shard, i))) {
+        return false;
+      }
+      ts_store_->Merge(&remote_ts_store, shard_, shard_id_);
+    }
+  } else {
+    TSStore remote_ts_store;
+    remote_ts_store.set_now(ts_store_->now());
+    remote_ts_store.set_expire_threshold(ts_store_->expire_threshold());
+    remote_ts_store.Init(model_->mutable_param());
+    if (!remote_ts_store.Load(GetTSStoreFile(dir))) {
+      return false;
+    }
+    ts_store_->Merge(&remote_ts_store);
+  }
   return true;
 }
 
 bool ModelShard::WarmupFreqStore(const std::string& dir) {
-  FreqStore other;
-  if (!other.Load(GetFreqStoreFile(dir))) {
+  Shard remote_shard;
+  int status = GetShardStatus(dir, &remote_shard);
+  if (status == -1) {
     return false;
   }
-  freq_store_->Warmup(&other);
+
+  if (status == 0) {
+    for (int i = 0; i < remote_shard.shard_size(); ++i) {
+      FreqStore remote_freq_store;
+      remote_freq_store.set_freq_filter_threshold(
+          freq_store_->freq_filter_threshold());
+      remote_freq_store.Init(model_->mutable_param());
+      if (!remote_freq_store.Load(GetFreqStoreFile(dir, &remote_shard, i))) {
+        return false;
+      }
+      freq_store_->Merge(&remote_freq_store, shard_, shard_id_);
+    }
+  } else {
+    FreqStore remote_freq_store;
+    remote_freq_store.set_freq_filter_threshold(
+        freq_store_->freq_filter_threshold());
+    remote_freq_store.Init(model_->mutable_param());
+    if (!remote_freq_store.Load(GetFreqStoreFile(dir))) {
+      return false;
+    }
+    freq_store_->Merge(&remote_freq_store);
+  }
   return true;
 }
 
@@ -310,7 +505,6 @@ void ModelShard::Push(TensorMap* grad, TensorMap* overwritten_param) {
     optimizer_->Update(grad);
   }
 
-  // 'overwritten_param' can be nullptr.
   if (overwritten_param && !overwritten_param->empty()) {
     if (ol_store_) {
       ol_store_->Update(overwritten_param);
@@ -361,6 +555,140 @@ void ModelShard::AsyncPush(TensorMap* grad, TensorMap* overwritten_param,
     Push(grad, overwritten_param);
     completion_handler();
   });
+}
+
+void ModelShard::SplitPullRequest(const PullRequest& full_pull_request,
+                                  std::vector<PullRequest>* pull_requests,
+                                  std::vector<id_set_t*>* aux) const {
+  DXASSERT(shard_->shard_mode() == 1);
+  int shard_size = shard_->shard_size();
+  DXASSERT((int)pull_requests->size() == shard_size);
+  DXASSERT((int)aux->size() == shard_size);
+
+  for (PullRequest& pull_request : *pull_requests) {
+    pull_request.clear();
+    pull_request.is_train = full_pull_request.is_train;
+  }
+
+  for (const std::string& name : full_pull_request.tsr_set) {
+    int shard_id = shard_->GetTSRShardId(name);
+    (*pull_requests)[shard_id].tsr_set.emplace(name);
+  }
+
+  for (const auto& entry : full_pull_request.srm_map) {
+    const std::string& name = entry.first;
+    const id_set_t& id_set = entry.second;
+    size_t srm_id_size = id_set.size() / shard_size;
+    for (int i = 0; i < shard_size; ++i) {
+      (*aux)[i] = &(*pull_requests)[i].srm_map[name];
+      (*aux)[i]->reserve(srm_id_size);
+    }
+    for (int_t id : id_set) {
+      int shard_id = shard_->GetSRMShardId(id);
+      (*aux)[shard_id]->emplace(id);
+    }
+  }
+
+  for (const auto& entry : full_pull_request.id_freq_map) {
+    int_t id = entry.first;
+    freq_t freq = entry.second;
+    int shard_id = shard_->GetSRMShardId(id);
+    (*pull_requests)[shard_id].id_freq_map.emplace(id, freq);
+  }
+}
+
+void ModelShard::SplitGrad(const TensorMap& param, TensorMap* full_grad,
+                           std::vector<std::unique_ptr<TensorMap>>* grads,
+                           std::vector<srm_t*>* aux) const {
+  DXASSERT(shard_->shard_mode() == 1);
+  int shard_size = shard_->shard_size();
+  DXASSERT((int)grads->size() == shard_size);
+  DXASSERT((int)aux->size() == shard_size);
+
+  for (auto& grad : *grads) {
+    grad->ClearValue();
+  }
+
+  for (auto& entry : *full_grad) {
+    const std::string& name = entry.first;
+    auto it = param.find(name);
+    if (it == param.end()) {
+      continue;
+    }
+
+    const Any& Wany = it->second;
+    Any& Gany = entry.second;
+    if (Wany.is<tsr_t>()) {
+      int shard_id = shard_->GetTSRShardId(name);
+      if (Gany.is<tsr_t>()) {
+        auto& G = Gany.unsafe_to_ref<tsr_t>();
+        // view, zero-copy
+        (*grads)[shard_id]->get_or_insert<tsr_t>(name) = G.get_view();
+      } else if (Gany.is<srm_t>()) {
+        auto& G = Gany.unsafe_to_ref<srm_t>();
+        int col = G.col();
+        (*grads)[shard_id]->get_or_insert<srm_t>(name) = std::move(G);
+        G.clear();
+        G.set_col(col);
+      }
+    } else if (Wany.is<srm_t>()) {
+      if (Gany.is<srm_t>()) {
+        auto& G = Gany.unsafe_to_ref<srm_t>();
+        size_t srm_id_size = G.size() / shard_size;
+        for (int i = 0; i < shard_size; ++i) {
+          (*aux)[i] = &(*grads)[i]->get_or_insert<srm_t>(name);
+          (*aux)[i]->set_col(G.col());
+          (*aux)[i]->reserve(srm_id_size);
+        }
+        for (const auto& _entry : G) {
+          int_t id = _entry.first;
+          const float_t* embedding = _entry.second;
+          int shard_id = shard_->GetSRMShardId(id);
+          // view, zero-copy
+          (*aux)[shard_id]->assign_view(id, embedding);
+        }
+      }
+    }
+  }
+}
+
+void ModelShard::SplitParam(const TensorMap& full_param,
+                            std::vector<std::unique_ptr<TensorMap>>* params,
+                            std::vector<srm_t*>* aux) const {
+  DXASSERT(shard_->shard_mode() == 1);
+  int shard_size = shard_->shard_size();
+  DXASSERT((int)params->size() == shard_size);
+  DXASSERT((int)aux->size() == shard_size);
+
+  for (auto& param : *params) {
+    param->ClearValue();
+  }
+
+  for (const auto& entry : full_param) {
+    const std::string& name = entry.first;
+    const Any& Wany = entry.second;
+    if (Wany.is<tsr_t>()) {
+      int shard_id = shard_->GetTSRShardId(name);
+      auto& W = Wany.unsafe_to_ref<tsr_t>();
+      // view, zero-copy
+      (*params)[shard_id]->get_or_insert<tsr_t>(name) = W.get_view();
+    } else if (Wany.is<srm_t>()) {
+      auto& W = Wany.unsafe_to_ref<srm_t>();
+      size_t srm_id_size = W.size() / shard_size;
+      for (int i = 0; i < shard_size; ++i) {
+        (*aux)[i] = &(*params)[i]->get_or_insert<srm_t>(name);
+        (*aux)[i]->set_col(W.col());
+        (*aux)[i]->reserve(srm_id_size);
+      }
+      for (const auto& _entry : W) {
+        int_t id = _entry.first;
+        const float_t* embedding = _entry.second;
+        int shard_id = shard_->GetSRMShardId(id);
+        // view, zero-copy
+        (*aux)[shard_id]->assign_view(id, embedding);
+      }
+    }
+  }
 }
 
 }  // namespace deepx_core
