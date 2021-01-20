@@ -10,10 +10,12 @@
 
 namespace deepx_core {
 
-bool FreqStore::InitParam(const TensorMap& param) {
+void FreqStore::Init(const TensorMap* param) noexcept { param_ = param; }
+
+bool FreqStore::InitParam() {
   DXINFO("Initializing FreqStore...");
   id_freq_map_.clear();
-  for (const auto& entry : param) {
+  for (const auto& entry : *param_) {
     const Any& Wany = entry.second;
     if (Wany.is<srm_t>()) {
       const auto& W = Wany.unsafe_to_ref<srm_t>();
@@ -92,33 +94,16 @@ bool FreqStore::Load(const std::string& file) {
   return true;
 }
 
-void FreqStore::Merge(
-    FreqStore* other,
-    const std::function<bool(const id_freq_map_t::value_type&)>& func) {
+void FreqStore::Merge(FreqStore* other, const Shard* shard, int shard_id) {
   DXINFO("Merging FreqStore...");
-  size_t merged = 0;
+  size_t prev_size = id_freq_map_.size();
   id_freq_map_.reserve(id_freq_map_.size() + other->id_freq_map_.size());
   for (auto& entry : other->id_freq_map_) {
-    if (!func || func(entry)) {
-      freq_t& freq = id_freq_map_[entry.first];
-      if (freq > std::numeric_limits<freq_t>::max() - entry.second) {
-        freq = std::numeric_limits<freq_t>::max();
-      } else {
-        freq += entry.second;
-      }
-      ++merged;
+    if (shard == nullptr || shard->HasSRM(shard_id, entry.first)) {
+      id_freq_map_.emplace(entry);
     }
   }
-  DXINFO("FreqStore has merged %zu entries.", merged);
-}
-
-void FreqStore::Warmup(FreqStore* other) {
-  DXINFO("Warming up FreqStore...");
-  id_freq_map_.reserve(id_freq_map_.size() + other->id_freq_map_.size());
-  for (auto& entry : other->id_freq_map_) {
-    id_freq_map_.emplace(entry);
-  }
-  DXINFO("Done.");
+  DXINFO("FreqStore has merged %zu entries.", id_freq_map_.size() - prev_size);
 }
 
 void FreqStore::RemoveIf(
@@ -160,6 +145,10 @@ void FreqStore::GetIdFreqMap(const Instance& inst, id_freq_map_t* id_freq_map) {
 }
 
 void FreqStore::Filter(PullRequest* pull_request) {
+  if (freq_filter_threshold_ == 0) {
+    return;
+  }
+
   if (use_lock_) {
     Filter_Lock(pull_request);
   } else {
@@ -168,6 +157,10 @@ void FreqStore::Filter(PullRequest* pull_request) {
 }
 
 void FreqStore::Filter(TensorMap* grad) const {
+  if (freq_filter_threshold_ == 0) {
+    return;
+  }
+
   if (use_lock_) {
     Filter_Lock(grad);
   } else {
@@ -249,7 +242,6 @@ void FreqStore::Filter_Lock(TensorMap* grad) const {
 }
 
 bool FreqStore::Filter_NoLock(int_t id) const noexcept {
-  DXASSERT(freq_filter_threshold_ > 0);
   auto it = id_freq_map_.find(id);
   if (it != id_freq_map_.end()) {
     return it->second < freq_filter_threshold_;
@@ -258,7 +250,6 @@ bool FreqStore::Filter_NoLock(int_t id) const noexcept {
 }
 
 bool FreqStore::Filter_Lock(int_t id) const noexcept {
-  DXASSERT(freq_filter_threshold_ > 0);
   ReadLockGuard guard(id_freq_map_lock_.get());
   auto it = id_freq_map_.find(id);
   if (it != id_freq_map_.end()) {

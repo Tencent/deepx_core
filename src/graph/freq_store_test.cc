@@ -30,8 +30,11 @@ TEST_F(FreqStoreTest, GetIdFreqMap) {
 }
 
 TEST_F(FreqStoreTest, Filter) {
+  TensorMap param;
+
   FreqStore freq_store;
   freq_store.set_freq_filter_threshold(FREQ_THRESHOLD);
+  freq_store.Init(&param);
 
   {
     PullRequest pull_request;
