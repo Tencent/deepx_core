@@ -4,72 +4,76 @@
 //
 
 #pragma once
-#include <deepx_core/graph/dist_proto.h>
-#include <deepx_core/graph/tensor_map.h>
+#include <deepx_core/common/stream.h>
 #include <deepx_core/tensor/data_type.h>
-#include <memory>
 #include <string>
-#include <vector>
 
 namespace deepx_core {
+
+class Shard;
+
+/************************************************************************/
+/* Shard functions */
+/************************************************************************/
+bool SaveShard(const std::string& dir, const Shard& shard);
+bool LoadShard(const std::string& dir, Shard* shard);
 
 /************************************************************************/
 /* Shard */
 /************************************************************************/
 class Shard : public DataType {
  private:
-  int shard_id_;
-  int shard_size_;
+  // 0, non-shard mode
+  // 1, shard mode
+  int shard_mode_ = 0;
+  int shard_size_ = 0;
+  std::string shard_func_name_;
   tsr_shard_func_t tsr_shard_func_;
   srm_shard_func_t srm_shard_func_;
 
  public:
-  void set_shard_id(int shard_id) noexcept { shard_id_ = shard_id; }
-  int shard_id() const noexcept { return shard_id_; }
-  void set_shard_size(int shard_size) noexcept { shard_size_ = shard_size; }
+  int shard_mode() const noexcept { return shard_mode_; }
   int shard_size() const noexcept { return shard_size_; }
-  void set_tsr_shard_func(const tsr_shard_func_t& tsr_shard_func) {
-    tsr_shard_func_ = tsr_shard_func;
+  const std::string& shard_func_name() const noexcept {
+    return shard_func_name_;
   }
   const tsr_shard_func_t& tsr_shard_func() const noexcept {
     return tsr_shard_func_;
-  }
-  void set_srm_shard_func(const srm_shard_func_t& srm_shard_func) {
-    srm_shard_func_ = srm_shard_func;
   }
   const srm_shard_func_t& srm_shard_func() const noexcept {
     return srm_shard_func_;
   }
 
+ public:
+  static void RegisterShardFunc(const std::string& shard_func_name,
+                                const tsr_shard_func_t& tsr_shard_func,
+                                const srm_shard_func_t& srm_shard_func);
+
  private:
-  static int DefaultTSRShardFunc(const std::string& name,
-                                 int shard_size) noexcept;
-  static int DefaultSRMShardFunc(int_t id, int shard_size) noexcept;
+  void _Init(int shard_mode, int shard_size,
+             const std::string& shard_func_name);
 
  public:
-  Shard();
-  Shard(int shard_id, int shard_size,
-        const tsr_shard_func_t& tsr_shard_func = nullptr,
-        const srm_shard_func_t& srm_shard_func = nullptr);
+  void InitNonShard();
+  void InitShard(int shard_size, const std::string& shard_func_name);
+  bool Write(OutputStream& os) const;  // NOLINT
+  bool Read(InputStream& is);          // NOLINT
+  bool Save(const std::string& file) const;
+  bool Load(const std::string& file);
 
  public:
-  bool HasTSR(const std::string& name) const noexcept {
-    return tsr_shard_func_(name, shard_size_) == shard_id_;
+  int GetTSRShardId(const std::string& name) const noexcept {
+    return tsr_shard_func_(name, shard_size_);
   }
-  bool HasSRM(int_t id) const noexcept {
-    return srm_shard_func_(id, shard_size_) == shard_id_;
+  int GetSRMShardId(int_t id) const noexcept {
+    return srm_shard_func_(id, shard_size_);
   }
-
- public:
-  void SplitPullRequest(const PullRequest& full_pull_request,
-                        std::vector<PullRequest>* pull_requests,
-                        std::vector<id_set_t*>* aux) const;
-  void SplitGrad(const TensorMap& param, TensorMap* full_grad,
-                 std::vector<std::unique_ptr<TensorMap>>* grads,
-                 std::vector<srm_t*>* aux) const;
-  void SplitParam(const TensorMap& full_param,
-                  std::vector<std::unique_ptr<TensorMap>>* params,
-                  std::vector<srm_t*>* aux) const;
+  bool HasTSR(int shard_id, const std::string& name) const noexcept {
+    return tsr_shard_func_(name, shard_size_) == shard_id;
+  }
+  bool HasSRM(int shard_id, int_t id) const noexcept {
+    return srm_shard_func_(id, shard_size_) == shard_id;
+  }
 };
 
 }  // namespace deepx_core

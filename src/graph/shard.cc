@@ -7,159 +7,199 @@
 #include <deepx_core/dx_log.h>
 #include <deepx_core/graph/shard.h>
 #include <cstdint>
+#include <unordered_map>
 #include <utility>
 
 namespace deepx_core {
+namespace {
 
-int Shard::DefaultTSRShardFunc(const std::string& name,
-                               int shard_size) noexcept {
-  return (int)((uint32_t)MurmurHash2(name) % (uint32_t)shard_size);
-}
-
-int Shard::DefaultSRMShardFunc(int_t id, int shard_size) noexcept {
-  return (int)((uint32_t)id % (uint32_t)shard_size);
-}
-
-Shard::Shard()
-    : shard_id_(0),
-      shard_size_(1),
-      tsr_shard_func_(&DefaultTSRShardFunc),
-      srm_shard_func_(&DefaultSRMShardFunc) {}
-
-Shard::Shard(int shard_id, int shard_size,
-             const tsr_shard_func_t& tsr_shard_func,
-             const srm_shard_func_t& srm_shard_func)
-    : shard_id_(shard_id),
-      shard_size_(shard_size),
-      tsr_shard_func_(tsr_shard_func ? tsr_shard_func : &DefaultTSRShardFunc),
-      srm_shard_func_(srm_shard_func ? srm_shard_func : &DefaultSRMShardFunc) {
-  DXCHECK_THROW(shard_id_ >= 0);
-  DXCHECK_THROW(shard_id_ < shard_size_);
-}
-
-void Shard::SplitPullRequest(const PullRequest& full_pull_request,
-                             std::vector<PullRequest>* pull_requests,
-                             std::vector<id_set_t*>* aux) const {
-  DXASSERT((int)pull_requests->size() == shard_size_);
-  DXASSERT((int)aux->size() == shard_size_);
-  for (PullRequest& pull_request : *pull_requests) {
-    pull_request.clear();
-    pull_request.is_train = full_pull_request.is_train;
+/************************************************************************/
+/* DefaultShardFunc */
+/************************************************************************/
+class DefaultShardFunc : public DataType {
+ public:
+  static int TSRShardFunc(const std::string& name, int shard_size) noexcept {
+    return (int)((uint32_t)MurmurHash2(name) % (uint32_t)shard_size);
   }
 
-  for (const std::string& name : full_pull_request.tsr_set) {
-    int shard_id = tsr_shard_func_(name, shard_size_);
-    (*pull_requests)[shard_id].tsr_set.emplace(name);
+  static int SRMShardFunc(int_t id, int shard_size) noexcept {
+    return (int)((uint32_t)id % (uint32_t)shard_size);
   }
+};
 
-  for (const auto& entry : full_pull_request.srm_map) {
-    const std::string& name = entry.first;
-    const id_set_t& id_set = entry.second;
-    size_t srm_id_size = id_set.size() / shard_size_;
-    for (int i = 0; i < shard_size_; ++i) {
-      (*aux)[i] = &(*pull_requests)[i].srm_map[name];
-      (*aux)[i]->reserve(srm_id_size);
+/************************************************************************/
+/* ShardFuncMap */
+/************************************************************************/
+class ShardFuncMap : public DataType {
+ private:
+  using shard_func_t = std::pair<tsr_shard_func_t, srm_shard_func_t>;
+  using shard_func_map_t = std::unordered_map<std::string, shard_func_t>;
+  shard_func_map_t map_;
+
+ public:
+  void Register(const std::string& name, tsr_shard_func_t tsr_shard_func,
+                srm_shard_func_t srm_shard_func) {
+    if (map_.count(name) > 0) {
+      DXTHROW_INVALID_ARGUMENT("Duplicate registered name: %s.", name.c_str());
     }
-    for (int_t id : id_set) {
-      int shard_id = srm_shard_func_(id, shard_size_);
-      (*aux)[shard_id]->emplace(id);
+    if (tsr_shard_func == nullptr) {
+      tsr_shard_func = &DefaultShardFunc::TSRShardFunc;
     }
+    if (srm_shard_func == nullptr) {
+      srm_shard_func = &DefaultShardFunc::SRMShardFunc;
+    }
+    map_.emplace(name, std::make_pair(tsr_shard_func, srm_shard_func));
   }
 
-  for (const auto& entry : full_pull_request.id_freq_map) {
-    int_t id = entry.first;
-    freq_t freq = entry.second;
-    int shard_id = srm_shard_func_(id, shard_size_);
-    (*pull_requests)[shard_id].id_freq_map.emplace(id, freq);
+  void Get(const std::string& name, tsr_shard_func_t* tsr_shard_func,
+           srm_shard_func_t* srm_shard_func) {
+    auto it = map_.find(name);
+    if (it == map_.end()) {
+      DXTHROW_INVALID_ARGUMENT("Unregistered name: %s.", name.c_str());
+    }
+    *tsr_shard_func = it->second.first;
+    *srm_shard_func = it->second.second;
   }
+
+ public:
+  static ShardFuncMap& GetInstance() {
+    static ShardFuncMap shard_func_map;
+    return shard_func_map;
+  }
+};
+
+/************************************************************************/
+/* DefaultShardFuncRegister */
+/************************************************************************/
+class DefaultShardFuncRegister {
+ public:
+  DefaultShardFuncRegister() {
+    ShardFuncMap::GetInstance().Register("default", nullptr, nullptr);
+  }
+} default_shard_func_register;
+
+}  // namespace
+
+/************************************************************************/
+/* Shard functions */
+/************************************************************************/
+namespace {
+
+std::string GetShardFile(const std::string& dir) { return dir + "/shard.bin"; }
+
+}  // namespace
+
+bool SaveShard(const std::string& dir, const Shard& shard) {
+  return shard.Save(GetShardFile(dir));
 }
 
-void Shard::SplitGrad(const TensorMap& param, TensorMap* full_grad,
-                      std::vector<std::unique_ptr<TensorMap>>* grads,
-                      std::vector<srm_t*>* aux) const {
-  DXASSERT((int)grads->size() == shard_size_);
-  DXASSERT((int)aux->size() == shard_size_);
-  for (auto& grad : *grads) {
-    grad->ClearValue();
+bool LoadShard(const std::string& dir, Shard* shard) {
+  // backward compatibility
+  std::string file = dir + "/shard_info.bin";
+  if (AutoFileSystem::Exists(file)) {
+    return shard->Load(file);
+  }
+  return shard->Load(GetShardFile(dir));
+}
+
+/************************************************************************/
+/* Shard */
+/************************************************************************/
+void Shard::RegisterShardFunc(const std::string& shard_func_name,
+                              const tsr_shard_func_t& tsr_shard_func,
+                              const srm_shard_func_t& srm_shard_func) {
+  ShardFuncMap::GetInstance().Register(shard_func_name, tsr_shard_func,
+                                       srm_shard_func);
+}
+
+void Shard::_Init(int shard_mode, int shard_size,
+                  const std::string& shard_func_name) {
+  shard_mode_ = shard_mode;
+  shard_size_ = shard_size;
+  shard_func_name_ = shard_func_name;
+  ShardFuncMap::GetInstance().Get(shard_func_name_, &tsr_shard_func_,
+                                  &srm_shard_func_);
+}
+
+void Shard::InitNonShard() { _Init(0, 1, "default"); }
+
+void Shard::InitShard(int shard_size, const std::string& shard_func_name) {
+  _Init(1, shard_size, shard_func_name);
+}
+
+bool Shard::Write(OutputStream& os) const {
+  int version = 0x203de81b;  // magic number version
+  os << version;
+  os << shard_mode_ << shard_size_ << shard_func_name_;
+  if (!os) {
+    DXERROR("Failed to write shard.");
+    return false;
+  }
+  return true;
+}
+
+bool Shard::Read(InputStream& is) {
+  int version;
+  if (is.Peek(&version, sizeof(version)) != sizeof(version)) {
+    DXERROR("Failed to read shard.");
+    return false;
   }
 
-  for (auto& entry : *full_grad) {
-    const std::string& name = entry.first;
-    auto it = param.find(name);
-    if (it == param.end()) {
-      continue;
-    }
-
-    const Any& Wany = it->second;
-    Any& Gany = entry.second;
-    if (Wany.is<tsr_t>()) {
-      int shard_id = tsr_shard_func_(name, shard_size_);
-      if (Gany.is<tsr_t>()) {
-        auto& G = Gany.unsafe_to_ref<tsr_t>();
-        // view, zero-copy
-        (*grads)[shard_id]->get_or_insert<tsr_t>(name) = G.get_view();
-      } else if (Gany.is<srm_t>()) {
-        auto& G = Gany.unsafe_to_ref<srm_t>();
-        int col = G.col();
-        (*grads)[shard_id]->get_or_insert<srm_t>(name) = std::move(G);
-        G.clear();
-        G.set_col(col);
+  if (version == 0x203de81b) {  // magic number version
+    is >> version;
+    is >> shard_mode_ >> shard_size_ >> shard_func_name_;
+  } else {
+    // backward compatibility
+    int shard_size;
+    is >> shard_size;
+    if (is) {
+      if (shard_size == 0) {
+        shard_mode_ = 0;
+        shard_size_ = 1;
+      } else {
+        shard_mode_ = 1;
+        shard_size_ = shard_size;
       }
-    } else if (Wany.is<srm_t>()) {
-      if (Gany.is<srm_t>()) {
-        auto& G = Gany.unsafe_to_ref<srm_t>();
-        size_t srm_id_size = G.size() / shard_size_;
-        for (int i = 0; i < shard_size_; ++i) {
-          (*aux)[i] = &(*grads)[i]->get_or_insert<srm_t>(name);
-          (*aux)[i]->set_col(G.col());
-          (*aux)[i]->reserve(srm_id_size);
-        }
-        for (const auto& _entry : G) {
-          int_t id = _entry.first;
-          const float_t* embedding = _entry.second;
-          int shard_id = srm_shard_func_(id, shard_size_);
-          // view, zero-copy
-          (*aux)[shard_id]->assign_view(id, embedding);
-        }
-      }
+      shard_func_name_ = "default";
     }
   }
+
+  if (!is) {
+    DXERROR("Failed to read shard.");
+    return false;
+  }
+
+  ShardFuncMap::GetInstance().Get(shard_func_name_, &tsr_shard_func_,
+                                  &srm_shard_func_);
+  return true;
 }
 
-void Shard::SplitParam(const TensorMap& full_param,
-                       std::vector<std::unique_ptr<TensorMap>>* params,
-                       std::vector<srm_t*>* aux) const {
-  DXASSERT((int)params->size() == shard_size_);
-  DXASSERT((int)aux->size() == shard_size_);
-  for (auto& param : *params) {
-    param->ClearValue();
+bool Shard::Save(const std::string& file) const {
+  AutoOutputFileStream os;
+  if (!os.Open(file)) {
+    DXERROR("Failed to open: %s.", file.c_str());
+    return false;
   }
+  DXINFO("Saving shard to %s...", file.c_str());
+  if (!Write(os)) {
+    return false;
+  }
+  DXINFO("Done.");
+  return true;
+}
 
-  for (const auto& entry : full_param) {
-    const std::string& name = entry.first;
-    const Any& Wany = entry.second;
-    if (Wany.is<tsr_t>()) {
-      int shard_id = tsr_shard_func_(name, shard_size_);
-      auto& W = Wany.unsafe_to_ref<tsr_t>();
-      // view, zero-copy
-      (*params)[shard_id]->get_or_insert<tsr_t>(name) = W.get_view();
-    } else if (Wany.is<srm_t>()) {
-      auto& W = Wany.unsafe_to_ref<srm_t>();
-      size_t srm_id_size = W.size() / shard_size_;
-      for (int i = 0; i < shard_size_; ++i) {
-        (*aux)[i] = &(*params)[i]->get_or_insert<srm_t>(name);
-        (*aux)[i]->set_col(W.col());
-        (*aux)[i]->reserve(srm_id_size);
-      }
-      for (const auto& _entry : W) {
-        int_t id = _entry.first;
-        const float_t* embedding = _entry.second;
-        int shard_id = srm_shard_func_(id, shard_size_);
-        // view, zero-copy
-        (*aux)[shard_id]->assign_view(id, embedding);
-      }
-    }
+bool Shard::Load(const std::string& file) {
+  AutoInputFileStream is;
+  if (!is.Open(file)) {
+    DXERROR("Failed to open: %s.", file.c_str());
+    return false;
   }
+  DXINFO("Loading shard from %s...", file.c_str());
+  if (!Read(is)) {
+    return false;
+  }
+  DXINFO("Done.");
+  return true;
 }
 
 }  // namespace deepx_core
