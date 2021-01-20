@@ -2,8 +2,6 @@
 // Author: Yafei Zhang (kimmyzhang@tencent.com)
 //
 
-#include <deepx_core/graph/graph.h>
-#include <deepx_core/graph/graph_node.h>
 #include <deepx_core/graph/tensor_map.h>
 #include <deepx_core/graph/ts_store.h>
 #include <deepx_core/tensor/data_type.h>
@@ -15,18 +13,15 @@ class TSStoreTest : public testing::Test, public DataType {
  protected:
   void TestExpire(ts_t now, ts_t expire_threshold,
                   const id_set_t& expected_expired) {
-    Graph graph;
-    auto* X = new InstanceNode("X", Shape(1, 0), TENSOR_TYPE_CSR);
-    auto* W = new VariableNode("W", Shape(0, 2), TENSOR_TYPE_SRM);
-    auto* Z = EmbeddingLookup("Z", X, W);
-    ASSERT_TRUE(graph.Compile({Z}, 1));
+    TensorMap param;
+    param.insert<srm_t>("W");
 
     TSStore ts_store;
 
     {
       ts_store.set_now(0);
       ts_store.set_expire_threshold(expire_threshold);
-      ts_store.Init(&graph);
+      ts_store.Init(&param);
       TensorMap grad;
       grad.insert<srm_t>("W") = srm_t{{1, 2}, {{1, 1}, {2, 2}}};
       ts_store.Update(&grad);
@@ -35,7 +30,7 @@ class TSStoreTest : public testing::Test, public DataType {
     {
       ts_store.set_now(now);
       ts_store.set_expire_threshold(expire_threshold);
-      ts_store.Init(&graph);
+      ts_store.Init(&param);
       TensorMap grad;
       grad.insert<srm_t>("W") = srm_t{{3, 4}, {{3, 3}, {4, 4}}};
       ts_store.Update(&grad);

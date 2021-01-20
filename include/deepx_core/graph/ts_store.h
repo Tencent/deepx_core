@@ -5,10 +5,9 @@
 
 #pragma once
 #include <deepx_core/common/stream.h>
-#include <deepx_core/graph/graph.h>
+#include <deepx_core/graph/shard.h>
 #include <deepx_core/graph/tensor_map.h>
 #include <deepx_core/tensor/data_type.h>
-#include <functional>
 #include <memory>
 #include <mutex>
 #include <string>
@@ -22,7 +21,7 @@ class TSStore : public DataType {
  private:
   ts_t now_ = 0;
   ts_t expire_threshold_ = 0;
-  const Graph* graph_ = nullptr;
+  const TensorMap* param_ = nullptr;
   id_ts_map_t id_ts_map_;
   int use_lock_ = 0;
   std::unique_ptr<std::mutex> id_ts_map_lock_;
@@ -34,20 +33,17 @@ class TSStore : public DataType {
     expire_threshold_ = expire_threshold;
   }
   ts_t expire_threshold() const noexcept { return expire_threshold_; }
-  const Graph& graph() const noexcept { return *graph_; }
+  const TensorMap& param() const noexcept { return *param_; }
 
  public:
-  void Init(const Graph* graph) noexcept;
-  bool InitParam(const TensorMap& param);
+  void Init(const TensorMap* param) noexcept;
+  bool InitParam();
   void InitLock();
   bool Write(OutputStream& os) const;  // NOLINT
   bool Read(InputStream& is);          // NOLINT
   bool Save(const std::string& file) const;
   bool Load(const std::string& file);
-  void Merge(TSStore* other,
-             const std::function<bool(const id_ts_map_t::value_type&)>& func =
-                 nullptr);
-  void Warmup(TSStore* other);
+  void Merge(TSStore* other, const Shard* shard = nullptr, int shard_id = 0);
 
  public:
   // thread safe after 'InitLock'

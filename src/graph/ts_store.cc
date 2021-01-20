@@ -8,12 +8,12 @@
 
 namespace deepx_core {
 
-void TSStore::Init(const Graph* graph) noexcept { graph_ = graph; }
+void TSStore::Init(const TensorMap* param) noexcept { param_ = param; }
 
-bool TSStore::InitParam(const TensorMap& param) {
+bool TSStore::InitParam() {
   DXINFO("Initializing TSStore...");
   id_ts_map_.clear();
-  for (const auto& entry : param) {
+  for (const auto& entry : *param_) {
     const Any& Wany = entry.second;
     if (Wany.is<srm_t>()) {
       const auto& W = Wany.unsafe_to_ref<srm_t>();
@@ -92,41 +92,29 @@ bool TSStore::Load(const std::string& file) {
   return true;
 }
 
-void TSStore::Merge(
-    TSStore* other,
-    const std::function<bool(const id_ts_map_t::value_type&)>& func) {
+void TSStore::Merge(TSStore* other, const Shard* shard, int shard_id) {
   DXINFO("Merging TSStore...");
-  size_t merged = 0;
+  size_t prev_size = id_ts_map_.size();
   id_ts_map_.reserve(id_ts_map_.size() + other->id_ts_map_.size());
-  for (auto& entry : other->id_ts_map_) {
-    if (!func || func(entry)) {
-      ts_t& ts = id_ts_map_[entry.first];
-      if (ts < entry.second) {
-        ts = entry.second;
-        ++merged;
-      }
+  for (const auto& entry : other->id_ts_map_) {
+    if (shard == nullptr || shard->HasSRM(shard_id, entry.first)) {
+      id_ts_map_.emplace(entry);
     }
   }
-  DXINFO("TSStore has merged %zu entries.", merged);
-}
-
-void TSStore::Warmup(TSStore* other) {
-  DXINFO("Warming up TSStore...");
-  id_ts_map_.reserve(id_ts_map_.size() + other->id_ts_map_.size());
-  for (auto& entry : other->id_ts_map_) {
-    id_ts_map_.emplace(entry);
-  }
-  DXINFO("Done.");
+  DXINFO("TSStore has merged %zu entries.", id_ts_map_.size() - prev_size);
 }
 
 void TSStore::Update(TensorMap* grad) {
   for (const auto& entry : *grad) {
     const std::string& name = entry.first;
-    const GraphNode* node = graph_->find_node(name);
-    DXASSERT(node);
-    DXASSERT(node->node_type() == GRAPH_NODE_TYPE_PARAM);
+    auto it = param_->find(name);
+    if (it == param_->end()) {
+      continue;
+    }
+
+    const Any& Wany = it->second;
     const Any& Gany = entry.second;
-    if (Gany.is<srm_t>() && node->tensor_type() == TENSOR_TYPE_SRM) {
+    if (Wany.is<srm_t>() && Gany.is<srm_t>()) {
       const auto& G = Gany.unsafe_to_ref<srm_t>();
       if (use_lock_) {
         std::unique_lock<std::mutex> guard(*id_ts_map_lock_);
