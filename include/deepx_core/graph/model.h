@@ -38,15 +38,16 @@ class Model : public DataType {
   void Init(const Graph* graph) noexcept;
   bool InitParamPlaceholder();
   bool InitParam(std::default_random_engine& engine,  // NOLINT
-                 const Shard* shard = nullptr);
+                 const Shard* shard = nullptr, int shard_id = 0);
   void InitLock();
   bool Write(OutputStream& os) const;  // NOLINT
   bool Read(InputStream& is);          // NOLINT
   bool Save(const std::string& file) const;
   bool Load(const std::string& file);
   bool SaveText(const std::string& file) const;
-  void Merge(Model* other, const Shard* shard = nullptr);
-  void Warmup(Model* other);
+  bool SaveFeatureKV(const std::string& file,
+                     int feature_kv_protocol_version) const;
+  void Merge(Model* other, const Shard* shard = nullptr, int shard_id = 0);
 
  public:
   bool HasSRM() const noexcept;
@@ -60,38 +61,16 @@ class Model : public DataType {
   void Update(TensorMap* param);
 
  private:
-  template <class ReduceTSR, class ReduceSRM>
-  void Reduce(TensorMap* param, ReduceTSR&& reduce_tsr,
-              ReduceSRM&& reduce_srm) {
-    for (auto& entry : *param) {
-      const std::string& name = entry.first;
-      auto it = param_.find(name);
-      if (it == param_.end()) {
-        continue;
-      }
-
-      Any& local_Wany = it->second;
-      Any& remote_Wany = entry.second;
-      if (local_Wany.is<tsr_t>() && remote_Wany.is<tsr_t>()) {
-        auto& local_W = local_Wany.unsafe_to_ref<tsr_t>();
-        auto& remote_W = remote_Wany.unsafe_to_ref<tsr_t>();
-        if (local_W.same_shape(remote_W)) {
-          reduce_tsr(name, local_W, remote_W);
-        }
-      } else if (local_Wany.is<srm_t>() && remote_Wany.is<srm_t>()) {
-        auto& local_W = local_Wany.unsafe_to_ref<srm_t>();
-        auto& remote_W = remote_Wany.unsafe_to_ref<srm_t>();
-        if (local_W.col() == remote_W.col()) {
-          reduce_srm(name, local_W, remote_W);
-        }
-      }
-    }
-  }
-
-  template <class ReduceTSR, class ReduceSRM>
-  void Reduce(Model* other, ReduceTSR&& reduce_tsr, ReduceSRM&& reduce_srm) {
-    Reduce(&other->param_, reduce_tsr, reduce_srm);
-  }
+  using tsr_reduce_func_t =
+      std::function<void(const std::string&, tsr_t&, tsr_t&)>;
+  using srm_reduce_func_t =
+      std::function<void(const std::string&, srm_t&, srm_t&)>;
+  void Reduce(TensorMap* param, const tsr_reduce_func_t& tsr_reduce_func,
+              const srm_reduce_func_t& srm_reduce_func,
+              const Shard* shard = nullptr, int shard_id = 0);
+  void Reduce(Model* other, const tsr_reduce_func_t& tsr_reduce_func,
+              const srm_reduce_func_t& srm_reduce_func,
+              const Shard* shard = nullptr, int shard_id = 0);
 };
 
 }  // namespace deepx_core
