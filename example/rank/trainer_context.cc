@@ -185,14 +185,14 @@ void TrainerContext::PredictFile(int thread_id, const std::string& file,
 }
 
 /************************************************************************/
-/* TrainerContextNoShard */
+/* TrainerContextNonShard */
 /************************************************************************/
-void TrainerContextNoShard::Init(ModelShard* model_shard) {
+void TrainerContextNonShard::Init(ModelShard* model_shard) {
   _Init(model_shard);
   optimizer_ = local_model_shard_->mutable_optimizer();
 }
 
-void TrainerContextNoShard::TrainBatch() {
+void TrainerContextNonShard::TrainBatch() {
   const Instance& inst = op_context_->inst();
   if (op_context_batch_ != inst.batch()) {
     op_context_batch_ = inst.batch();
@@ -207,7 +207,7 @@ void TrainerContextNoShard::TrainBatch() {
   file_loss_weight_ += 1;
 }
 
-void TrainerContextNoShard::PredictBatch() {
+void TrainerContextNonShard::PredictBatch() {
   const Instance& inst = op_context_->inst();
   if (op_context_batch_ != inst.batch()) {
     op_context_batch_ = inst.batch();

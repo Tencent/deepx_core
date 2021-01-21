@@ -68,9 +68,9 @@ class TrainerContext : public DataType {
 };
 
 /************************************************************************/
-/* TrainerContextNoShard */
+/* TrainerContextNonShard */
 /************************************************************************/
-class TrainerContextNoShard : public TrainerContext {
+class TrainerContextNonShard : public TrainerContext {
  protected:
   Optimizer* optimizer_ = nullptr;
 

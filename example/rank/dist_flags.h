@@ -4,7 +4,7 @@
 //
 
 #pragma once
-#include <deepx_core/graph/model_shard.h>
+#include <deepx_core/graph/shard.h>
 #include <deepx_core/ps/tcp_connection.h>
 #include <gflags/gflags.h>
 #include <vector>
@@ -49,7 +49,7 @@ extern int FLAGS_is_ps;
 extern TcpEndpoint FLAGS_cs_endpoint;
 extern std::vector<TcpEndpoint> FLAGS_ps_endpoints;
 extern int FLAGS_ps_size;
-extern ShardInfo FLAGS_shard_info;
+extern Shard FLAGS_shard;
 
 void CheckFlags();
 

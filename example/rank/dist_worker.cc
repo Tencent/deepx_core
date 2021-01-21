@@ -10,7 +10,6 @@
 #include <deepx_core/graph/dist_proto.h>
 #include <deepx_core/graph/graph.h>
 #include <deepx_core/graph/model_shard.h>
-#include <deepx_core/graph/shard.h>
 #include <deepx_core/graph/tensor_map.h>
 #include <deepx_core/ps/tcp_connection.h>
 #include <chrono>
@@ -62,7 +61,7 @@ void TrainerContextDist::Init(ModelShard* local_model_shard) {
 
   DXCHECK_THROW(ps_conns_.ConnectRetry(FLAGS_ps_endpoints) == 0);
 
-  shard_size_ = FLAGS_shard_info.shard_size;
+  shard_size_ = FLAGS_shard.shard_size();
   pull_requests_.resize(shard_size_);
   pull_request_masks_.resize(shard_size_);
   params_.resize(shard_size_);
@@ -177,7 +176,6 @@ class TrainerDist {
   IoContext io_;
   TcpConnection cs_conn_;
   Graph graph_;
-  Shard shard_;
   ModelShard local_model_shard_;
   TrainerContextDist context_;
 
@@ -200,14 +198,14 @@ void TrainerDist::Init() {
       DXCHECK_THROW(model_zoo->InitConfig(config));
       DXCHECK_THROW(model_zoo->InitGraph(&graph_));
     } else {
-      DXCHECK_THROW(graph_.Load(GetGraphFile(FLAGS_in_model)));
+      DXCHECK_THROW(LoadGraph(FLAGS_in_model, &graph_));
     }
   } else {
-    DXCHECK_THROW(graph_.Load(GetGraphFile(FLAGS_in_model)));
+    DXCHECK_THROW(LoadGraph(FLAGS_in_model, &graph_));
   }
 
-  shard_ = Shard(0, FLAGS_ps_size);
-  local_model_shard_.Init(&graph_, &shard_);
+  local_model_shard_.InitShard(&FLAGS_shard, 0);
+  local_model_shard_.InitGraph(&graph_);
   DXCHECK_THROW(local_model_shard_.InitModelPlaceholder());
 
   context_.set_instance_reader(FLAGS_instance_reader);

@@ -9,7 +9,6 @@
 #include <deepx_core/graph/dist_proto.h>
 #include <deepx_core/graph/graph.h>
 #include <deepx_core/graph/model_shard.h>
-#include <deepx_core/graph/shard.h>
 #include <deepx_core/graph/tensor_map.h>
 #include <deepx_core/ps/coord_server.h>
 #include <deepx_core/ps/param_server.h>
@@ -40,7 +39,6 @@ class RankParamServer : public ParamServer {
 
  private:
   Graph graph_;
-  Shard shard_;
   ModelShard model_shard_;
 
  public:
@@ -64,12 +62,12 @@ void RankParamServer::Init() {
       DXCHECK_THROW(model_zoo->InitConfig(config));
       DXCHECK_THROW(model_zoo->InitGraph(&graph_));
     } else {
-      DXCHECK_THROW(graph_.Load(GetGraphFile(FLAGS_in_model)));
+      DXCHECK_THROW(LoadGraph(FLAGS_in_model, &graph_));
     }
 
-    shard_ = Shard(FLAGS_ps_id, FLAGS_ps_size);
     model_shard_.seed(FLAGS_seed + FLAGS_ps_id * 10099);  // magic number
-    model_shard_.Init(&graph_, &shard_);
+    model_shard_.InitShard(&FLAGS_shard, FLAGS_ps_id);
+    model_shard_.InitGraph(&graph_);
     if (FLAGS_in_model.empty()) {
       DXCHECK_THROW(model_shard_.InitModel());
       DXCHECK_THROW(
@@ -115,16 +113,16 @@ void RankParamServer::Init() {
       }
     }
   } else {
-    DXCHECK_THROW(graph_.Load(GetGraphFile(FLAGS_in_model)));
-    shard_ = Shard(FLAGS_ps_id, FLAGS_ps_size);
-    model_shard_.Init(&graph_, &shard_);
+    DXCHECK_THROW(LoadGraph(FLAGS_in_model, &graph_));
+    model_shard_.InitShard(&FLAGS_shard, FLAGS_ps_id);
+    model_shard_.InitGraph(&graph_);
     DXCHECK_THROW(model_shard_.LoadModel(FLAGS_in_model));
   }
 
   DXCHECK_THROW(model_shard_.model().HasSRM());
 
   if (FLAGS_is_train && config_.thread > 1) {
-    model_shard_.InitLock();
+    DXCHECK_THROW(model_shard_.InitLock());
   }
 }
 
@@ -173,8 +171,8 @@ void RankParamServer::OnPushNotify(conn_t conn) {
 
 void RankParamServer::OnModelSaveRequest(conn_t /*conn*/) {
   if (FLAGS_ps_id == 0) {
-    DXCHECK_THROW(graph_.Save(GetGraphFile(FLAGS_out_model)));
-    DXCHECK_THROW(SaveShardInfo(FLAGS_out_model, FLAGS_shard_info));
+    DXCHECK_THROW(SaveGraph(FLAGS_out_model, graph_));
+    DXCHECK_THROW(SaveShard(FLAGS_out_model, FLAGS_shard));
   }
   if (FLAGS_out_model_remove_zeros) {
     model_shard_.mutable_model()->RemoveZerosSRM();

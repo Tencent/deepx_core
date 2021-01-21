@@ -30,7 +30,7 @@ DEFINE_int32(verbose, 1, "verbose level: 0-10");
 namespace deepx_core {
 namespace {
 
-ShardInfo FLAGS_shard_info;
+Shard FLAGS_shard;
 
 /************************************************************************/
 /* Predictor */
@@ -38,8 +38,6 @@ ShardInfo FLAGS_shard_info;
 class Predictor {
  protected:
   Graph graph_;
-
-  int shard_size_ = 0;
 
   std::vector<std::string> files_;
   FileDispatcher file_dispatcher_;
@@ -56,9 +54,7 @@ class Predictor {
 };
 
 void Predictor::Init() {
-  DXCHECK_THROW(graph_.Load(GetGraphFile(FLAGS_in_model)));
-
-  shard_size_ = FLAGS_shard_info.shard_size;
+  DXCHECK_THROW(LoadGraph(FLAGS_in_model, &graph_));
 
   DXCHECK_THROW(AutoFileSystem::ListRecursive(FLAGS_in, true, &files_));
 
@@ -114,26 +110,26 @@ void Predictor::PredictFile(int thread_id, const std::string& file,
 }
 
 /************************************************************************/
-/* PredictorNoShard */
+/* PredictorNonShard */
 /************************************************************************/
-class PredictorNoShard : public Predictor {
+class PredictorNonShard : public Predictor {
  private:
-  Shard shard_;
   ModelShard model_shard_;
 
  public:
   void Init() override;
 };
 
-void PredictorNoShard::Init() {
+void PredictorNonShard::Init() {
   Predictor::Init();
 
-  model_shard_.Init(&graph_, &shard_);
+  model_shard_.InitShard(&FLAGS_shard, 0);
+  model_shard_.InitGraph(&graph_);
   DXCHECK_THROW(model_shard_.LoadModel(FLAGS_in_model));
 
   contexts_tls_.resize(FLAGS_thread);
   for (int i = 0; i < FLAGS_thread; ++i) {
-    std::unique_ptr<TrainerContextNoShard> context(new TrainerContextNoShard);
+    std::unique_ptr<TrainerContextNonShard> context(new TrainerContextNonShard);
     context->set_instance_reader(FLAGS_instance_reader);
     context->set_instance_reader_config(FLAGS_instance_reader_config);
     context->set_batch(FLAGS_batch);
@@ -150,8 +146,7 @@ void PredictorNoShard::Init() {
 /************************************************************************/
 class PredictorShard : public Predictor {
  private:
-  std::vector<Shard> shards_;
-  std::vector<Shard> shards_tls_;
+  int shard_size_ = 0;
   std::vector<ModelShard> model_shards_;
   std::vector<ModelShard> model_shards_tls_;
 
@@ -163,20 +158,19 @@ class PredictorShard : public Predictor {
 void PredictorShard::Init() {
   Predictor::Init();
 
-  shards_.resize(shard_size_);
+  shard_size_ = FLAGS_shard.shard_size();
   model_shards_.resize(shard_size_);
   for (int i = 0; i < shard_size_; ++i) {
-    shards_[i] = Shard(i, shard_size_);
-    model_shards_[i].Init(&graph_, &shards_[i]);
+    model_shards_[i].InitShard(&FLAGS_shard, i);
+    model_shards_[i].InitGraph(&graph_);
     DXCHECK_THROW(model_shards_[i].LoadModel(FLAGS_in_model));
   }
 
   contexts_tls_.resize(FLAGS_thread);
-  shards_tls_.resize(FLAGS_thread);
   model_shards_tls_.resize(FLAGS_thread);
   for (int i = 0; i < FLAGS_thread; ++i) {
-    shards_tls_[i] = Shard(0, shard_size_);
-    model_shards_tls_[i].Init(&graph_, &shards_tls_[i]);
+    model_shards_tls_[i].InitShard(&FLAGS_shard, 0);
+    model_shards_tls_[i].InitGraph(&graph_);
     DXCHECK_THROW(model_shards_tls_[i].InitModelPlaceholder());
     std::unique_ptr<TrainerContextShard> context(new TrainerContextShard);
     context->set_instance_reader(FLAGS_instance_reader);
@@ -254,7 +248,7 @@ void CheckFlags() {
 
   DXCHECK_THROW(FLAGS_verbose >= 0);
 
-  DXCHECK_THROW(LoadShardInfo(FLAGS_in_model, &FLAGS_shard_info));
+  DXCHECK_THROW(LoadShard(FLAGS_in_model, &FLAGS_shard));
 }
 
 int main(int argc, char** argv) {
@@ -269,8 +263,8 @@ int main(int argc, char** argv) {
   CheckFlags();
 
   std::unique_ptr<Predictor> predictor;
-  if (FLAGS_shard_info.shard_size == 0) {
-    predictor.reset(new PredictorNoShard);
+  if (FLAGS_shard.shard_mode() == 0) {
+    predictor.reset(new PredictorNonShard);
   } else {
     predictor.reset(new PredictorShard);
   }

@@ -59,7 +59,7 @@ DEFINE_uint64(freq_filter_threshold, 0,
 namespace deepx_core {
 namespace {
 
-ShardInfo FLAGS_shard_info;
+Shard FLAGS_shard;
 
 /************************************************************************/
 /* Trainer */
@@ -67,8 +67,6 @@ ShardInfo FLAGS_shard_info;
 class Trainer {
  protected:
   Graph graph_;
-
-  int shard_size_ = 0;
 
   std::default_random_engine engine_;
 
@@ -100,11 +98,9 @@ void Trainer::Init() {
     DXCHECK_THROW(model_zoo->InitConfig(config));
     DXCHECK_THROW(model_zoo->InitGraph(&graph_));
   } else {
-    DXCHECK_THROW(graph_.Load(GetGraphFile(FLAGS_in_model)));
+    DXCHECK_THROW(LoadGraph(FLAGS_in_model, &graph_));
   }
   DXINFO("Computational graph:\n%s", graph_.Dot().c_str());
-
-  shard_size_ = FLAGS_shard_info.shard_size;
 
   engine_.seed(FLAGS_seed);
 
@@ -200,16 +196,15 @@ void Trainer::TrainFile(int thread_id, const std::string& file) {
 }
 
 void Trainer::Save() {
-  DXCHECK_THROW(graph_.Save(GetGraphFile(FLAGS_out_model)));
-  DXCHECK_THROW(SaveShardInfo(FLAGS_out_model, FLAGS_shard_info));
+  DXCHECK_THROW(SaveGraph(FLAGS_out_model, graph_));
+  DXCHECK_THROW(SaveShard(FLAGS_out_model, FLAGS_shard));
 }
 
 /************************************************************************/
-/* TrainerNoShard */
+/* TrainerNonShard */
 /************************************************************************/
-class TrainerNoShard : public Trainer {
+class TrainerNonShard : public Trainer {
  private:
-  Shard shard_;
   ModelShard model_shard_;
 
  public:
@@ -217,11 +212,12 @@ class TrainerNoShard : public Trainer {
   void Save() override;
 };
 
-void TrainerNoShard::Init() {
+void TrainerNonShard::Init() {
   Trainer::Init();
 
   model_shard_.seed(FLAGS_seed);
-  model_shard_.Init(&graph_, &shard_);
+  model_shard_.InitShard(&FLAGS_shard, 0);
+  model_shard_.InitGraph(&graph_);
   if (FLAGS_in_model.empty()) {
     DXCHECK_THROW(model_shard_.InitModel());
     DXCHECK_THROW(
@@ -240,7 +236,7 @@ void TrainerNoShard::Init() {
 
   contexts_tls_.resize(FLAGS_thread);
   for (int i = 0; i < FLAGS_thread; ++i) {
-    std::unique_ptr<TrainerContextNoShard> context(new TrainerContextNoShard);
+    std::unique_ptr<TrainerContextNonShard> context(new TrainerContextNonShard);
     context->set_instance_reader(FLAGS_instance_reader);
     context->set_instance_reader_config(FLAGS_instance_reader_config);
     context->set_batch(FLAGS_batch);
@@ -252,7 +248,7 @@ void TrainerNoShard::Init() {
   }
 }
 
-void TrainerNoShard::Save() {
+void TrainerNonShard::Save() {
   Trainer::Save();
   if (FLAGS_out_model_remove_zeros) {
     model_shard_.mutable_model()->RemoveZerosSRM();
@@ -273,8 +269,7 @@ void TrainerNoShard::Save() {
 /************************************************************************/
 class TrainerShard : public Trainer {
  private:
-  std::vector<Shard> shards_;
-  std::vector<Shard> shards_tls_;
+  int shard_size_ = 0;
   std::vector<ModelShard> model_shards_;
   std::vector<ModelShard> model_shards_tls_;
 
@@ -287,12 +282,12 @@ class TrainerShard : public Trainer {
 void TrainerShard::Init() {
   Trainer::Init();
 
-  shards_.resize(shard_size_);
+  shard_size_ = FLAGS_shard.shard_size();
   model_shards_.resize(shard_size_);
   for (int i = 0; i < shard_size_; ++i) {
-    shards_[i] = Shard(i, shard_size_);
     model_shards_[i].seed(FLAGS_seed + i * 10099);  // magic number
-    model_shards_[i].Init(&graph_, &shards_[i]);
+    model_shards_[i].InitShard(&FLAGS_shard, i);
+    model_shards_[i].InitGraph(&graph_);
     if (FLAGS_in_model.empty()) {
       DXCHECK_THROW(model_shards_[i].InitModel());
       DXCHECK_THROW(model_shards_[i].InitOptimizer(FLAGS_optimizer,
@@ -344,11 +339,10 @@ void TrainerShard::Init() {
   }
 
   contexts_tls_.resize(FLAGS_thread);
-  shards_tls_.resize(FLAGS_thread);
   model_shards_tls_.resize(FLAGS_thread);
   for (int i = 0; i < FLAGS_thread; ++i) {
-    shards_tls_[i] = Shard(0, shard_size_);
-    model_shards_tls_[i].Init(&graph_, &shards_tls_[i]);
+    model_shards_tls_[i].InitShard(&FLAGS_shard, 0);
+    model_shards_tls_[i].InitGraph(&graph_);
     DXCHECK_THROW(model_shards_tls_[i].InitModelPlaceholder());
     std::unique_ptr<TrainerContextShard> context(new TrainerContextShard);
     context->set_instance_reader(FLAGS_instance_reader);
@@ -496,7 +490,11 @@ void CheckFlags() {
   DXCHECK_THROW(FLAGS_freq_filter_threshold <=
                 (google::uint64)std::numeric_limits<DataType::freq_t>::max());
 
-  FLAGS_shard_info = GetShardInfo(FLAGS_in_model, FLAGS_model_shard);
+  if (FLAGS_model_shard == 0) {
+    FLAGS_shard.InitNonShard();
+  } else {
+    FLAGS_shard.InitShard(FLAGS_model_shard, "default");
+  }
 }
 
 int main(int argc, char** argv) {
@@ -511,8 +509,8 @@ int main(int argc, char** argv) {
   CheckFlags();
 
   std::unique_ptr<Trainer> trainer;
-  if (FLAGS_shard_info.shard_size == 0) {
-    trainer.reset(new TrainerNoShard);
+  if (FLAGS_shard.shard_mode() == 0) {
+    trainer.reset(new TrainerNonShard);
   } else {
     trainer.reset(new TrainerShard);
   }

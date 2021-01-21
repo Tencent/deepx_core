@@ -55,7 +55,7 @@ int FLAGS_is_ps = 0;
 TcpEndpoint FLAGS_cs_endpoint;
 std::vector<TcpEndpoint> FLAGS_ps_endpoints;
 int FLAGS_ps_size = 0;
-ShardInfo FLAGS_shard_info;
+Shard FLAGS_shard;
 
 void CheckFlags() {
   AutoFileSystem fs;
@@ -172,11 +172,7 @@ void CheckFlags() {
                   (google::uint64)std::numeric_limits<DataType::freq_t>::max());
   }
 
-  if (FLAGS_is_train) {
-    FLAGS_shard_info = GetShardInfo(FLAGS_in_model, FLAGS_ps_size);
-  } else {
-    DXCHECK_THROW(LoadShardInfo(FLAGS_in_model, &FLAGS_shard_info));
-  }
+  FLAGS_shard.InitShard(FLAGS_ps_size, "default");
 }
 
 }  // namespace deepx_core
