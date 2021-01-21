@@ -12,7 +12,6 @@
 #include <deepx_core/graph/instance_reader.h>
 #include <deepx_core/graph/model.h>
 #include <deepx_core/graph/op_context.h>
-#include <deepx_core/graph/shard.h>
 #include <deepx_core/graph/tensor_map.h>
 #include <gflags/gflags.h>
 #include <cstdint>

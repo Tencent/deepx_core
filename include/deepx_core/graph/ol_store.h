@@ -42,6 +42,7 @@ class OLStore : public DataType {
   }
   float_t distance_threshold() const noexcept { return distance_threshold_; }
   const Graph& graph() const noexcept { return *graph_; }
+  const TensorMap& param() const noexcept { return *param_; }
 
  public:
   void Init(const Graph* graph, const TensorMap* param) noexcept;

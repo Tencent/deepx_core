@@ -22,8 +22,8 @@
 namespace deepx_core {
 
 using param_initializer_t =
-    std::function<void(std::default_random_engine& engine, TensorMap* param)>;
-using inst_initializer_t = std::function<void(Instance* inst)>;
+    std::function<void(std::default_random_engine&, TensorMap*)>;
+using inst_initializer_t = std::function<void(Instance*)>;
 
 void CheckOpForward(GraphNode* node, int on_heap,
                     const DataType::tsr_t& expected_forward,

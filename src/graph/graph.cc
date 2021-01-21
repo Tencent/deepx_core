@@ -15,7 +15,11 @@ namespace deepx_core {
 /************************************************************************/
 /* Graph functions */
 /************************************************************************/
+namespace {
+
 std::string GetGraphFile(const std::string& dir) { return dir + "/graph.bin"; }
+
+}  // namespace
 
 bool SaveGraph(const std::string& dir, const Graph& graph) {
   return graph.Save(GetGraphFile(dir));
@@ -533,14 +537,14 @@ bool Graph::SaveDot(const std::string& file) const {
     DXERROR("Failed to open: %s.", file.c_str());
     return false;
   }
-  DXINFO("Saving graph dot to %s...", file.c_str());
+  DXINFO("Saving graph to %s...", file.c_str());
   std::string s;
   if (!WriteDot(&s)) {
     return false;
   }
   os.Write(s.data(), s.size());
   if (!os) {
-    DXERROR("Failed to write graph dot.");
+    DXERROR("Failed to write graph.");
     return false;
   }
   DXINFO("Done.");

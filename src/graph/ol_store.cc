@@ -30,11 +30,13 @@ void OLStore::Update(TensorMap* param) {
       continue;
     }
 
-    const Any& Wany = entry.second;
-    if (it->second.is<srm_t>() && Wany.is<srm_t>()) {
+    const Any& local_Wany = it->second;
+    const Any& remote_Wany = entry.second;
+    if (local_Wany.is<srm_t>() && remote_Wany.is<srm_t>()) {
+      const auto& remote_W = remote_Wany.unsafe_to_ref<srm_t>();
       srm_state_t& srm_state = srm_state_map_[name];
-      const auto& W = Wany.unsafe_to_ref<srm_t>();
-      for (const auto& _entry : W) {
+      for (const auto& _entry : remote_W) {
+        // no overflow check
         ++srm_state[_entry.first].update;
       }
     }
@@ -85,6 +87,10 @@ auto OLStore::Collect() -> id_set_t {
 
 bool OLStore::Collect(const State& state, int n, const float_t* embedding,
                       const float_t* prev_embedding) const {
+  if (embedding == nullptr) {
+    return false;
+  }
+
   if (prev_embedding == nullptr) {
     return true;
   }

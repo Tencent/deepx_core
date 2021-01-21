@@ -40,9 +40,8 @@ class DataTypeT {
   using ts_t = uint32_t;
   using id_ts_map_t = std::unordered_map<int_t, ts_t>;
 
-  using tsr_shard_func_t =
-      std::function<int(const std::string& name, int shard_size)>;
-  using srm_shard_func_t = std::function<int(int_t id, int shard_size)>;
+  using tsr_shard_func_t = std::function<int(const std::string&, int)>;
+  using srm_shard_func_t = std::function<int(int_t, int)>;
 
   static constexpr int DATA_TYPE_TOKEN = TOKEN;
 };

@@ -19,7 +19,6 @@ class Graph;
 /************************************************************************/
 /* Graph functions */
 /************************************************************************/
-std::string GetGraphFile(const std::string& dir);
 bool SaveGraph(const std::string& dir, const Graph& graph);
 bool LoadGraph(const std::string& dir, Graph* graph);
 bool ParseFromString(const std::string& s, Graph* graph);

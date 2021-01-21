@@ -18,6 +18,8 @@ DEFINE_string(out_model, "", "output model file(optional)");
 namespace deepx_core {
 namespace {
 
+Shard FLAGS_shard;
+
 void CheckFlags() {
   AutoFileSystem fs;
 
@@ -34,6 +36,7 @@ void CheckFlags() {
   }
   DXCHECK_THROW(fs.Open(FLAGS_out_model));
   DXCHECK_THROW(!IsStdinStdoutPath(FLAGS_out_model));
+  DXCHECK_THROW(LoadShard(FLAGS_in_model, &FLAGS_shard));
 }
 
 int main(int argc, char** argv) {
@@ -46,10 +49,8 @@ int main(int argc, char** argv) {
   google::ParseCommandLineFlags(&argc, &argv, true);
 
   CheckFlags();
-  ShardInfo shard_info;
-  DXCHECK_THROW(LoadShardInfo(FLAGS_in_model, &shard_info));
 
-  int shard_size = shard_info.shard_size;
+  int shard_size = FLAGS_shard.shard_size();
   DXINFO("shard_size=%d", shard_size);
   if (shard_size == 1) {
     DXINFO("Nothing to merge.");
@@ -60,19 +61,20 @@ int main(int argc, char** argv) {
   Graph graph;
   DXCHECK_THROW(LoadGraph(FLAGS_in_model, &graph));
 
-  std::vector<Shard> shards(shard_size);
   std::vector<std::unique_ptr<ModelShard>> model_shards(shard_size);
   for (int i = 0; i < shard_size; ++i) {
-    shards[i] = Shard(i, shard_size);
     model_shards[i].reset(new ModelShard);
-    model_shards[i]->Init(&graph, &shards[i]);
+    model_shards[i]->InitShard(&FLAGS_shard, i);
+    model_shards[i]->InitGraph(&graph);
     DXCHECK_THROW(model_shards[i]->LoadModel(FLAGS_in_model));
   }
 
   Shard shard;
+  shard.InitNonShard();
   std::unique_ptr<ModelShard> merged;
   merged.reset(new ModelShard);
-  merged->Init(&graph, &shard);
+  merged->InitShard(&shard, 0);
+  merged->InitGraph(&graph);
   DXCHECK_THROW(merged->InitModelPlaceholder());
   for (int i = 0; i < shard_size; ++i) {
     merged->mutable_model()->Merge(model_shards[i]->mutable_model());
