@@ -38,6 +38,7 @@ class ClassFactory {
   pointer New(const std::string& name) const {
     auto it = map_.find(name);
     if (it == map_.end()) {
+      DXERROR("Unregistered name: %s.", name.c_str());
       return nullptr;
     }
     return it->second();
