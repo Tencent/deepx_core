@@ -489,24 +489,6 @@ auto Vector<T>::erase(const_iterator first, const_iterator last) -> iterator {
 }
 
 template <typename T>
-void Vector<T>::push_back(const_reference value) {
-  if (is_view()) {
-    throw std::runtime_error("push_back: couldn't push_back to a vector view.");
-  }
-  storage_.push_back(value);
-  set_view_non_empty();
-}
-
-template <typename T>
-void Vector<T>::push_back(value_type&& value) {
-  if (is_view()) {
-    throw std::runtime_error("push_back: couldn't push_back to a vector view.");
-  }
-  storage_.push_back(value);
-  set_view_non_empty();
-}
-
-template <typename T>
 template <typename... Args>
 void Vector<T>::emplace_back(Args&&... args) {
   if (is_view()) {

@@ -438,20 +438,6 @@ TEST_F(VectorTest, erase_range_view) {
   EXPECT_ANY_THROW(v.erase(v.begin(), v.begin() + 1));
 }
 
-TEST_F(VectorTest, push_back) {
-  vi_t v;
-  v.push_back(1);
-  EXPECT_EQ(v, vi_t({1}));
-  v.push_back(2);
-  EXPECT_EQ(v, vi_t({1, 2}));
-}
-
-TEST_F(VectorTest, push_back_view) {
-  vi_t v;
-  v.view(VI234.data(), VI234.size());
-  EXPECT_ANY_THROW(v.push_back(1));
-}
-
 TEST_F(VectorTest, emplace_back) {
   vi_t v;
   v.emplace_back(1);
