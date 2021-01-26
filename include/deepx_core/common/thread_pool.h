@@ -8,11 +8,7 @@
 #include <functional>
 #include <mutex>
 #include <thread>
-#include <utility>
 #include <vector>
-#if !defined NDEBUG
-#include <stdexcept>  // std::runtime_error
-#endif
 
 namespace deepx_core {
 
@@ -21,12 +17,13 @@ namespace deepx_core {
 /************************************************************************/
 class ThreadPool {
  public:
-  using function_t = std::function<void()>;
-  struct wait_token_t {
+  struct WaitToken {
     std::mutex mutex;
     std::condition_variable cond;
     int remain = 0;
   };
+  using function_t = std::function<void()>;
+  using wait_token_t = WaitToken;
 
  private:
   mutable std::mutex mutex_;
@@ -36,83 +33,27 @@ class ThreadPool {
   std::vector<std::thread> threads_;
 
  private:
-  int started() const noexcept {
-    std::unique_lock<std::mutex> guard(mutex_);
-    return started_;
-  }
-
- private:
+  int started() const noexcept;
   void worker_thread();
 
  public:
   ~ThreadPool();
 
-  void start(int thread);
+  // Start 'n' worker threads.
+  void start(int n);
+
+  // Run all remaining function objects and stop all worker threads.
   void stop() noexcept;
 
-  template <class Func>
-  void emplace(Func&& func) {
-#if !defined NDEBUG
-    if (!started()) {
-      throw std::runtime_error("emplace: the thread pool is not started.");
-    }
-#endif
+  // Post a 'func' and return immediately.
+  // 'func' will be run in a worker thread.
+  void post(function_t func);
 
-    {
-      std::unique_lock<std::mutex> guard(mutex_);
-      tasks_.emplace_front(std::forward<function_t>(func));
-    }
-    cond_.notify_one();
-  }
+  // Run 'func' in a worker thread and wait for the completion.
+  void run(const function_t& func, wait_token_t* token);
 
-  template <class Func>
-  void emplace_wait(Func&& func, wait_token_t* token) {
-#if !defined NDEBUG
-    if (!started()) {
-      throw std::runtime_error("emplace_wait: the thread pool is not started.");
-    }
-#endif
-
-    token->remain = 1;
-    emplace([&func, token] {
-      func();
-      std::unique_lock<std::mutex> guard(token->mutex);
-      if (--token->remain == 0) {
-        token->cond.notify_all();
-      }
-    });
-
-    std::unique_lock<std::mutex> guard(token->mutex);
-    while (token->remain) {
-      token->cond.wait(guard);
-    }
-  }
-
-  void batch_emplace_wait(const std::vector<function_t>& funcs,
-                          wait_token_t* token) {
-#if !defined NDEBUG
-    if (!started()) {
-      throw std::runtime_error(
-          "batch_emplace_wait: the thread pool is not started.");
-    }
-#endif
-
-    token->remain = (int)funcs.size();
-    for (const function_t& func : funcs) {
-      emplace([&func, token] {
-        func();
-        std::unique_lock<std::mutex> guard(token->mutex);
-        if (--token->remain == 0) {
-          token->cond.notify_all();
-        }
-      });
-    }
-
-    std::unique_lock<std::mutex> guard(token->mutex);
-    while (token->remain) {
-      token->cond.wait(guard);
-    }
-  }
+  // Run 'funcs' in worker threads and wait for the completion.
+  void run(const std::vector<function_t>& funcs, wait_token_t* token);
 };
 
 }  // namespace deepx_core

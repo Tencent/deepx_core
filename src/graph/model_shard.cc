@@ -543,7 +543,7 @@ void ModelShard::StopThreadPool() { thread_pool_->stop(); }
 
 void ModelShard::AsyncPull(PullRequest* pull_request, TensorMap* param,
                            const std::function<void()>& completion_handler) {
-  thread_pool_->emplace([this, pull_request, param, completion_handler]() {
+  thread_pool_->post([this, pull_request, param, completion_handler]() {
     Pull(pull_request, param);
     completion_handler();
   });
@@ -551,7 +551,7 @@ void ModelShard::AsyncPull(PullRequest* pull_request, TensorMap* param,
 
 void ModelShard::AsyncPush(TensorMap* grad, TensorMap* overwritten_param,
                            const std::function<void()>& completion_handler) {
-  thread_pool_->emplace([this, grad, overwritten_param, completion_handler]() {
+  thread_pool_->post([this, grad, overwritten_param, completion_handler]() {
     Push(grad, overwritten_param);
     completion_handler();
   });
