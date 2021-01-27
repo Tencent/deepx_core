@@ -33,7 +33,7 @@ class ThreadPool {
   std::vector<std::thread> threads_;
 
  private:
-  int started() const noexcept;
+  int started() const;
   void worker_thread();
 
  public:
@@ -43,7 +43,7 @@ class ThreadPool {
   void start(int n);
 
   // Run all remaining function objects and stop all worker threads.
-  void stop() noexcept;
+  void stop();
 
   // Post a 'func' and return immediately.
   // 'func' will be run in a worker thread.

@@ -10,7 +10,7 @@
 
 namespace deepx_core {
 
-int ThreadPool::started() const noexcept {
+int ThreadPool::started() const {
   std::unique_lock<std::mutex> guard(mutex_);
   return started_;
 }
@@ -55,7 +55,7 @@ void ThreadPool::start(int n) {
   }
 }
 
-void ThreadPool::stop() noexcept {
+void ThreadPool::stop() {
   {
     std::unique_lock<std::mutex> guard(mutex_);
     if (started_) {
