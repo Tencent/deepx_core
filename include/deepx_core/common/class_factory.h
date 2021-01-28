@@ -4,7 +4,6 @@
 
 #pragma once
 #include <deepx_core/dx_log.h>
-#include <memory>
 #include <set>
 #include <string>
 #include <type_traits>  // std::enable_if, ...
@@ -87,18 +86,5 @@ class ClassFactoryRegister {
 
 #define CLASS_FACTORY_NAMES(T) \
   deepx_core::ClassFactory<T>::GetInstance().Names()
-
-/************************************************************************/
-/* Helper functions */
-/************************************************************************/
-template <typename T>
-std::unique_ptr<T> class_factory_make_unique(const std::string& name) {
-  return std::unique_ptr<T>(ClassFactory<T>::GetInstance().New(name));
-}
-
-template <typename T>
-std::shared_ptr<T> class_factory_make_shared(const std::string& name) {
-  return std::shared_ptr<T>(ClassFactory<T>::GetInstance().New(name));
-}
 
 }  // namespace deepx_core

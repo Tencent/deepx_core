@@ -12,7 +12,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\deepx_core\dx_gtest.h" />
-    <ClInclude Include="..\src\common\class_factory_test.h" />
     <ClInclude Include="..\src\graph\op\op_test.h" />
     <ClInclude Include="..\src\graph\simp\simp_test.h" />
   </ItemGroup>
@@ -22,10 +21,6 @@
     <ClCompile Include="..\src\common\array_view_test.cc" />
     <ClCompile Include="..\src\common\blocking_queue_test.cc" />
     <ClCompile Include="..\src\common\class_factory_test.cc" />
-    <ClCompile Include="..\src\common\class_factory_test_a.cc" />
-    <ClCompile Include="..\src\common\class_factory_test_b.cc" />
-    <ClCompile Include="..\src\common\class_factory_test_c.cc" />
-    <ClCompile Include="..\src\common\class_factory_test_d.cc" />
     <ClCompile Include="..\src\common\compress_test.cc" />
     <ClCompile Include="..\src\common\fast_strtox_test.cc" />
     <ClCompile Include="..\src\common\group_config_test.cc" />

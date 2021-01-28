@@ -31,9 +31,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\include\deepx_core\dx_gtest.h" />
-    <ClInclude Include="..\src\common\class_factory_test.h">
-      <Filter>common</Filter>
-    </ClInclude>
     <ClInclude Include="..\src\graph\op\op_test.h">
       <Filter>graph\op</Filter>
     </ClInclude>
@@ -55,18 +52,6 @@
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\src\common\class_factory_test.cc">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\class_factory_test_a.cc">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\class_factory_test_b.cc">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\class_factory_test_c.cc">
-      <Filter>common</Filter>
-    </ClCompile>
-    <ClCompile Include="..\src\common\class_factory_test_d.cc">
       <Filter>common</Filter>
     </ClCompile>
     <ClCompile Include="..\src\common\compress_test.cc">

@@ -5,7 +5,7 @@
 include Makefile.rule
 
 SOURCES      := $(shell find src -type f -name "*.cc" | sort)
-TEST_SOURCES := $(shell find src -type f -name "*_test*.cc" | sort)
+TEST_SOURCES := $(shell find src -type f -name "*_test.cc" | sort)
 BIN_SOURCES  := $(shell find src -type f -name "*_main.cc" | sort)
 LIB_SOURCES  := $(filter-out $(TEST_SOURCES) $(BIN_SOURCES),$(SOURCES))
 LINT_SOURCES := $(SOURCES:.cc=.lint)

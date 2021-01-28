@@ -43,7 +43,7 @@ def deepx_core_library(name, have_wxg_log=False):
               'src/**/*.cc',
           ],
           exclude=[
-              'src/**/*_test*.cc',
+              'src/**/*_test.cc',
               'src/**/*_main.cc',
           ],
       ),
