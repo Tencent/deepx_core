@@ -5,6 +5,9 @@
 
 #pragma once
 #include <chrono>
+#include <string>
+#include <utility>
+#include <vector>
 
 namespace deepx_core {
 
@@ -34,5 +37,18 @@ using SecondTimerGuard = TimerGuard<std::chrono::seconds>;
 using MillisecondTimerGuard = TimerGuard<std::chrono::milliseconds>;
 using MicrosecondTimerGuard = TimerGuard<std::chrono::microseconds>;
 using NanosecondTimerGuard = TimerGuard<std::chrono::nanoseconds>;
+
+/************************************************************************/
+/* ProfileItem */
+/************************************************************************/
+struct ProfileItem {
+  std::string phase;
+  double nanosecond = 0;
+  ProfileItem() = default;
+  ProfileItem(std::string _phase, double _nanosecond)
+      : phase(std::move(_phase)), nanosecond(_nanosecond) {}
+};
+
+void DumpProfileItems(std::vector<ProfileItem>* items);
 
 }  // namespace deepx_core
