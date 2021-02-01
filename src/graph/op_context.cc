@@ -5,97 +5,49 @@
 #include <deepx_core/common/profile_util.h>
 #include <deepx_core/dx_log.h>
 #include <deepx_core/graph/op_context.h>
-#include <cstdio>
 #include <cstdlib>  // getenv
 #include <cstring>  // strcmp
-#include <sstream>
 #include <unordered_set>
 #include <utility>
 
 namespace deepx_core {
 
 void OpContext::DumpProfile() const {
-  double total = 0;
-  for (const auto& entry : profile_map_) {
-    total += entry.second.init_forward;
-    total += entry.second.init_predict;
-    total += entry.second.init_backward;
-    total += entry.second.forward;
-    total += entry.second.predict;
-    total += entry.second.backward;
-    total += entry.second.get_pull_request;
+  if (profile_map_.empty()) {
+    return;
   }
 
-  const char* unit;
-  double scale;
-  if (total > 1e+9) {
-    // more than 1 second
-    unit = "seconds";
-    scale = 1e+9;
-  } else if (total > 1e+6) {
-    // more than 1 millisecond
-    unit = "milliseconds";
-    scale = 1e+6;
-  } else if (total > 1e+3) {
-    // more than 1 microsecond
-    unit = "microseconds";
-    scale = 1e+3;
-  } else {
-    unit = "nanoseconds";
-    scale = 1;
+  std::vector<ProfileItem> items;
+  auto add_op_profile = [&items](const OpProfile& op_profile) {
+#define ADD_OP_PROFILE_MEMBER(member, method)     \
+  if (op_profile.member > 0) {                    \
+    std::string phase;                            \
+    if (op_profile.node) {                        \
+      phase = op_profile.node->class_name();      \
+      phase += "::";                              \
+      phase += #method;                           \
+      phase += "(";                               \
+      phase += op_profile.node->name();           \
+      phase += ")";                               \
+    } else {                                      \
+      phase = #method;                            \
+    }                                             \
+    items.emplace_back(phase, op_profile.member); \
   }
-
-  char buf1[256];
-  char buf2[256];
-  std::ostringstream os;
-  os << std::endl;
-  snprintf(buf2, sizeof(buf2), "%-16s %-40s %12s %13s", "name", "method", unit,
-           "percentage");
-  os << buf2 << std::endl;
-  os << std::string(16 + 40 + 12 + 13 + 3, '-') << std::endl;
-
-#if __GNUC__ == 7 || __GNUC__ == 8
-// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=78969
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat-truncation"
-#endif
-  auto dump_profile = [ total, scale, &buf1, &buf2, &os ](
-      const OpProfile& op_profile, const char* class_name) noexcept {
-#define DUMP_PROFILE_MEMBER(member_name, member)                              \
-  do {                                                                        \
-    const char* name;                                                         \
-    if (op_profile.node) {                                                    \
-      name = op_profile.node->name().c_str();                                 \
-    } else {                                                                  \
-      name = "global";                                                        \
-    }                                                                         \
-    if (op_profile.member > 0) {                                              \
-      snprintf(buf1, sizeof(buf1), "%s::%s", class_name, member_name);        \
-      snprintf(buf2, sizeof(buf2), "%-16s %-40s %12.3f %12.3f%%", name, buf1, \
-               op_profile.member / scale, op_profile.member / total * 100);   \
-      os << buf2 << std::endl;                                                \
-    }                                                                         \
-  } while (0)
-    DUMP_PROFILE_MEMBER("InitForward", init_forward);
-    DUMP_PROFILE_MEMBER("InitPredict", init_predict);
-    DUMP_PROFILE_MEMBER("InitBackward", init_backward);
-    DUMP_PROFILE_MEMBER("Forward", forward);
-    DUMP_PROFILE_MEMBER("Predict", predict);
-    DUMP_PROFILE_MEMBER("Backward", backward);
-    DUMP_PROFILE_MEMBER("GetPullRequest", get_pull_request);
-#undef DUMP_PROFILE_MEMBER
+    ADD_OP_PROFILE_MEMBER(init_forward, InitForward);
+    ADD_OP_PROFILE_MEMBER(init_predict, InitPredict);
+    ADD_OP_PROFILE_MEMBER(init_backward, InitBackward);
+    ADD_OP_PROFILE_MEMBER(forward, Forward);
+    ADD_OP_PROFILE_MEMBER(predict, Predict);
+    ADD_OP_PROFILE_MEMBER(backward, Backward);
+    ADD_OP_PROFILE_MEMBER(get_pull_request, GetPullRequest);
+#undef ADD_OP_PROFILE_MEMBER
   };
-#if __GNUC__ == 7 || __GNUC__ == 8
-#pragma GCC diagnostic pop
-#endif
-
-  dump_profile(global_profile_, "OpContext");
-  for (int i = 0; i < forward_chain_size_; ++i) {
-    Op* op = forward_chain_[i].get();
-    const OpProfile& op_profile = profile_map_.at(op);
-    dump_profile(op_profile, op->class_name());
+  add_op_profile(global_profile_);
+  for (const auto& entry : profile_map_) {
+    add_op_profile(entry.second);
   }
-  DXINFO("%s", os.str().c_str());
+  DumpProfileItems(&items);
 }
 
 OpContext::OpContext() {
@@ -161,6 +113,7 @@ bool OpContext::InitOp(const std::vector<GraphTarget>& targets,
   overwritten_ptr_.clear();
 
   if (enable_profile_) {
+    DumpProfile();
     global_profile_.clear();
     profile_map_.clear();
   }
