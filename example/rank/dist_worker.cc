@@ -5,6 +5,7 @@
 
 #include <deepx_core/common/any_map.h>
 #include <deepx_core/common/misc.h>
+#include <deepx_core/common/profile_util.h>
 #include <deepx_core/common/stream.h>
 #include <deepx_core/dx_log.h>
 #include <deepx_core/graph/dist_proto.h>
@@ -80,14 +81,50 @@ void TrainerContextDist::TrainBatch() {
   const Instance& inst = op_context_->inst();
   if (op_context_batch_ != inst.batch()) {
     op_context_batch_ = inst.batch();
-    op_context_->InitForward();
-    op_context_->InitBackward();
+    if (!enable_profile_) {
+      op_context_->InitForward();
+      op_context_->InitBackward();
+    } else {
+      {
+        NanosecondTimerGuard guard(profile_map_["OpContext::InitForward"]);
+        op_context_->InitForward();
+      }
+      {
+        NanosecondTimerGuard guard(profile_map_["OpContext::InitBackward"]);
+        op_context_->InitBackward();
+      }
+    }
   }
 
-  Pull();
-  op_context_->Forward();
-  op_context_->Backward();
-  Push();
+  if (!enable_profile_) {
+    op_context_->GetPullRequest(&pull_request_);
+    Pull();
+    op_context_->Forward();
+    op_context_->Backward();
+    Push();
+  } else {
+    {
+      NanosecondTimerGuard guard(profile_map_["OpContext::GetPullRequest"]);
+      op_context_->GetPullRequest(&pull_request_);
+    }
+    {
+      NanosecondTimerGuard guard(profile_map_["Pull"]);
+      Pull();
+    }
+    {
+      NanosecondTimerGuard guard(profile_map_["OpContext::Forward"]);
+      op_context_->Forward();
+    }
+    {
+      NanosecondTimerGuard guard(profile_map_["OpContext::Backward"]);
+      op_context_->Backward();
+    }
+    {
+      NanosecondTimerGuard guard(profile_map_["Push"]);
+      Push();
+    }
+  }
+
   file_loss_ += op_context_->loss();
   file_loss_weight_ += 1;
 }
@@ -96,15 +133,35 @@ void TrainerContextDist::PredictBatch() {
   const Instance& inst = op_context_->inst();
   if (op_context_batch_ != inst.batch()) {
     op_context_batch_ = inst.batch();
-    op_context_->InitPredict();
+    if (!enable_profile_) {
+      op_context_->InitPredict();
+    } else {
+      NanosecondTimerGuard guard(profile_map_["OpContext::InitPredict"]);
+      op_context_->InitPredict();
+    }
   }
 
-  Pull();
-  op_context_->Predict();
+  if (!enable_profile_) {
+    op_context_->GetPullRequest(&pull_request_);
+    Pull();
+    op_context_->Predict();
+  } else {
+    {
+      NanosecondTimerGuard guard(profile_map_["OpContext::GetPullRequest"]);
+      op_context_->GetPullRequest(&pull_request_);
+    }
+    {
+      NanosecondTimerGuard guard(profile_map_["Pull"]);
+      Pull();
+    }
+    {
+      NanosecondTimerGuard guard(profile_map_["OpContext::Predict"]);
+      op_context_->Predict();
+    }
+  }
 }
 
 void TrainerContextDist::Pull() {
-  op_context_->GetPullRequest(&pull_request_);
   if (FLAGS_freq_filter_threshold > 0 && FLAGS_is_train) {
     FreqStore::GetIdFreqMap(op_context_->inst(), &pull_request_.id_freq_map);
   }

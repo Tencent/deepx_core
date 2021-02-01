@@ -14,6 +14,7 @@
 #include <deepx_core/tensor/data_type.h>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace deepx_core {
@@ -55,10 +56,18 @@ class TrainerContext : public DataType {
   double file_loss_weight() const noexcept { return file_loss_weight_; }
 
  protected:
+  int enable_profile_ = 0;
+  std::unordered_map<std::string, double> profile_map_;
+
+ protected:
+  void DumpProfile() const;
+
+ protected:
   void _Init(ModelShard* local_model_shard);
 
  public:
-  virtual ~TrainerContext() = default;
+  TrainerContext();
+  virtual ~TrainerContext();
   virtual void TrainBatch() = 0;
   virtual void TrainFile(int thread_id, const std::string& file);
   virtual void PredictBatch() = 0;

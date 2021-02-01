@@ -6,10 +6,12 @@
 #include "trainer_context.h"
 #include <deepx_core/common/any_map.h>
 #include <deepx_core/common/misc.h>
+#include <deepx_core/common/profile_util.h>
 #include <deepx_core/dx_log.h>
 #include <deepx_core/graph/freq_store.h>
 #include <deepx_core/graph/instance_reader.h>
 #include <chrono>
+#include <cstring>  // strcmp
 #include <mutex>
 #include <sstream>
 
@@ -18,6 +20,18 @@ namespace deepx_core {
 /************************************************************************/
 /* TrainerContext */
 /************************************************************************/
+void TrainerContext::DumpProfile() const {
+  if (profile_map_.empty()) {
+    return;
+  }
+
+  std::vector<ProfileItem> items;
+  for (const auto& entry : profile_map_) {
+    items.emplace_back(entry.first, entry.second);
+  }
+  DumpProfileItems(&items);
+}
+
 void TrainerContext::_Init(ModelShard* local_model_shard) {
   local_model_shard_ = local_model_shard;
   op_context_.reset(new OpContext);
@@ -26,6 +40,26 @@ void TrainerContext::_Init(ModelShard* local_model_shard) {
   op_context_batch_ = -1;
   file_loss_ = 0;
   file_loss_weight_ = 0;
+
+  if (enable_profile_) {
+    DumpProfile();
+    profile_map_.clear();
+  }
+}
+
+TrainerContext::TrainerContext() {
+  const char* enable_profile = getenv("DEEPX_TRAINER_CONTEXT_ENABLE_PROFILE");
+  if (enable_profile && strcmp(enable_profile, "1") == 0) {
+    enable_profile_ = 1;
+  } else {
+    enable_profile_ = 0;
+  }
+}
+
+TrainerContext::~TrainerContext() {
+  if (enable_profile_) {
+    DumpProfile();
+  }
 }
 
 void TrainerContext::TrainFile(int thread_id, const std::string& file) {
@@ -58,7 +92,15 @@ void TrainerContext::TrainFile(int thread_id, const std::string& file) {
   };
 
   Instance* inst = op_context_->mutable_inst();
-  while (instance_reader->GetBatch(inst)) {
+  auto get_batch = [this, &instance_reader](Instance* inst) {
+    if (!enable_profile_) {
+      return instance_reader->GetBatch(inst);
+    } else {
+      NanosecondTimerGuard guard(profile_map_["InstanceReader::GetBatch"]);
+      return instance_reader->GetBatch(inst);
+    }
+  };
+  while (get_batch(inst)) {
     TrainBatch();
     if (verbose_ && ++processed_batch % verbose_batch == 0) {
       dump_speed();
@@ -166,9 +208,22 @@ void TrainerContext::PredictFile(int thread_id, const std::string& file,
   };
 
   Instance* inst = op_context_->mutable_inst();
-  while (instance_reader->GetBatch(inst)) {
+  auto get_batch = [this, &instance_reader](Instance* inst) {
+    if (!enable_profile_) {
+      return instance_reader->GetBatch(inst);
+    } else {
+      NanosecondTimerGuard guard(profile_map_["InstanceReader::GetBatch"]);
+      return instance_reader->GetBatch(inst);
+    }
+  };
+  while (get_batch(inst)) {
     PredictBatch();
-    DumpPredictBatch(os);
+    if (!enable_profile_) {
+      DumpPredictBatch(os);
+    } else {
+      NanosecondTimerGuard guard(profile_map_["DumpPredictBatch"]);
+      DumpPredictBatch(os);
+    }
     if (verbose_ && ++processed_batch % verbose_batch == 0) {
       dump_speed();
     }
@@ -176,7 +231,12 @@ void TrainerContext::PredictFile(int thread_id, const std::string& file,
 
   if (inst->batch() > 0) {
     PredictBatch();
-    DumpPredictBatch(os);
+    if (!enable_profile_) {
+      DumpPredictBatch(os);
+    } else {
+      NanosecondTimerGuard guard(profile_map_["DumpPredictBatch"]);
+      DumpPredictBatch(os);
+    }
   }
 
   if (verbose_) {
@@ -196,13 +256,39 @@ void TrainerContextNonShard::TrainBatch() {
   const Instance& inst = op_context_->inst();
   if (op_context_batch_ != inst.batch()) {
     op_context_batch_ = inst.batch();
-    op_context_->InitForward();
-    op_context_->InitBackward();
+    if (!enable_profile_) {
+      op_context_->InitForward();
+      op_context_->InitBackward();
+    } else {
+      {
+        NanosecondTimerGuard guard(profile_map_["OpContext::InitForward"]);
+        op_context_->InitForward();
+      }
+      {
+        NanosecondTimerGuard guard(profile_map_["OpContext::InitBackward"]);
+        op_context_->InitBackward();
+      }
+    }
   }
 
-  op_context_->Forward();
-  op_context_->Backward();
-  optimizer_->Update(op_context_->mutable_grad());
+  if (!enable_profile_) {
+    op_context_->Forward();
+    op_context_->Backward();
+    optimizer_->Update(op_context_->mutable_grad());
+  } else {
+    {
+      NanosecondTimerGuard guard(profile_map_["OpContext::Forward"]);
+      op_context_->Forward();
+    }
+    {
+      NanosecondTimerGuard guard(profile_map_["OpContext::Backward"]);
+      op_context_->Backward();
+    }
+    {
+      NanosecondTimerGuard guard(profile_map_["Optimizer::Update"]);
+      optimizer_->Update(op_context_->mutable_grad());
+    }
+  }
   file_loss_ += op_context_->loss();
   file_loss_weight_ += 1;
 }
@@ -211,10 +297,20 @@ void TrainerContextNonShard::PredictBatch() {
   const Instance& inst = op_context_->inst();
   if (op_context_batch_ != inst.batch()) {
     op_context_batch_ = inst.batch();
-    op_context_->InitPredict();
+    if (!enable_profile_) {
+      op_context_->InitPredict();
+    } else {
+      NanosecondTimerGuard guard(profile_map_["OpContext::InitPredict"]);
+      op_context_->InitPredict();
+    }
   }
 
-  op_context_->Predict();
+  if (!enable_profile_) {
+    op_context_->Predict();
+  } else {
+    NanosecondTimerGuard guard(profile_map_["OpContext::Predict"]);
+    op_context_->Predict();
+  }
 }
 
 /************************************************************************/
@@ -252,14 +348,49 @@ void TrainerContextShard::TrainBatch() {
   const Instance& inst = op_context_->inst();
   if (op_context_batch_ != inst.batch()) {
     op_context_batch_ = inst.batch();
-    op_context_->InitForward();
-    op_context_->InitBackward();
+    if (!enable_profile_) {
+      op_context_->InitForward();
+      op_context_->InitBackward();
+    } else {
+      {
+        NanosecondTimerGuard guard(profile_map_["OpContext::InitForward"]);
+        op_context_->InitForward();
+      }
+      {
+        NanosecondTimerGuard guard(profile_map_["OpContext::InitBackward"]);
+        op_context_->InitBackward();
+      }
+    }
   }
 
-  Pull(1);
-  op_context_->Forward();
-  op_context_->Backward();
-  Push();
+  if (!enable_profile_) {
+    op_context_->GetPullRequest(&pull_request_);
+    Pull(1);
+    op_context_->Forward();
+    op_context_->Backward();
+    Push();
+  } else {
+    {
+      NanosecondTimerGuard guard(profile_map_["OpContext::GetPullRequest"]);
+      op_context_->GetPullRequest(&pull_request_);
+    }
+    {
+      NanosecondTimerGuard guard(profile_map_["Pull"]);
+      Pull(1);
+    }
+    {
+      NanosecondTimerGuard guard(profile_map_["OpContext::Forward"]);
+      op_context_->Forward();
+    }
+    {
+      NanosecondTimerGuard guard(profile_map_["OpContext::Backward"]);
+      op_context_->Backward();
+    }
+    {
+      NanosecondTimerGuard guard(profile_map_["Push"]);
+      Push();
+    }
+  }
   file_loss_ += op_context_->loss();
   file_loss_weight_ += 1;
 }
@@ -268,11 +399,32 @@ void TrainerContextShard::PredictBatch() {
   const Instance& inst = op_context_->inst();
   if (op_context_batch_ != inst.batch()) {
     op_context_batch_ = inst.batch();
-    op_context_->InitPredict();
+    if (!enable_profile_) {
+      op_context_->InitPredict();
+    } else {
+      NanosecondTimerGuard guard(profile_map_["OpContext::InitPredict"]);
+      op_context_->InitPredict();
+    }
   }
 
-  Pull(0);
-  op_context_->Predict();
+  if (!enable_profile_) {
+    op_context_->GetPullRequest(&pull_request_);
+    Pull(0);
+    op_context_->Predict();
+  } else {
+    {
+      NanosecondTimerGuard guard(profile_map_["OpContext::GetPullRequest"]);
+      op_context_->GetPullRequest(&pull_request_);
+    }
+    {
+      NanosecondTimerGuard guard(profile_map_["Pull"]);
+      Pull(0);
+    }
+    {
+      NanosecondTimerGuard guard(profile_map_["OpContext::Predict"]);
+      op_context_->Predict();
+    }
+  }
 }
 
 void TrainerContextShard::CompletionHandler() {
@@ -290,7 +442,6 @@ void TrainerContextShard::WaitForCompletion() {
 }
 
 void TrainerContextShard::Pull(int is_train) {
-  op_context_->GetPullRequest(&pull_request_);
   pull_request_.is_train = is_train;
   if (freq_filter_threshold_ > 0 && is_train) {
     FreqStore::GetIdFreqMap(op_context_->inst(), &pull_request_.id_freq_map);
