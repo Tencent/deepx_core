@@ -17,6 +17,7 @@
     <ClCompile Include="..\src\common\group_config.cc" />
     <ClCompile Include="..\src\common\hash.cc" />
     <ClCompile Include="..\src\common\misc.cc" />
+    <ClCompile Include="..\src\common\profile_util.cc" />
     <ClCompile Include="..\src\common\stream.cc" />
     <ClCompile Include="..\src\common\str_util.cc" />
     <ClCompile Include="..\src\common\thread_pool.cc" />
