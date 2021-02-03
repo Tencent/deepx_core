@@ -116,6 +116,7 @@
     <ClInclude Include="..\include\deepx_core\common\hash.h" />
     <ClInclude Include="..\include\deepx_core\common\hash_map.h" />
     <ClInclude Include="..\include\deepx_core\common\hash_map_io.h" />
+    <ClInclude Include="..\include\deepx_core\common\lru_cache.h" />
     <ClInclude Include="..\include\deepx_core\common\misc.h" />
     <ClInclude Include="..\include\deepx_core\common\profile_util.h" />
     <ClInclude Include="..\include\deepx_core\common\read_write_lock.h" />

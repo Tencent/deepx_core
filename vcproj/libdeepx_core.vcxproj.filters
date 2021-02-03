@@ -342,6 +342,9 @@
     <ClInclude Include="..\include\deepx_core\common\hash_map_io.h">
       <Filter>common</Filter>
     </ClInclude>
+    <ClInclude Include="..\include\deepx_core\common\lru_cache.h">
+      <Filter>common</Filter>
+    </ClInclude>
     <ClInclude Include="..\include\deepx_core\common\misc.h">
       <Filter>common</Filter>
     </ClInclude>

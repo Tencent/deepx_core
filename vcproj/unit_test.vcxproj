@@ -26,6 +26,7 @@
     <ClCompile Include="..\src\common\group_config_test.cc" />
     <ClCompile Include="..\src\common\hash_map_test.cc" />
     <ClCompile Include="..\src\common\hash_test.cc" />
+    <ClCompile Include="..\src\common\lru_cache_test.cc" />
     <ClCompile Include="..\src\common\misc_test.cc" />
     <ClCompile Include="..\src\common\stream_test.cc" />
     <ClCompile Include="..\src\common\str_util_test.cc" />
