@@ -51,6 +51,23 @@ class AdamOptimizer : public OptimizerBase2 {
     return true;
   }
 
+  void WriteConfigLegacy(OutputStream& os) const override {
+    os << config_.rho1 << config_.rho2 << config_.alpha << config_.beta
+       << config_.rho1t << config_.rho2t;
+  }
+
+  void ReadConfigLegacy(InputStream& is) override {
+    is >> config_.rho1 >> config_.rho2 >> config_.alpha >> config_.beta >>
+        config_.rho1t >> config_.rho2t;
+    config_.one_sub_rho1 = 1 - config_.rho1;
+    config_.one_sub_rho2 = 1 - config_.rho2;
+    config_.rho_aux = 0;
+  }
+
+  void CopyConfigLegacy(const Optimizer& other) override {
+    config_ = ((const AdamOptimizer&)other).config_;
+  }
+
   void PreUpdate() override { ll_optimizer_t::PreBatch(&config_); }
 
   void PostUpdate() override { ll_optimizer_t::PostBatch(&config_); }

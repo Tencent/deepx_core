@@ -51,6 +51,20 @@ class SGDOptimizer : public OptimizerBase0 {
     return true;
   }
 
+  void WriteConfigLegacy(OutputStream& os) const override {
+    os << config_.alpha << config_.min_alpha << config_.batch_decay
+       << config_.batch_decay_rate << config_.real_batch << config_.real_alpha;
+  }
+
+  void ReadConfigLegacy(InputStream& is) override {
+    is >> config_.alpha >> config_.min_alpha >> config_.batch_decay >>
+        config_.batch_decay_rate >> config_.real_batch >> config_.real_alpha;
+  }
+
+  void CopyConfigLegacy(const Optimizer& other) override {
+    config_ = ((const SGDOptimizer&)other).config_;
+  }
+
   void PreUpdate() override { ll_optimizer_t::PreBatch(&config_); }
 
   void PostUpdate() override { ll_optimizer_t::PostBatch(&config_); }

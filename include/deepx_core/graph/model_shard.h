@@ -62,29 +62,56 @@ class ModelShard : public DataType {
   const OLStore& ol_store() const noexcept { return *ol_store_; }
 
  private:
+  // backward compatibility
+  static std::string GetSuffixLegacy(const Shard* shard, int shard_id);
   static std::string GetSuffix(const Shard* shard, int shard_id);
+  // backward compatibility
+  static std::string GetModelFileLegacy(const std::string& dir,
+                                        const Shard* shard, int shard_id);
   static std::string GetModelFile(const std::string& dir, const Shard* shard,
                                   int shard_id);
   static std::string GetTextModelFile(const std::string& dir,
                                       const Shard* shard, int shard_id);
   static std::string GetFeatureKVModelFile(const std::string& dir,
                                            const Shard* shard, int shard_id);
+  // backward compatibility
+  static std::string GetOptimizerFileLegacy(const std::string& dir,
+                                            const Shard* shard, int shard_id);
   static std::string GetOptimizerFile(const std::string& dir,
                                       const Shard* shard, int shard_id);
+  // backward compatibility
+  static std::string GetTSStoreFileLegacy(const std::string& dir,
+                                          const Shard* shard, int shard_id);
   static std::string GetTSStoreFile(const std::string& dir, const Shard* shard,
                                     int shard_id);
+  // backward compatibility
+  static std::string GetFreqStoreFileLegacy(const std::string& dir,
+                                            const Shard* shard, int shard_id);
   static std::string GetFreqStoreFile(const std::string& dir,
                                       const Shard* shard, int shard_id);
+  // backward compatibility
+  static std::string GetSuccessFileLegacy(const std::string& dir,
+                                          const Shard* shard, int shard_id);
   static std::string GetSuccessFile(const std::string& dir, const Shard* shard,
                                     int shard_id);
 
  private:
+  // backward compatibility
+  std::string GetModelFileLegacy(const std::string& dir) const;
   std::string GetModelFile(const std::string& dir) const;
   std::string GetTextModelFile(const std::string& dir) const;
   std::string GetFeatureKVModelFile(const std::string& dir) const;
+  // backward compatibility
+  std::string GetOptimizerFileLegacy(const std::string& dir) const;
   std::string GetOptimizerFile(const std::string& dir) const;
+  // backward compatibility
+  std::string GetTSStoreFileLegacy(const std::string& dir) const;
   std::string GetTSStoreFile(const std::string& dir) const;
+  // backward compatibility
+  std::string GetFreqStoreFileLegacy(const std::string& dir) const;
   std::string GetFreqStoreFile(const std::string& dir) const;
+  // backward compatibility
+  std::string GetSuccessFileLegacy(const std::string& dir) const;
   std::string GetSuccessFile(const std::string& dir) const;
 
  public:
@@ -100,15 +127,31 @@ class ModelShard : public DataType {
   bool InitOLStore(freq_t update_threshold, float_t distance_threshold);
   bool InitLock();
 
+  // backward compatibility
+  bool SaveModelLegacy(const std::string& dir) const;
   bool SaveModel(const std::string& dir) const;
   bool SaveTextModel(const std::string& dir) const;
+  // backward compatibility
+  bool SaveFeatureKVModelLegacy(const std::string& dir,
+                                int feature_kv_protocol_version) const;
   bool SaveFeatureKVModel(const std::string& dir,
                           int feature_kv_protocol_version) const;
+  // backward compatibility
+  bool SaveOLFeatureKVModelLegacy(const std::string& dir,
+                                  int feature_kv_protocol_version) const;
   bool SaveOLFeatureKVModel(const std::string& dir,
                             int feature_kv_protocol_version) const;
+  // backward compatibility
+  bool SaveOptimizerLegacy(const std::string& dir) const;
   bool SaveOptimizer(const std::string& dir) const;
+  // backward compatibility
+  bool SaveTSStoreLegacy(const std::string& dir) const;
   bool SaveTSStore(const std::string& dir) const;
+  // backward compatibility
+  bool SaveFreqStoreLegacy(const std::string& dir) const;
   bool SaveFreqStore(const std::string& dir) const;
+  // backward compatibility
+  bool SaveSuccessLegacy(const std::string& dir) const;
   bool SaveSuccess(const std::string& dir) const;
 
  private:
@@ -117,18 +160,40 @@ class ModelShard : public DataType {
   // Return 1, 'shard_' and 'remote_shard' are the same.
   // Return 0, 'shard_' and 'remote_shard' differ in shard size or shard func.
   // Return -1, error.
+
+  // backward compatibility
+  int GetShardStatusLegacy(const std::string& dir, Shard* remote_shard) const;
   int GetShardStatus(const std::string& dir, Shard* remote_shard) const;
 
  public:
+  // backward compatibility
+  bool LoadModelLegacy(const std::string& dir);
   bool LoadModel(const std::string& dir);
+  // backward compatibility
+  bool LoadOptimizerLegacy(const std::string& dir,
+                           const std::string& optimizer_config);
   bool LoadOptimizer(const std::string& dir,
                      const std::string& optimizer_config);
+  // backward compatibility
+  bool LoadTSStoreLegacy(const std::string& dir, ts_t now,
+                         ts_t expire_threshold);
   bool LoadTSStore(const std::string& dir, ts_t now, ts_t expire_threshold);
+  // backward compatibility
+  bool LoadFreqStoreLegacy(const std::string& dir,
+                           freq_t freq_filter_threshold);
   bool LoadFreqStore(const std::string& dir, freq_t freq_filter_threshold);
 
+  // backward compatibility
+  bool WarmupModelLegacy(const std::string& dir);
   bool WarmupModel(const std::string& dir);
+  // backward compatibility
+  bool WarmupOptimizerLegacy(const std::string& dir);
   bool WarmupOptimizer(const std::string& dir);
+  // backward compatibility
+  bool WarmupTSStoreLegacy(const std::string& dir);
   bool WarmupTSStore(const std::string& dir);
+  // backward compatibility
+  bool WarmupFreqStoreLegacy(const std::string& dir);
   bool WarmupFreqStore(const std::string& dir);
 
  public:

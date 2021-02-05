@@ -92,12 +92,59 @@ void Model::InitLock() {
   }
 }
 
+bool Model::WriteLegacy(OutputStream& os) const {
+  int version = 0;
+  os << version;
+  os << DATA_TYPE_TOKEN;
+  os << param_;
+  if (!os) {
+    DXERROR("Failed to write model.");
+    return false;
+  }
+  return true;
+}
+
 bool Model::Write(OutputStream& os) const {
   int version = 0;
   os << version;
   os << param_;
   if (!os) {
     DXERROR("Failed to write model.");
+    return false;
+  }
+  return true;
+}
+
+bool Model::ReadLegacy(InputStream& is) {
+  int version;
+  is >> version;
+  if (!is) {
+    DXERROR("Failed to read model.");
+    return false;
+  }
+
+  if (version > 0) {
+    DXERROR("Couldn't handle a higher version: %d.", version);
+    is.set_bad();
+    return false;
+  }
+
+  int data_type_token;
+  is >> data_type_token;
+  if (!is) {
+    DXERROR("Failed to read model.");
+    return false;
+  }
+
+  if (data_type_token != DATA_TYPE_TOKEN) {
+    DXERROR("Inconsistent data type token: %d vs %d.", data_type_token,
+            DATA_TYPE_TOKEN);
+    return false;
+  }
+
+  is >> param_;
+  if (!is) {
+    DXERROR("Failed to read model.");
     return false;
   }
   return true;
@@ -125,6 +172,20 @@ bool Model::Read(InputStream& is) {
   return true;
 }
 
+bool Model::SaveLegacy(const std::string& file) const {
+  AutoOutputFileStream os;
+  if (!os.Open(file)) {
+    DXERROR("Failed to open: %s.", file.c_str());
+    return false;
+  }
+  DXINFO("Saving model to %s...", file.c_str());
+  if (!WriteLegacy(os)) {
+    return false;
+  }
+  DXINFO("Done.");
+  return true;
+}
+
 bool Model::Save(const std::string& file) const {
   AutoOutputFileStream os;
   if (!os.Open(file)) {
@@ -133,6 +194,20 @@ bool Model::Save(const std::string& file) const {
   }
   DXINFO("Saving model to %s...", file.c_str());
   if (!Write(os)) {
+    return false;
+  }
+  DXINFO("Done.");
+  return true;
+}
+
+bool Model::LoadLegacy(const std::string& file) {
+  AutoInputFileStream is;
+  if (!is.Open(file)) {
+    DXERROR("Failed to open: %s.", file.c_str());
+    return false;
+  }
+  DXINFO("Loading model from %s...", file.c_str());
+  if (!ReadLegacy(is)) {
     return false;
   }
   DXINFO("Done.");

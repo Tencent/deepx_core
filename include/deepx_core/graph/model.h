@@ -40,9 +40,17 @@ class Model : public DataType {
   bool InitParam(std::default_random_engine& engine,  // NOLINT
                  const Shard* shard = nullptr, int shard_id = 0);
   void InitLock();
-  bool Write(OutputStream& os) const;  // NOLINT
-  bool Read(InputStream& is);          // NOLINT
+  // backward compatibility
+  bool WriteLegacy(OutputStream& os) const;  // NOLINT
+  bool Write(OutputStream& os) const;        // NOLINT
+  // backward compatibility
+  bool ReadLegacy(InputStream& is);  // NOLINT
+  bool Read(InputStream& is);        // NOLINT
+  // backward compatibility
+  bool SaveLegacy(const std::string& file) const;
   bool Save(const std::string& file) const;
+  // backward compatibility
+  bool LoadLegacy(const std::string& file);
   bool Load(const std::string& file);
   bool SaveText(const std::string& file) const;
   bool SaveFeatureKV(const std::string& file,

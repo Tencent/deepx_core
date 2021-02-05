@@ -65,6 +65,42 @@ class HybridOptimizer : public OptimizerImpl {
     return true;
   }
 
+  void WriteConfigLegacy(OutputStream& os) const override {
+    int version = 0x0a0c72e7;  // magic number version
+    os << version;
+    os << ada_grad_config_.alpha << ada_grad_config_.beta;
+    os << ftrl_config_.alpha << ftrl_config_.beta << ftrl_config_.l1
+       << ftrl_config_.l2;
+  }
+
+  void ReadConfigLegacy(InputStream& is) override {
+    int version;
+    if (is.Peek(&version, sizeof(version)) != sizeof(version)) {
+      return;
+    }
+
+    if (version == 0x0a0c72e7) {  // magic number version
+      is >> version;
+      is >> ada_grad_config_.alpha >> ada_grad_config_.beta;
+      is >> ftrl_config_.alpha >> ftrl_config_.beta >> ftrl_config_.l1 >>
+          ftrl_config_.l2;
+      ftrl_config_.inv_alpha = 1 / ftrl_config_.alpha;
+    } else {
+      int default_optimizer;
+      std::unordered_map<std::string, int> optimizer_map;
+      is >> default_optimizer >> optimizer_map;
+      is >> ada_grad_config_.alpha >> ada_grad_config_.beta;
+      is >> ftrl_config_.alpha >> ftrl_config_.beta >> ftrl_config_.l1 >>
+          ftrl_config_.l2;
+      ftrl_config_.inv_alpha = 1 / ftrl_config_.alpha;
+    }
+  }
+
+  void CopyConfigLegacy(const Optimizer& other) override {
+    ada_grad_config_ = ((const HybridOptimizer&)other).ada_grad_config_;
+    ftrl_config_ = ((const HybridOptimizer&)other).ftrl_config_;
+  }
+
   void InitParamTSR(const std::string& /*name*/, const tsr_t& W,
                     OptimizerTSRSlot* slot) const override {
     slot->O.resize(1);

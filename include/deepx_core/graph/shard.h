@@ -16,6 +16,8 @@ class Shard;
 /* Shard functions */
 /************************************************************************/
 bool SaveShard(const std::string& dir, const Shard& shard);
+// backward compatibility
+bool LoadShardLegacy(const std::string& dir, Shard* shard);
 bool LoadShard(const std::string& dir, Shard* shard);
 
 /************************************************************************/

@@ -28,6 +28,23 @@ class DefaultShardFunc : public DataType {
 };
 
 /************************************************************************/
+/* ModuloShardFunc */
+/************************************************************************/
+// backward compatibility
+class ModuloShardFunc : public DataType {
+ public:
+  static int TSRShardFunc(const std::string& /*name*/,
+                          int /*shard_size*/) noexcept {
+    return 0;
+  }
+
+  static int SRMShardFunc(int_t id, int shard_size) noexcept {
+    id = (id & UINT64_C(0x0000ffffff000000)) >> 24;
+    return (int)((uint32_t)id % (uint32_t)shard_size);
+  }
+};
+
+/************************************************************************/
 /* ShardFuncMap */
 /************************************************************************/
 class ShardFuncMap : public DataType {
@@ -78,6 +95,19 @@ class DefaultShardFuncRegister {
   }
 } default_shard_func_register;
 
+/************************************************************************/
+/* ModuloShardFuncRegister */
+/************************************************************************/
+// backward compatibility
+class ModuloShardFuncRegister {
+ public:
+  ModuloShardFuncRegister() {
+    ShardFuncMap::GetInstance().Register("modulo",
+                                         &ModuloShardFunc::TSRShardFunc,
+                                         &ModuloShardFunc::SRMShardFunc);
+  }
+} modulo_shard_func_register;
+
 }  // namespace
 
 /************************************************************************/
@@ -91,6 +121,19 @@ std::string GetShardFile(const std::string& dir) { return dir + "/shard.bin"; }
 
 bool SaveShard(const std::string& dir, const Shard& shard) {
   return shard.Save(GetShardFile(dir));
+}
+
+bool LoadShardLegacy(const std::string& dir, Shard* shard) {
+  for (int i = 1; i <= 1024; ++i) {  // magic number
+    std::string file = dir + "/SUCCESS_0." + std::to_string(i) + ".-2.1";
+    if (AutoFileSystem::Exists(file)) {
+      shard->InitShard(i, "modulo");
+      return true;
+    }
+  }
+
+  DXERROR("Invalid model dir: %s.", dir.c_str());
+  return false;
 }
 
 bool LoadShard(const std::string& dir, Shard* shard) {

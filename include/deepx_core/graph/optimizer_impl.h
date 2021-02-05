@@ -59,6 +59,130 @@ inline InputStream& operator>>(InputStream& is, OptimizerSRMSlot& slot) {
   return is;
 }
 
+// backward compatibility
+inline InputStream& ReadOptimizerSRPSlot(InputStream& is,           // NOLINT
+                                         OptimizerSRMSlot& slot) {  // NOLINT
+  int size;
+  is.Read(&size, sizeof(size));
+  if (is) {
+    if (size > 0) {
+      slot.O.resize(size);
+      for (int i = 0; i < size; ++i) {
+        ReadSRP(is, slot.O[i]);
+        if (!is) {
+          return is;
+        }
+      }
+    } else {
+      slot.O.clear();
+    }
+  }
+  return is;
+}
+
+// backward compatibility
+inline InputStream& ReadOptimizerSVPSlot(InputStream& is,           // NOLINT
+                                         OptimizerSRMSlot& slot) {  // NOLINT
+  int size;
+  is.Read(&size, sizeof(size));
+  if (is) {
+    if (size > 0) {
+      slot.O.resize(size);
+      for (int i = 0; i < size; ++i) {
+        ReadSVP(is, slot.O[i]);
+        if (!is) {
+          return is;
+        }
+      }
+    } else {
+      slot.O.clear();
+    }
+  }
+  return is;
+}
+
+// backward compatibility
+inline InputStream& ReadOptimizerSRPSlotMap(
+    InputStream& is,                                                // NOLINT
+    std::unordered_map<std::string, OptimizerSRMSlot>& slot_map) {  // NOLINT
+  int version;
+  if (is.Peek(&version, sizeof(version)) != sizeof(version)) {
+    return is;
+  }
+
+  size_t size;
+  if (version == 0x0a0c72e7) {  // magic number version
+    uint64_t size_u64 = 0;
+    is >> version;
+    is >> size_u64;
+    size = (size_t)size_u64;
+  } else {
+    int size_i = 0;
+    is >> size_i;
+    size = (size_t)size_i;
+  }
+  if (!is) {
+    return is;
+  }
+
+  slot_map.clear();
+  if (size > 0) {
+    std::string name;
+    OptimizerSRMSlot slot;
+    slot_map.reserve(size);
+    for (size_t i = 0; i < size; ++i) {
+      is >> name;
+      ReadOptimizerSRPSlot(is, slot);
+      if (!is) {
+        return is;
+      }
+      slot_map.emplace(std::move(name), std::move(slot));
+    }
+  }
+  return is;
+}
+
+// backward compatibility
+inline InputStream& ReadOptimizerSVPSlotMap(
+    InputStream& is,                                                // NOLINT
+    std::unordered_map<std::string, OptimizerSRMSlot>& slot_map) {  // NOLINT
+  int version;
+  if (is.Peek(&version, sizeof(version)) != sizeof(version)) {
+    return is;
+  }
+
+  size_t size;
+  if (version == 0x0a0c72e7) {  // magic number version
+    uint64_t size_u64 = 0;
+    is >> version;
+    is >> size_u64;
+    size = (size_t)size_u64;
+  } else {
+    int size_i = 0;
+    is >> size_i;
+    size = (size_t)size_i;
+  }
+  if (!is) {
+    return is;
+  }
+
+  slot_map.clear();
+  if (size > 0) {
+    std::string name;
+    OptimizerSRMSlot slot;
+    slot_map.reserve(size);
+    for (size_t i = 0; i < size; ++i) {
+      is >> name;
+      ReadOptimizerSVPSlot(is, slot);
+      if (!is) {
+        return is;
+      }
+      slot_map.emplace(std::move(name), std::move(slot));
+    }
+  }
+  return is;
+}
+
 /************************************************************************/
 /* OptimizerImpl */
 /************************************************************************/
@@ -77,8 +201,11 @@ class OptimizerImpl : public Optimizer {
   bool InitConfig(const StringMap& /*config*/) override;
   bool InitParam() override;
   void InitLock(AnyMap* param_lock) override;
+  bool WriteLegacy(OutputStream& os) const override;
   bool Write(OutputStream& os) const override;
+  bool ReadLegacy(InputStream& is) override;
   bool Read(InputStream& is) override;
+  bool MergeLegacy(Optimizer* other, const Shard* shard, int shard_id) override;
   bool Merge(Optimizer* other, const Shard* shard, int shard_id) override;
 
  public:
@@ -94,6 +221,12 @@ class OptimizerImpl : public Optimizer {
                             OptimizerTSRSlot* slot) const = 0;
   virtual void InitParamSRM(const std::string& name, const srm_t& W,
                             OptimizerSRMSlot* slot) const = 0;
+  // backward compatibility
+  virtual void WriteConfigLegacy(OutputStream& /*os*/) const {}  // NOLINT
+  // backward compatibility
+  virtual void ReadConfigLegacy(InputStream& /*is*/) {}  // NOLINT
+  // backward compatibility
+  virtual void CopyConfigLegacy(const Optimizer& /*other*/) {}
   void UpdateParam(const std::string& name, Any* Gany, Any* Wany);
   virtual void PreUpdate() {}
   virtual void PostUpdate() {}

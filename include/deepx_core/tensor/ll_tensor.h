@@ -4,7 +4,6 @@
 
 #pragma once
 #include <deepx_core/common/read_write_lock.h>
-#include <deepx_core/common/stream.h>
 #include <deepx_core/dx_log.h>
 #include <deepx_core/tensor/csr_matrix.h>
 #include <deepx_core/tensor/ll_math.h>
@@ -857,12 +856,6 @@ class LLOptimizer : protected LLSparseTensor<T, I> {
   static void Init(Config*) noexcept {}
 
   template <class Config>
-  static void Write(OutputStream&, const Config&) {}  // NOLINT
-
-  template <class Config>
-  static void Read(InputStream&, Config&) {}  // NOLINT
-
-  template <class Config>
   static void PreBatch(Config*) noexcept {}
 
   template <class Config>
@@ -1162,16 +1155,6 @@ class LLOptimizer : protected LLSparseTensor<T, I> {
     config->real_alpha = config->alpha;
   }
 
-  static void Write(OutputStream& os, const SGDConfig& config) {  // NOLINT
-    os << config.alpha << config.min_alpha << config.batch_decay
-       << config.batch_decay_rate << config.real_batch << config.real_alpha;
-  }
-
-  static void Read(InputStream& is, SGDConfig& config) {  // NOLINT
-    is >> config.alpha >> config.min_alpha >> config.batch_decay >>
-        config.batch_decay_rate >> config.real_batch >> config.real_alpha;
-  }
-
   static void PostBatch(SGDConfig* config) noexcept {
     if (config->batch_decay) {
       if (++config->real_batch >= config->batch_decay) {
@@ -1209,15 +1192,6 @@ class LLOptimizer : protected LLSparseTensor<T, I> {
     config->one_sub_rho = 1 - config->rho;
   }
 
-  static void Write(OutputStream& os, const AdaDeltaConfig& config) {  // NOLINT
-    os << config.rho << config.alpha << config.beta;
-  }
-
-  static void Read(InputStream& is, AdaDeltaConfig& config) {  // NOLINT
-    is >> config.rho >> config.alpha >> config.beta;
-    config.one_sub_rho = 1 - config.rho;
-  }
-
   static void UpdateScalar(const AdaDeltaConfig& config, float_t g, ptr_t w,
                            ptr_t n, ptr_t deltaw) noexcept {
     float_t new_n = config.rho * *n + config.one_sub_rho * g * g;
@@ -1238,14 +1212,6 @@ class LLOptimizer : protected LLSparseTensor<T, I> {
     float_t alpha = (float_t)0.01;
     float_t beta = SMOOTH;
   };
-
-  static void Write(OutputStream& os, const AdaGradConfig& config) {  // NOLINT
-    os << config.alpha << config.beta;
-  }
-
-  static void Read(InputStream& is, AdaGradConfig& config) {  // NOLINT
-    is >> config.alpha >> config.beta;
-  }
 
   static void UpdateScalar(const AdaGradConfig& config, float_t g, ptr_t w,
                            ptr_t n) noexcept {
@@ -1277,19 +1243,6 @@ class LLOptimizer : protected LLSparseTensor<T, I> {
     config->one_sub_rho1 = 1 - config->rho1;
     config->one_sub_rho2 = 1 - config->rho2;
     config->rho_aux = 0;
-  }
-
-  static void Write(OutputStream& os, const AdamConfig& config) {  // NOLINT
-    os << config.rho1 << config.rho2 << config.alpha << config.beta
-       << config.rho1t << config.rho2t;
-  }
-
-  static void Read(InputStream& is, AdamConfig& config) {  // NOLINT
-    is >> config.rho1 >> config.rho2 >> config.alpha >> config.beta >>
-        config.rho1t >> config.rho2t;
-    config.one_sub_rho1 = 1 - config.rho1;
-    config.one_sub_rho2 = 1 - config.rho2;
-    config.rho_aux = 0;
   }
 
   static void PreBatch(AdamConfig* config) noexcept {
@@ -1326,15 +1279,6 @@ class LLOptimizer : protected LLSparseTensor<T, I> {
     config->inv_alpha = 1 / config->alpha;
   }
 
-  static void Write(OutputStream& os, const FTRLConfig& config) {  // NOLINT
-    os << config.alpha << config.beta << config.l1 << config.l2;
-  }
-
-  static void Read(InputStream& is, FTRLConfig& config) {  // NOLINT
-    is >> config.alpha >> config.beta >> config.l1 >> config.l2;
-    config.inv_alpha = 1 / config.alpha;
-  }
-
   static void UpdateScalar(const FTRLConfig& config, float_t g, ptr_t w,
                            ptr_t n, ptr_t z) noexcept {
     float_t new_n = *n + g * g;
@@ -1367,15 +1311,6 @@ class LLOptimizer : protected LLSparseTensor<T, I> {
 
   static void Init(GFTRLConfig* config) noexcept {
     config->inv_alpha = 1 / config->alpha;
-  }
-
-  static void Write(OutputStream& os, const GFTRLConfig& config) {  // NOLINT
-    os << config.alpha << config.beta << config.lambda;
-  }
-
-  static void Read(InputStream& is, GFTRLConfig& config) {  // NOLINT
-    is >> config.alpha >> config.beta >> config.lambda;
-    config.inv_alpha = 1 / config.alpha;
   }
 
   static void UpdateScalar(const GFTRLConfig& config, float_t g, ptr_t w,
@@ -1441,14 +1376,6 @@ class LLOptimizer : protected LLSparseTensor<T, I> {
     float_t alpha = (float_t)0.1;
   };
 
-  static void Write(OutputStream& os, const MomentumConfig& config) {  // NOLINT
-    os << config.rho << config.alpha;
-  }
-
-  static void Read(InputStream& is, MomentumConfig& config) {  // NOLINT
-    is >> config.rho >> config.alpha;
-  }
-
   static void UpdateScalar(const MomentumConfig& config, float_t g, ptr_t w,
                            ptr_t v) noexcept {
     float_t new_v = config.rho * *v + g;
@@ -1470,15 +1397,6 @@ class LLOptimizer : protected LLSparseTensor<T, I> {
 
   static void Init(RMSPropConfig* config) noexcept {
     config->one_sub_rho = 1 - config->rho;
-  }
-
-  static void Write(OutputStream& os, const RMSPropConfig& config) {  // NOLINT
-    os << config.rho << config.alpha << config.beta;
-  }
-
-  static void Read(InputStream& is, RMSPropConfig& config) {  // NOLINT
-    is >> config.rho >> config.alpha >> config.beta;
-    config.one_sub_rho = 1 - config.rho;
   }
 
   static void UpdateScalar(const RMSPropConfig& config, float_t g, ptr_t w,

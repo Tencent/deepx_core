@@ -39,9 +39,17 @@ class TSStore : public DataType {
   void Init(const TensorMap* param) noexcept;
   bool InitParam();
   void InitLock();
-  bool Write(OutputStream& os) const;  // NOLINT
-  bool Read(InputStream& is);          // NOLINT
+  // backward compatibility
+  bool WriteLegacy(OutputStream& os) const;  // NOLINT
+  bool Write(OutputStream& os) const;        // NOLINT
+  // backward compatibility
+  bool ReadLegacy(InputStream& is);  // NOLINT
+  bool Read(InputStream& is);        // NOLINT
+  // backward compatibility
+  bool SaveLegacy(const std::string& file) const;
   bool Save(const std::string& file) const;
+  // backward compatibility
+  bool LoadLegacy(const std::string& file);
   bool Load(const std::string& file);
   void Merge(TSStore* other, const Shard* shard = nullptr, int shard_id = 0);
 

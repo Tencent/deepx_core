@@ -5,6 +5,8 @@
 
 #include <deepx_core/dx_log.h>
 #include <deepx_core/graph/ts_store.h>
+#include <cstdint>
+#include <unordered_map>
 
 namespace deepx_core {
 
@@ -31,12 +33,79 @@ void TSStore::InitLock() {
   id_ts_map_lock_.reset(new std::mutex);
 }
 
+bool TSStore::WriteLegacy(OutputStream& os) const {
+  int version = 2;
+  os << version;
+  os << id_ts_map_;
+  if (!os) {
+    DXERROR("Failed to write TSStore.");
+    return false;
+  }
+  return true;
+}
+
 bool TSStore::Write(OutputStream& os) const {
   int version = 0;
   os << version;
   os << id_ts_map_;
   if (!os) {
     DXERROR("Failed to write TSStore.");
+    return false;
+  }
+  return true;
+}
+
+bool TSStore::ReadLegacy(InputStream& is) {
+  int version;
+  is >> version;
+  if (!is) {
+    DXERROR("Failed to read TSStore.");
+    return false;
+  }
+
+  if (version == 0) {
+    std::unordered_map<uint16_t, id_ts_map_t> node_2_id_ts_map;
+    is >> node_2_id_ts_map;
+    if (!is) {
+      DXERROR("Failed to read TSStore.");
+      return false;
+    }
+    id_ts_map_.clear();
+    for (const auto& entry : node_2_id_ts_map) {
+      const id_ts_map_t& id_ts_map = entry.second;
+      for (const auto& _entry : id_ts_map) {
+        ts_t& ts = id_ts_map_[_entry.first];
+        if (ts < _entry.second) {
+          ts = _entry.second;
+        }
+      }
+    }
+  } else if (version == 1) {
+    std::unordered_map<std::string, id_ts_map_t> name_2_id_ts_map;
+    is >> name_2_id_ts_map;
+    if (!is) {
+      DXERROR("Failed to read TSStore.");
+      return false;
+    }
+    id_ts_map_.clear();
+    for (const auto& entry : name_2_id_ts_map) {
+      const id_ts_map_t& id_ts_map = entry.second;
+      for (const auto& _entry : id_ts_map) {
+        ts_t& ts = id_ts_map_[_entry.first];
+        if (ts < _entry.second) {
+          ts = _entry.second;
+        }
+      }
+    }
+  } else if (version == 2) {
+    is >> id_ts_map_;
+    if (!is) {
+      DXERROR("Failed to read TSStore.");
+      return false;
+    }
+  } else {
+    DXERROR("Couldn't handle a higher version: %d.", version);
+    is.set_bad();
     return false;
   }
   return true;
@@ -64,6 +133,20 @@ bool TSStore::Read(InputStream& is) {
   return true;
 }
 
+bool TSStore::SaveLegacy(const std::string& file) const {
+  AutoOutputFileStream os;
+  if (!os.Open(file)) {
+    DXERROR("Failed to open: %s.", file.c_str());
+    return false;
+  }
+  DXINFO("Saving TSStore to %s...", file.c_str());
+  if (!WriteLegacy(os)) {
+    return false;
+  }
+  DXINFO("Done.");
+  return true;
+}
+
 bool TSStore::Save(const std::string& file) const {
   AutoOutputFileStream os;
   if (!os.Open(file)) {
@@ -72,6 +155,20 @@ bool TSStore::Save(const std::string& file) const {
   }
   DXINFO("Saving TSStore to %s...", file.c_str());
   if (!Write(os)) {
+    return false;
+  }
+  DXINFO("Done.");
+  return true;
+}
+
+bool TSStore::LoadLegacy(const std::string& file) {
+  AutoInputFileStream is;
+  if (!is.Open(file)) {
+    DXERROR("Failed to open: %s.", file.c_str());
+    return false;
+  }
+  DXINFO("Loading TSStore from %s...", file.c_str());
+  if (!ReadLegacy(is)) {
     return false;
   }
   DXINFO("Done.");

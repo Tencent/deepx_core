@@ -88,6 +88,18 @@ void OptimizerImpl::InitLock(AnyMap* param_lock) {
   }
 }
 
+bool OptimizerImpl::WriteLegacy(OutputStream& os) const {
+  int version = 1;
+  os << version;
+  WriteConfigLegacy(os);
+  os << tsr_slot_map_ << srm_slot_map_;
+  if (!os) {
+    DXERROR("Failed to write optimizer.");
+    return false;
+  }
+  return true;
+}
+
 bool OptimizerImpl::Write(OutputStream& os) const {
   int version = 0;
   os << version;
@@ -97,6 +109,43 @@ bool OptimizerImpl::Write(OutputStream& os) const {
     return false;
   }
   return true;
+}
+
+bool OptimizerImpl::ReadLegacy(InputStream& is) {
+  int version;
+  is >> version;
+  if (!is) {
+    DXERROR("Failed to read optimizer.");
+    return false;
+  }
+
+  if (version == 0) {
+    std::unordered_map<std::string, OptimizerSRMSlot> svp_slot_map;
+    ReadConfigLegacy(is);
+    is >> tsr_slot_map_;
+    ReadOptimizerSRPSlotMap(is, srm_slot_map_);
+    ReadOptimizerSVPSlotMap(is, svp_slot_map);
+    if (!is) {
+      DXERROR("Failed to read optimizer.");
+      return false;
+    }
+    for (auto& entry : svp_slot_map) {
+      srm_slot_map_.emplace(std::move(entry));
+    }
+    return true;
+  } else if (version == 1) {
+    ReadConfigLegacy(is);
+    is >> tsr_slot_map_ >> srm_slot_map_;
+    if (!is) {
+      DXERROR("Failed to read optimizer.");
+      return false;
+    }
+    return true;
+  } else {
+    DXERROR("Couldn't handle a higher version: %d.", version);
+    is.set_bad();
+    return false;
+  }
 }
 
 bool OptimizerImpl::Read(InputStream& is) {
@@ -122,6 +171,35 @@ bool OptimizerImpl::Read(InputStream& is) {
   if (!InitConfig(config_)) {
     return false;
   }
+  return true;
+}
+
+bool OptimizerImpl::MergeLegacy(Optimizer* other, const Shard* shard,
+                                int shard_id) {
+  DXINFO("Merging optimizer...");
+  auto config_reduce_func = [this, other](StringMap& /*local_config*/,
+                                          StringMap& /*remote_config*/) {
+    DXINFO("Merging config...");
+    CopyConfigLegacy(*other);
+  };
+  auto tsr_reduce_func = [](const std::string& name, tsr_t& local_W,
+                            tsr_t& remote_W) {
+    DXINFO("Merging TSR %s...", name.c_str());
+    local_W = std::move(remote_W);
+  };
+  auto srm_reduce_func = [shard, shard_id](const std::string& name,
+                                           srm_t& local_W, srm_t& remote_W) {
+    DXINFO("Merging SRM %s...", name.c_str());
+    local_W.merge_if(
+        std::move(remote_W), [shard, shard_id](const srm_t::value_type& entry) {
+          return shard == nullptr || shard->HasSRM(shard_id, entry.first);
+        });
+  };
+  if (!Reduce(other, config_reduce_func, tsr_reduce_func, srm_reduce_func,
+              shard, shard_id)) {
+    return false;
+  }
+  DXINFO("Done.");
   return true;
 }
 
@@ -312,6 +390,29 @@ std::unique_ptr<Optimizer> NewOptimizer(const std::string& name) {
   return optimizer;
 }
 
+bool SaveOptimizerLegacy(const std::string& file, const Optimizer& optimizer) {
+  AutoOutputFileStream os;
+  if (!os.Open(file)) {
+    DXERROR("Failed to open: %s.", file.c_str());
+    return false;
+  }
+
+  DXINFO("Saving optimizer to %s...", file.c_str());
+  std::string name = optimizer.class_name();
+  os << name;
+  if (!os) {
+    DXERROR("Failed to write optimizer.");
+    return false;
+  }
+
+  if (!optimizer.WriteLegacy(os)) {
+    return false;
+  }
+
+  DXINFO("Done.");
+  return true;
+}
+
 bool SaveOptimizer(const std::string& file, const Optimizer& optimizer) {
   AutoOutputFileStream os;
   if (!os.Open(file)) {
@@ -333,6 +434,34 @@ bool SaveOptimizer(const std::string& file, const Optimizer& optimizer) {
 
   DXINFO("Done.");
   return true;
+}
+
+std::unique_ptr<Optimizer> LoadOptimizerLegacy(const std::string& file) {
+  AutoInputFileStream is;
+  if (!is.Open(file)) {
+    DXERROR("Failed to open: %s.", file.c_str());
+    return nullptr;
+  }
+
+  DXINFO("Loading optimizer from %s...", file.c_str());
+  std::string name;
+  is >> name;
+  if (!is) {
+    DXERROR("Failed to read optimizer.");
+    return nullptr;
+  }
+
+  std::unique_ptr<Optimizer> optimizer(NewOptimizer(name));
+  if (!optimizer) {
+    return nullptr;
+  }
+
+  if (!optimizer->ReadLegacy(is)) {
+    return nullptr;
+  }
+
+  DXINFO("Done.");
+  return optimizer;
 }
 
 std::unique_ptr<Optimizer> LoadOptimizer(const std::string& file) {

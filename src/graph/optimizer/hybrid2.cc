@@ -59,6 +59,35 @@ class Hybrid2Optimizer : public OptimizerImpl {
     return true;
   }
 
+  void WriteConfigLegacy(OutputStream& os) const override {
+    int version = 0;
+    os << version;
+    os << ada_grad_config_.alpha << ada_grad_config_.beta;
+    os << gftrl_config_.alpha << gftrl_config_.beta << gftrl_config_.lambda;
+  }
+
+  void ReadConfigLegacy(InputStream& is) override {
+    int version;
+    is >> version;
+    if (!is) {
+      DXERROR("Failed to read config.");
+      return;
+    }
+    if (version > 0) {
+      DXERROR("Couldn't handle a higher version: %d.", version);
+      is.set_bad();
+      return;
+    }
+    is >> ada_grad_config_.alpha >> ada_grad_config_.beta;
+    is >> gftrl_config_.alpha >> gftrl_config_.beta >> gftrl_config_.lambda;
+    gftrl_config_.inv_alpha = 1 / gftrl_config_.alpha;
+  }
+
+  void CopyConfigLegacy(const Optimizer& other) override {
+    ada_grad_config_ = ((const Hybrid2Optimizer&)other).ada_grad_config_;
+    gftrl_config_ = ((const Hybrid2Optimizer&)other).gftrl_config_;
+  }
+
   void InitParamTSR(const std::string& /*name*/, const tsr_t& W,
                     OptimizerTSRSlot* slot) const override {
     slot->O.resize(1);

@@ -39,6 +39,18 @@ class MomentumOptimizer : public OptimizerBase1 {
     return true;
   }
 
+  void WriteConfigLegacy(OutputStream& os) const override {
+    os << config_.rho << config_.alpha;
+  }
+
+  void ReadConfigLegacy(InputStream& is) override {
+    is >> config_.rho >> config_.alpha;
+  }
+
+  void CopyConfigLegacy(const Optimizer& other) override {
+    config_ = ((const MomentumOptimizer&)other).config_;
+  }
+
   void PreUpdate() override { ll_optimizer_t::PreBatch(&config_); }
 
   void PostUpdate() override { ll_optimizer_t::PostBatch(&config_); }

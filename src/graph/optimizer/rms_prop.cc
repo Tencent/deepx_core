@@ -45,6 +45,19 @@ class RMSPropOptimizer : public OptimizerBase1 {
     return true;
   }
 
+  void WriteConfigLegacy(OutputStream& os) const override {
+    os << config_.rho << config_.alpha << config_.beta;
+  }
+
+  void ReadConfigLegacy(InputStream& is) override {
+    is >> config_.rho >> config_.alpha >> config_.beta;
+    config_.one_sub_rho = 1 - config_.rho;
+  }
+
+  void CopyConfigLegacy(const Optimizer& other) override {
+    config_ = ((const RMSPropOptimizer&)other).config_;
+  }
+
   void PreUpdate() override { ll_optimizer_t::PreBatch(&config_); }
 
   void PostUpdate() override { ll_optimizer_t::PostBatch(&config_); }

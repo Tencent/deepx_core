@@ -27,8 +27,15 @@ class Optimizer : public DataType {
   virtual bool InitConfig(const StringMap& config) = 0;
   virtual bool InitParam() = 0;
   virtual void InitLock(AnyMap* param_lock) = 0;
-  virtual bool Write(OutputStream& os) const = 0;  // NOLINT
-  virtual bool Read(InputStream& is) = 0;          // NOLINT
+  // backward compatibility
+  virtual bool WriteLegacy(OutputStream& os) const = 0;  // NOLINT
+  virtual bool Write(OutputStream& os) const = 0;        // NOLINT
+  // backward compatibility
+  virtual bool ReadLegacy(InputStream& is) = 0;  // NOLINT
+  virtual bool Read(InputStream& is) = 0;        // NOLINT
+  // backward compatibility
+  virtual bool MergeLegacy(Optimizer* other, const Shard* shard = nullptr,
+                           int shard_id = 0) = 0;
   virtual bool Merge(Optimizer* other, const Shard* shard = nullptr,
                      int shard_id = 0) = 0;
 
@@ -43,7 +50,11 @@ class Optimizer : public DataType {
 /* Optimizer functions */
 /************************************************************************/
 std::unique_ptr<Optimizer> NewOptimizer(const std::string& name);
+// backward compatibility
+bool SaveOptimizerLegacy(const std::string& file, const Optimizer& optimizer);
 bool SaveOptimizer(const std::string& file, const Optimizer& optimizer);
+// backward compatibility
+std::unique_ptr<Optimizer> LoadOptimizerLegacy(const std::string& file);
 std::unique_ptr<Optimizer> LoadOptimizer(const std::string& file);
 bool LoadOptimizerName(const std::string& file, std::string* name);
 
