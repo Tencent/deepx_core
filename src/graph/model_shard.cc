@@ -107,10 +107,7 @@ bool ModelShard::InitOptimizer(const std::string& optimizer,
   if (!optimizer_->InitParam()) {
     return false;
   }
-  if (!optimizer_config.empty()) {
-    return InitOptimizerConfig(optimizer_config);
-  }
-  return true;
+  return InitOptimizerConfig(optimizer_config);
 }
 
 bool ModelShard::InitOptimizerConfig(const std::string& optimizer_config) {
