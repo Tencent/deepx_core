@@ -30,7 +30,6 @@ $(BUILD_DIR_ABS)/eval_auc \
 $(BUILD_DIR_ABS)/feature_kv_demo \
 $(BUILD_DIR_ABS)/fs_tool \
 $(BUILD_DIR_ABS)/merge_model_shard \
-${BUILD_DIR_ABS}/ps_lite_env_adapter \
 $(BUILD_DIR_ABS)/unit_test
 
 SUBDIRS      := example
@@ -175,15 +174,6 @@ $(BUILD_DIR_ABS)/libdeepx_z.a
 	@echo Linking $@
 	@mkdir -p $(@D)
 	@$(CXX) -o $@ $(FORCE_LIBS) $^ $(LDFLAGS)
-
-$(BUILD_DIR_ABS)/ps_lite_env_adapter: \
-$(BUILD_DIR_ABS)/src/tools/ps_lite_env_adapter_main.o \
-$(BUILD_DIR_ABS)/libdeepx_core.a \
-$(BUILD_DIR_ABS)/libdeepx_gflags.a \
-$(BUILD_DIR_ABS)/libdeepx_z.a
-	@echo Linking $@
-	@mkdir -p $(@D)
-	@$(CXX) -o $@ $^ $(LDFLAGS)
 
 $(BUILD_DIR_ABS)/unit_test: \
 $(TEST_OBJECTS) \
