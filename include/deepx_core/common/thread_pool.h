@@ -45,14 +45,20 @@ class ThreadPool {
   // Run all remaining function objects and stop all worker threads.
   void stop();
 
-  // Post a 'func' and return immediately.
+  // Post 'func' and return immediately.
   // 'func' will be run in a worker thread.
+  //
+  // The thread pool must be started.
   void post(function_t func);
 
   // Run 'func' in a worker thread and wait for the completion.
+  //
+  // The thread pool must be started.
   void run(const function_t& func, wait_token_t* token);
 
   // Run 'funcs' in worker threads and wait for the completion.
+  //
+  // The thread pool must be started.
   void run(const std::vector<function_t>& funcs, wait_token_t* token);
 };
 

@@ -21,7 +21,7 @@ TEST_F(BlockingQueueTest, ProducerConsumer) {
   consumer_queue.start();
   producer_queue.start();
   for (int i = 0; i < N; ++i) {
-    consumer_queue.emplace(0);
+    consumer_queue.push(0);
   }
 
   auto producer = [this, &consumer_queue, &producer_queue]() {
@@ -29,7 +29,7 @@ TEST_F(BlockingQueueTest, ProducerConsumer) {
     for (int i = 0; i < M; ++i) {
       (void)consumer_queue.pop(&item);
       item = i;
-      producer_queue.emplace(item);
+      producer_queue.push(item);
     }
     producer_queue.stop();
   };
@@ -41,7 +41,7 @@ TEST_F(BlockingQueueTest, ProducerConsumer) {
       if (producer_queue.pop(&item)) {
         sum += item;
         item = -1;
-        consumer_queue.emplace(item);
+        consumer_queue.push(item);
       } else {
         consumer_queue.stop();
         break;

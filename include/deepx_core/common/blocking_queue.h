@@ -42,6 +42,7 @@ class BlockingQueue {
     return queue_.empty();
   }
 
+  // Start the blocking queue.
   void start() {
     std::unique_lock<std::mutex> guard(mutex_);
     if (!started_) {
@@ -49,6 +50,7 @@ class BlockingQueue {
     }
   }
 
+  // Stop the blocking queue.
   void stop() {
     std::unique_lock<std::mutex> guard(mutex_);
     if (started_) {
@@ -57,20 +59,25 @@ class BlockingQueue {
     }
   }
 
+  // Push an element constructed by 'args' to the blocking queue.
+  //
+  // The blocking queue must be started.
   template <typename... Args>
-  void emplace(Args&&... args) {
+  void push(Args&&... args) {
     std::unique_lock<std::mutex> guard(mutex_);
 #if !defined NDEBUG
     if (!started_) {
-      throw std::runtime_error("emplace: the blocking queue is not started.");
+      throw std::runtime_error("push: the blocking queue is not started.");
     }
 #endif
     queue_.emplace_back(std::forward<Args>(args)...);
     cond_.notify_one();
   }
 
+  // Pop an element from the blocking queue in blocking mode.
+  //
   // Return true, 'v' is got.
-  // Return false, the blocking queue is empty and is not running.
+  // Return false, the blocking queue is stopped and empty.
   bool pop(pointer v) {
     std::unique_lock<std::mutex> guard(mutex_);
     while (queue_.empty()) {
