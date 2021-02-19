@@ -17,10 +17,11 @@ def _default_copts():
       '-DHAVE_SAGE2=1',
       '-DHAVE_SAGE2_SGEMM=1',
       # '-DHAVE_SAGE2_SGEMM_JIT=1',
+      '-DHAVE_WXG_LOG=1',
   ]
 
 
-def deepx_core_library(name, have_wxg_log=False):
+def deepx_core_library(name):
   copts = _default_copts() + [
       '-Immsearchgateway/deepx_core/thirdparty',
       '-Wno-array-bounds',
@@ -30,11 +31,8 @@ def deepx_core_library(name, have_wxg_log=False):
       '//mm3rd/lz4-1.8.2:lz4',
       '//mm3rd/zlib-1.2.3:z',
       '//mmsearchgateway/sage2:sage2',
+      '//comm2/core:core',
   ]
-
-  if have_wxg_log:
-    copts = copts + ['-DHAVE_WXG_LOG=1']
-    deps = deps + ['//comm2/core:core']
 
   native.cc_library(
       name=name,
@@ -65,17 +63,12 @@ def deepx_core_user_library(name,
                             includes=[],
                             copts=[],
                             deps=[],
-                            alwayslink=False,
-                            have_wxg_log=False):
+                            alwayslink=False):
   for copt in _default_copts():
     if copt not in copts:
       copts = copts + [copt]
 
-  if have_wxg_log:
-    copts = copts + ['-DHAVE_WXG_LOG=1']
-    deps = deps + [':deepx_core']
-  else:
-    deps = deps + [':deepx_core_no_wxg_log']
+  deps = deps + [':deepx_core']
 
   native.cc_library(
       name=name,
@@ -88,25 +81,12 @@ def deepx_core_user_library(name,
   )
 
 
-def deepx_core_user_binary(name,
-                           srcs=[],
-                           deps=[],
-                           copts=[],
-                           have_wxg_log=False,
-                           have_wxg_feature_kv_client=False):
+def deepx_core_user_binary(name, srcs=[], copts=[], deps=[]):
   for copt in _default_copts():
     if copt not in copts:
       copts = copts + [copt]
 
-  if have_wxg_log:
-    copts = copts + ['-DHAVE_WXG_LOG=1']
-    deps = deps + [':deepx_core']
-  else:
-    deps = deps + [':deepx_core_no_wxg_log']
-
-  if have_wxg_feature_kv_client:
-    copts = copts + ['-DHAVE_WXG_FEATURE_KV_CLIENT=1']
-    deps = deps + ['//platform/kvsvr_feature/new/kvsvr:featurekvclient']
+  deps = deps + [':deepx_core']
 
   native.cc_binary(
       name=name,
