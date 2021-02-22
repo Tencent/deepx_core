@@ -265,19 +265,25 @@ void OptimizerImpl::UpdateParam(const std::string& name, Any* Gany, Any* Wany) {
     auto& W = Wany->unsafe_to_ref<tsr_t>();
     if (Gany->is<tsr_t>()) {
       auto& G = Gany->unsafe_to_ref<tsr_t>();
-      ll_optimizer_t::Clip(&G);
-      UpdateTSR2TSR(name, G, &W, &tsr_slot_map_[name]);
+      if (W.same_shape(G)) {
+        ll_optimizer_t::Clip(&G);
+        UpdateTSR2TSR(name, G, &W, &tsr_slot_map_[name]);
+      }
     } else if (Gany->is<srm_t>()) {
       auto& G = Gany->unsafe_to_ref<srm_t>();
-      ll_optimizer_t::Clip(&G);
-      UpdateSRM2TSR(name, G, &W, &tsr_slot_map_[name]);
+      if (W.dim(1) == G.col()) {
+        ll_optimizer_t::Clip(&G);
+        UpdateSRM2TSR(name, G, &W, &tsr_slot_map_[name]);
+      }
     }
   } else if (Wany->is<srm_t>()) {
     auto& W = Wany->unsafe_to_ref<srm_t>();
     if (Gany->is<srm_t>()) {
       auto& G = Gany->unsafe_to_ref<srm_t>();
-      ll_optimizer_t::Clip(&G);
-      UpdateSRM2SRM(name, G, &W, &srm_slot_map_[name]);
+      if (W.col() == G.col()) {
+        ll_optimizer_t::Clip(&G);
+        UpdateSRM2SRM(name, G, &W, &srm_slot_map_[name]);
+      }
     }
   }
 }
