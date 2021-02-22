@@ -1022,6 +1022,10 @@ void ModelShard::SplitGrad(const TensorMap& param, TensorMap* full_grad,
       }
     }
   }
+
+  for (auto& grad : *grads) {
+    grad->RemoveEmptyValue();
+  }
 }
 
 void ModelShard::SplitParam(const TensorMap& full_param,
@@ -1060,6 +1064,10 @@ void ModelShard::SplitParam(const TensorMap& full_param,
         (*aux)[shard_id]->assign_view(id, embedding);
       }
     }
+  }
+
+  for (auto& param : *params) {
+    param->RemoveEmptyValue();
   }
 }
 
