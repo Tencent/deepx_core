@@ -120,7 +120,7 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
     }
   }
 
-  void Test_WriteSparseParam_1_SparseParamParser(int version) {
+  void TestWriteSparseParam_1_SparseParamParser(int version) {
     CheckVersion(version);
 
     OutputStringStream os;
@@ -184,7 +184,7 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
     EXPECT_EQ(stat.feature_kv_client_error, 0);
   }
 
-  void Test_WriteSparseParam_2_SparseParamParser(int version) {
+  void TestWriteSparseParam_2_SparseParamParser(int version) {
     OutputStringStream os;
     id_set_t id_set = {0, 2, 4, 6, 8};
     ASSERT_TRUE(WriteSparseParam(os, graph, param, id_set, version));
@@ -272,22 +272,22 @@ TEST_F(FeatureKVUtilTest, WriteDenseParam_DenseParamParser) {
 }
 
 TEST_F(FeatureKVUtilTest, WriteSparseParam_1_SparseParamParser_version2) {
-  Test_WriteSparseParam_1_SparseParamParser(2);
+  TestWriteSparseParam_1_SparseParamParser(2);
 }
 
 TEST_F(FeatureKVUtilTest, WriteSparseParam_2_SparseParamParser_version2) {
-  Test_WriteSparseParam_2_SparseParamParser(2);
+  TestWriteSparseParam_2_SparseParamParser(2);
 }
 
 TEST_F(FeatureKVUtilTest, WriteSparseParam_1_SparseParamParser_version3) {
 #if HAVE_SAGE2 == 1
-  Test_WriteSparseParam_1_SparseParamParser(3);
+  TestWriteSparseParam_1_SparseParamParser(3);
 #endif
 }
 
 TEST_F(FeatureKVUtilTest, WriteSparseParam_2_SparseParamParser_version3) {
 #if HAVE_SAGE2 == 1
-  Test_WriteSparseParam_2_SparseParamParser(3);
+  TestWriteSparseParam_2_SparseParamParser(3);
 #endif
 }
 
