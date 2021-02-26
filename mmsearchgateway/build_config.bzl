@@ -8,7 +8,7 @@ def _default_copts():
       '-std=c++11',
       '-Wall',
       '-Wextra',
-      '-Werror',
+      # '-Werror',
       '-pedantic',
       '-Wno-float-equal',
       '-DOS_LINUX=1',
