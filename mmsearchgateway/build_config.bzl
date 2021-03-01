@@ -24,7 +24,6 @@ def _default_copts():
 def deepx_core_library(name):
   copts = _default_copts() + [
       '-Immsearchgateway/deepx_core/thirdparty',
-      '-Wno-array-bounds',
   ]
 
   deps = [

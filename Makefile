@@ -107,12 +107,6 @@ build_dir_abs:
 
 ################################################################
 
-# add -Wno-array-bounds for gcc 4.8.2
-$(BUILD_DIR_ABS)/src/graph/op/kernel/tensor_dot_op.o: src/graph/op/kernel/tensor_dot_op.cc
-	@echo Compiling $<
-	@mkdir -p $(@D)
-	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) -Wno-array-bounds -c -o $@ $<
-
 $(BUILD_DIR_ABS)/src/%.o: src/%.cc
 	@echo Compiling $<
 	@mkdir -p $(@D)
