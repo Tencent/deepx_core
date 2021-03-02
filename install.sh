@@ -64,8 +64,3 @@ echo Installing libraries to $PREFIX/lib
 for f in $(find . -name "libdeepx_*.a"); do
     $install -m 0644 $f $PREFIX/lib/$f
 done
-
-echo Installing binaries to $PREFIX/bin
-for f in $(find eval_auc fs_tool merge_model_shard); do
-    $install -m 0755 $f $PREFIX/bin/$f
-done

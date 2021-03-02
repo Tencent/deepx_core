@@ -20,6 +20,6 @@ test: $(SUBDIRS)
 lint: $(SUBDIRS)
 .PHONY: lint
 
-$(SUBDIRS): $(LIBRARIES)
+$(SUBDIRS):
 	@$(MAKE) -C $@ $(MAKECMDGOALS)
 .PHONY: $(SUBDIRS)

@@ -2,10 +2,6 @@
 # Author: Yafei Zhang (kimmyzhang@tencent.com)
 #
 
-ifeq ($(BUILD_DIR_ABS),)
-include Makefile.rule
-endif
-
 LIBFEATURE_SOURCES := $(wildcard thirdparty/feature/*.c)
 LIBFEATURE_OBJECTS := $(addprefix $(BUILD_DIR_ABS)/,$(LIBFEATURE_SOURCES))
 LIBFEATURE_OBJECTS := $(LIBFEATURE_OBJECTS:.c=.o)
@@ -37,11 +33,6 @@ $(BUILD_DIR_ABS)/libdeepx_gflags.a \
 $(BUILD_DIR_ABS)/libdeepx_gtest.a \
 $(BUILD_DIR_ABS)/libdeepx_lz4.a \
 $(BUILD_DIR_ABS)/libdeepx_z.a
-
-################################################################
-
-lib: $(3RD_LIBS)
-.PHONY: lib
 
 ################################################################
 

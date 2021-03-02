@@ -54,6 +54,12 @@ all: _all subdir_all
 	@echo "CXXFLAGS:    " $(CXXFLAGS)
 	@echo "LDFLAGS:     " $(LDFLAGS)
 	@echo "******************************************"
+	@echo "DEBUG:       " $(DEBUG)
+	@echo "SIMD:        " $(SIMD)
+	@echo "SAGE2:       " $(SAGE2)
+	@echo "SAGE2_SGEMM: " $(SAGE2_SGEMM)
+	@echo "SAGE2_SGEMM_JIT:" $(SAGE2_SGEMM_JIT)
+	@echo "******************************************"
 .PHONY: all
 
 include Makefile.3rd
@@ -65,6 +71,25 @@ subdir_all: _all
 		$(MAKE) -C $$dir all; \
 	done
 .PHONY: subdir_all
+
+lib: $(3RD_LIBS) $(LIBRARIES)
+	@echo "******************************************"
+	@echo "Build succsessfully at $(BUILD_DIR_ABS)"
+	@echo "CC:          " $(CC)
+	@echo "CXX:         " $(CXX)
+	@echo "AR:          " $(AR)
+	@echo "CPPFLAGS:    " $(CPPFLAGS)
+	@echo "CFLAGS:      " $(CFLAGS)
+	@echo "CXXFLAGS:    " $(CXXFLAGS)
+	@echo "LDFLAGS:     " $(LDFLAGS)
+	@echo "******************************************"
+	@echo "DEBUG:       " $(DEBUG)
+	@echo "SIMD:        " $(SIMD)
+	@echo "SAGE2:       " $(SAGE2)
+	@echo "SAGE2_SGEMM: " $(SAGE2_SGEMM)
+	@echo "SAGE2_SGEMM_JIT:" $(SAGE2_SGEMM_JIT)
+	@echo "******************************************"
+.PHONY: lib
 
 clean: _clean $(SUBDIRS)
 .PHONY: clean
@@ -93,13 +118,9 @@ $(SUBDIRS):
 	@$(MAKE) -C $@ $(MAKECMDGOALS)
 .PHONY: $(SUBDIRS)
 
-install: _all
+install: lib
 	@bash -e install.sh $(PREFIX) $(BUILD_DIR_ABS)
 .PHONY: install
-
-build_dir:
-	@echo $(BUILD_DIR)
-.PHONY: build_dir
 
 build_dir_abs:
 	@echo $(BUILD_DIR_ABS)
@@ -135,6 +156,7 @@ $(BUILD_DIR_ABS)/eval_auc: \
 $(BUILD_DIR_ABS)/src/tools/eval_auc_main.o \
 $(BUILD_DIR_ABS)/libdeepx_core.a \
 $(BUILD_DIR_ABS)/libdeepx_gflags.a \
+$(BUILD_DIR_ABS)/libdeepx_lz4.a \
 $(BUILD_DIR_ABS)/libdeepx_z.a
 	@echo Linking $@
 	@mkdir -p $(@D)
@@ -154,6 +176,7 @@ $(BUILD_DIR_ABS)/fs_tool: \
 $(BUILD_DIR_ABS)/src/tools/fs_tool_main.o \
 $(BUILD_DIR_ABS)/libdeepx_core.a \
 $(BUILD_DIR_ABS)/libdeepx_gflags.a \
+$(BUILD_DIR_ABS)/libdeepx_lz4.a \
 $(BUILD_DIR_ABS)/libdeepx_z.a
 	@echo Linking $@
 	@mkdir -p $(@D)

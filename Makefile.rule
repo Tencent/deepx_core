@@ -43,6 +43,7 @@ CPPFLAGS     += -D_WIN32_WINNT=0x0501
 LDFLAGS      += -lws2_32 -lmswsock -static
 endif
 
+DEBUG        ?= 0
 ifneq ($(DEBUG),1)
 CPPFLAGS     += -DNDEBUG
 CFLAGS       += -O3
@@ -64,20 +65,23 @@ CXXFLAGS     += -ftree-vectorize -ffast-math -mavx -mfma -mavx2
 endif
 
 SAGE2        ?= 0
-ifeq ($(SAGE2),1)
-CPPFLAGS     += -DHAVE_SAGE2=1 -I$(BUILD_ROOT)/sage2/include
-LDFLAGS      += $(BUILD_ROOT)/sage2/$(BUILD_DIR)/libsage2.a
-endif
-
 SAGE2_SGEMM  ?= 0
-ifeq ($(SAGE2_SGEMM),1)
-CPPFLAGS     += -DHAVE_SAGE2_SGEMM=1 -I$(BUILD_ROOT)/sage2/include
-LDFLAGS      += $(BUILD_ROOT)/sage2/$(BUILD_DIR)/libsage2.a
-endif
-
 SAGE2_SGEMM_JIT ?= 0
+_SAGE2       := 0
+ifeq ($(SAGE2),1)
+CPPFLAGS     += -DHAVE_SAGE2=1
+_SAGE2       := 1
+endif
+ifeq ($(SAGE2_SGEMM),1)
+CPPFLAGS     += -DHAVE_SAGE2_SGEMM=1
+_SAGE2       := 1
+endif
 ifeq ($(SAGE2_SGEMM_JIT),1)
-CPPFLAGS     += -DHAVE_SAGE2_SGEMM_JIT=1 -I$(BUILD_ROOT)/sage2/include
+CPPFLAGS     += -DHAVE_SAGE2_SGEMM_JIT=1
+_SAGE2       := 1
+endif
+ifeq ($(_SAGE2),1)
+CPPFLAGS     += -I$(BUILD_ROOT)/sage2/include
 LDFLAGS      += $(BUILD_ROOT)/sage2/$(BUILD_DIR)/libsage2.a
 endif
 
