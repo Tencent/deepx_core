@@ -13,7 +13,6 @@ deepx_core_user_library(
     name='example_rank_model_server',
     srcs=['example/rank/model_server.cc'],
     hdrs=['example/rank/model_server.h'],
-    alwayslink=True,
 )
 
 deepx_core_user_binary(

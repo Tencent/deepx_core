@@ -27,9 +27,9 @@ def deepx_core_library(name):
   ]
 
   deps = [
+      '//mmsearchgateway/sage2:sage2',
       '//mm3rd/lz4-1.8.2:lz4',
       '//mm3rd/zlib-1.2.3:z',
-      '//mmsearchgateway/sage2:sage2',
       '//comm2/core:core',
   ]
 
@@ -67,7 +67,7 @@ def deepx_core_user_library(name,
     if copt not in copts:
       copts = copts + [copt]
 
-  deps = deps + [':deepx_core']
+  deps = deps + ['//mmsearchgateway/deepx_core:deepx_core']
 
   native.cc_library(
       name=name,
@@ -85,7 +85,7 @@ def deepx_core_user_binary(name, srcs=[], copts=[], deps=[]):
     if copt not in copts:
       copts = copts + [copt]
 
-  deps = deps + [':deepx_core']
+  deps = deps + ['//mmsearchgateway/deepx_core:deepx_core']
 
   native.cc_binary(
       name=name,
