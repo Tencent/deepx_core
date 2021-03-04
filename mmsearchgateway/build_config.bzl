@@ -21,7 +21,7 @@ def _default_copts():
   ]
 
 
-def deepx_core_library(name):
+def deepx_core_library():
   copts = _default_copts() + [
       '-Immsearchgateway/deepx_core/thirdparty',
   ]
@@ -34,34 +34,32 @@ def deepx_core_library(name):
   ]
 
   native.cc_library(
-      name=name,
+      name='deepx_core',
+      includes=['include'],
+      hdrs=native.glob(['include/**/*.h']),
       srcs=native.glob(
-          [
-              'src/**/*.cc',
-          ],
+          ['src/**/*.cc'],
           exclude=[
               'src/**/*_test.cc',
               'src/**/*_main.cc',
           ],
       ),
-      hdrs=native.glob([
-          'include/**/*.h',
-      ]),
-      includes=[
-          'include',
-      ],
       copts=copts,
+      linkopts=['-ldl'],
       deps=deps,
+      visibility=['//visibility:public'],
       alwayslink=True,
   )
 
 
 def deepx_core_user_library(name,
-                            srcs=[],
-                            hdrs=[],
                             includes=[],
+                            hdrs=[],
+                            srcs=[],
                             copts=[],
+                            linkopts=[],
                             deps=[],
+                            visibility=['//visibility:public'],
                             alwayslink=False):
   for copt in _default_copts():
     if copt not in copts:
@@ -71,16 +69,18 @@ def deepx_core_user_library(name,
 
   native.cc_library(
       name=name,
-      srcs=srcs,
-      hdrs=hdrs,
       includes=includes,
+      hdrs=hdrs,
+      srcs=srcs,
       copts=copts,
+      linkopts=linkopts,
       deps=deps,
+      visibility=visibility,
       alwayslink=alwayslink,
   )
 
 
-def deepx_core_user_binary(name, srcs=[], copts=[], deps=[]):
+def deepx_core_user_binary(name, srcs=[], copts=[], linkopts=[], deps=[]):
   for copt in _default_copts():
     if copt not in copts:
       copts = copts + [copt]
@@ -91,5 +91,6 @@ def deepx_core_user_binary(name, srcs=[], copts=[], deps=[]):
       name=name,
       srcs=srcs,
       copts=copts,
+      linkopts=linkopts,
       deps=deps,
   )
