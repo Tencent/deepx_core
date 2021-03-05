@@ -23,20 +23,20 @@ class LRUCache {
   using size_type = size_t;
 
   struct ListNode {
-    ListNode* next;
-    ListNode* prev;
+    ListNode* next;  // NOLINT
+    ListNode* prev;  // NOLINT
   };
 
   class Node {
    private:
     friend class LRUCache;
     const key_type key_;
-    mapped_type value_;
-    size_type key_hash_;
-    int in_cache_;
-    int ref_;
-    ListNode hash_node_;
-    ListNode lru_node_;
+    mapped_type value_;   // NOLINT
+    size_type key_hash_;  // NOLINT
+    int in_cache_;        // NOLINT
+    int ref_;             // NOLINT
+    ListNode hash_node_;  // NOLINT
+    ListNode lru_node_;   // NOLINT
 
    public:
     explicit Node(const key_type& key) : key_(key) {}
@@ -120,10 +120,10 @@ class LRUCache {
     if (hash_get(key, key_hash, &hash_node)) {
       node_type* node = hash_node_to_node(hash_node);
       ref(node);
-      return create_node_ptr(node);
+      return create_node_pointer(node);
     }
 
-    node_pointer new_node = create_node_ptr(key);
+    node_pointer new_node = create_node_pointer(key);
     new_node->value_ = mapped_type();
     new_node->key_hash_ = key_hash;
     new_node->in_cache_ = 1;
@@ -148,10 +148,10 @@ class LRUCache {
       node_type* node = hash_node_to_node(hash_node);
       node->value_ = value;
       ref(node);
-      return create_node_ptr(node);
+      return create_node_pointer(node);
     }
 
-    node_pointer new_node = create_node_ptr(key);
+    node_pointer new_node = create_node_pointer(key);
     new_node->value_ = value;
     new_node->key_hash_ = key_hash;
     new_node->in_cache_ = 1;
@@ -176,10 +176,10 @@ class LRUCache {
       node_type* node = hash_node_to_node(hash_node);
       node->value_ = mapped_type(std::forward<Args>(value_args)...);
       ref(node);
-      return create_node_ptr(node);
+      return create_node_pointer(node);
     }
 
-    node_pointer new_node = create_node_ptr(key);
+    node_pointer new_node = create_node_pointer(key);
     new_node->value_ = mapped_type(std::forward<Args>(value_args)...);
     new_node->key_hash_ = key_hash;
     new_node->in_cache_ = 1;
@@ -202,9 +202,9 @@ class LRUCache {
     if (hash_get(key, key_hash, &hash_node)) {
       node_type* node = hash_node_to_node(hash_node);
       ref(node);
-      return create_node_ptr(node);
+      return create_node_pointer(node);
     }
-    return create_node_ptr(nullptr);
+    return create_node_pointer(nullptr);
   }
 
   // Erase by 'key'.
@@ -303,7 +303,7 @@ class LRUCache {
     --size_;
   }
 
-  node_pointer create_node_ptr(node_type* node) noexcept {
+  node_pointer create_node_pointer(node_type* node) noexcept {
     auto deleter = [this](node_type* _node) {
       if (_node) {
         release(_node);
@@ -312,9 +312,9 @@ class LRUCache {
     return node_pointer(node, deleter);
   }
 
-  node_pointer create_node_ptr(const key_type& key) {
+  node_pointer create_node_pointer(const key_type& key) {
     node_type* node = new node_type(key);
-    return create_node_ptr(node);
+    return create_node_pointer(node);
   }
 
   void ref(node_type* node) noexcept {
