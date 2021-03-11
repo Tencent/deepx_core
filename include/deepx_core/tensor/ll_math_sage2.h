@@ -106,6 +106,21 @@ inline void LLMath<float>::tanh(int n, cptr_t x, ptr_t y) noexcept {
 }
 
 template <>
+inline float LLMath<float>::max(int n, cptr_t x) noexcept {
+  return sage2_max_ps(n, x);
+}
+
+template <>
+inline float LLMath<float>::min(int n, cptr_t x) noexcept {
+  return sage2_min_ps(n, x);
+}
+
+template <>
+inline float LLMath<float>::sum(int n, cptr_t x) noexcept {
+  return sage2_sum_ps(n, x);
+}
+
+template <>
 inline float LLMath<float>::dot(int n, cptr_t x, cptr_t y) noexcept {
   return sage2_dot_ps(n, x, y);
 }
