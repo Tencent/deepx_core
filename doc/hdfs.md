@@ -20,7 +20,6 @@ export JAVA_HOME=$CDH/jdk1.7.0_51
 export JRE_HOME=$JAVA_HOME/jre
 export HADOOP_HOME=$CDH/hadoop-2.6.0-cdh5.5.0
 export HADOOP_CONF_DIR=$HADOOP_HOME/etc/hadoop
-export SPARK_HOME=$CDH_PROGRAMS/spark-1.6.0-bin-hadoop2.6
 CLASSPATH=
 HADOOP_CLASSPATH=
 JARS=$(find $HADOOP_HOME/share -name "*.jar" -type f)
@@ -31,7 +30,7 @@ do
 done
 export CLASSPATH=$HADOOP_CONF_DIR:$CLASSPATH
 export HADOOP_CLASSPATH=$HADOOP_CONF_DIR:$HADOOP_CLASSPATH
-export PATH=$JAVA_HOME/bin:$HADOOP_HOME/bin:$SPARK_HOME/bin:$PATH
+export PATH=$JAVA_HOME/bin:$HADOOP_HOME/bin:$PATH
 export LIBRARY_PATH=$JRE_HOME/lib/amd64:$JRE_HOME/lib/amd64/server:$LIBRARY_PATH
 export LD_LIBRARY_PATH=$JRE_HOME/lib/amd64:$JRE_HOME/lib/amd64/server:$LD_LIBRARY_PATH
 
@@ -55,7 +54,7 @@ libhdfs is unavailable.
 请检查.
 
 1. "libhdfs.so"是否可以被加载到.
-2. 环境变量.
+2. 环境变量是否正确.
 
 如果加载成功, 将看到以下日志.
 
