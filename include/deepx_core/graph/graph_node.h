@@ -1585,6 +1585,19 @@ class SubscriptNode : public GraphNodeUnaryBase {
   DEFINE_GRAPH_NODE_LIKE(SubscriptNode);
 };
 
+class Subscript2Node : public GraphNodeBinaryBase {
+ private:
+  int axis_ = 0;
+  DEFINE_GRAPH_NODE_ATTR(Subscript2Node, axis_);
+
+ public:
+  int axis() const noexcept { return axis_; }
+
+ public:
+  Subscript2Node(std::string name, GraphNode* X, GraphNode* Y, int axis);
+  DEFINE_GRAPH_NODE_LIKE(Subscript2Node);
+};
+
 class SubscriptRangeNode : public GraphNodeUnaryBase {
  private:
   int axis_ = 0;
@@ -1967,6 +1980,7 @@ DEFINE_GRAPH_NODE_CREATOR(SqueezeFast)
 DEFINE_GRAPH_NODE_CREATOR(SqueezeZeroCopy)
 DEFINE_GRAPH_NODE_CREATOR(Transpose)
 DEFINE_GRAPH_NODE_CREATOR(Subscript)
+DEFINE_GRAPH_NODE_CREATOR(Subscript2)
 DEFINE_GRAPH_NODE_CREATOR(SubscriptRange)
 DEFINE_GRAPH_NODE_CREATOR(LayerNorm)
 DEFINE_GRAPH_NODE_CREATOR(SequenceMask)

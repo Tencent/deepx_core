@@ -4034,6 +4034,61 @@ Subscript(X, 2, 1) = TSR(
 )
 ```
 
+### Subscript2Node
+
+```c++
+Subscript2Node(std::string name, GraphNode* X, GraphNode* Y, int axis);
+GraphNode* Subscript2(std::string name, GraphNode* X, GraphNode* Y, int axis);
+```
+
+对X的axis轴取下标Y.
+
+参数.
+
+- X, TSR.
+- Y, 形状和剪除X的axis轴相同的TSR.
+  - 下标, 元素必须是0, 1, 2, ..., k - 1, 其中k是X的axis轴的维度.
+- axis, 轴.
+
+返回.
+
+- Z, 形状和Y相同的TSR.
+
+例子(类python伪码).
+
+```
+# (2, 3, 4)
+X = TSR([[[ 0,  1,  2,  3],
+          [ 4,  5,  6,  7],
+          [ 8,  9, 10, 11]],
+         [[12, 13, 14, 15],
+          [16, 17, 18, 19],
+          [20, 21, 22, 23]]])
+# (3, 4)
+Y = TSR([[0, 1, 0, 1],
+         [0, 0, 1, 1],
+         [1, 1, 0, 0]])
+Subscript2(X, Y, 0) = TSR(
+  [[ 0, 13,  2, 15],
+   [ 4,  5, 18, 19],
+   [20, 21, 10, 11]]
+)
+# (2, 4)
+Y = TSR([[0, 1, 0, 1],
+         [1, 2, 1, 2]])
+Subscript2(X, Y, 1) = TSR(
+  [[ 0,  5,  2,  7],
+   [16, 21, 18, 23]]
+)
+# (2, 3)
+Y = TSR([[0, 1, 2],
+         [1, 2, 3]])
+Subscript2(X, Y, 2) = TSR(
+  [[ 0,  5, 10],
+   [13, 18, 23]]
+)
+```
+
 ### SubscriptRangeNode
 
 ```c++
