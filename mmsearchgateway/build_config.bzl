@@ -1,6 +1,8 @@
 # Copyright 2020 the deepx authors.
 # Author: Yafei Zhang (kimmyzhang@tencent.com)
 #
+# only for mmsearchgateway
+#
 
 
 def _default_copts():
@@ -28,8 +30,8 @@ def deepx_core_library():
 
   deps = [
       '//mmsearchgateway/sage2:sage2',
-      '//mm3rd/lz4-1.8.2:lz4',
-      '//mm3rd/zlib-1.2.3:z',
+      '//mm3rd/lz4:lz4',
+      '//mm3rd/zlib:z',
       '//comm2/core:core',
   ]
 
