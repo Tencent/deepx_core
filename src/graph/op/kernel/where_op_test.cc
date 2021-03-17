@@ -26,21 +26,6 @@ TEST_F(WhereBackwardTest, Where) {
   VariableNode X("X", shape, TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
   VariableNode Y("Y", shape, TENSOR_INITIALIZER_TYPE_RANDN, 0, 1);
   WhereNode Z("Z", &C, &X, &Y);
-
-  X.set_need_grad(1);
-  Y.set_need_grad(1);
-  CheckOpBackward(&Z, 0);
-
-  X.set_need_grad(1);
-  Y.set_need_grad(0);
-  CheckOpBackward(&Z, 0);
-
-  X.set_need_grad(0);
-  Y.set_need_grad(1);
-  CheckOpBackward(&Z, 0);
-
-  X.set_need_grad(0);
-  Y.set_need_grad(0);
   CheckOpBackward(&Z, 0);
 }
 
