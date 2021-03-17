@@ -4363,8 +4363,6 @@ GraphNode* StopGrad(std::string name, GraphNode* X);
 ```c++
 BatchNormNode(std::string name, GraphNode* X, GraphNode* gamma, GraphNode* beta,
               GraphNode* mean, GraphNode* var, double moving_decay = 0.9);
-GraphNode* BatchNorm(const std::string& prefix, GraphNode* X,
-                     double moving_decay = 0.9);
 ```
 
 批标准化<sup>5</sup>.
