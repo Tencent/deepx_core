@@ -100,9 +100,10 @@ GraphNode* Relu(std::string name, GraphNode* X);
 下面文档有以下约定.
 
 - 将节点的返回张量记为Z.
-- 以"Batch"开头的节点表示输入节点和输出节点的第1个轴是batch轴.
+- 轴从0开始计数.
+- 以"Batch"开头的节点表示输入节点和输出节点的第0个轴是batch轴.
 - axis做为参数表示轴.
-  - 如果axis大于等于0, 表示第axis个轴(从0开始计数).
+  - 如果axis大于等于0, 表示第axis个轴.
   - 如果axis小于0, 表示倒数第-axis个轴.
 - 省略节点名称参数.
 
@@ -200,7 +201,7 @@ $$
 Z_i = \left\{
 \begin{aligned}
 & X_i & & \text{if } X_i > 0 \\
-& \alpha (\exp(X_i) - 1 ) & & \text{otherwise}
+& \alpha (\exp(X_i) - 1) & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -227,7 +228,7 @@ $$
 Z_i = \left\{
 \begin{aligned}
 & \lambda X_i & & \text{if } X_i > 0 \\
-& \lambda \alpha (\exp(X_i) - 1 ) & & \text{otherwise}
+& \lambda \alpha (\exp(X_i) - 1) & & \text{otherwise}
 \end{aligned}
 \right.
 $$
@@ -2088,7 +2089,7 @@ $$
 - X, 形如(batch, m)的TSR.
   - 行必须是概率分布, 即满足$\sum_{j=0}^m X_{ij} = 1$且$X_{ij} \ge 0$.
 - Y, 形如(batch, 1)的TSR.
-  - 表示确定的类目, 元素必须是0, 1, 2, ..., m-1.
+  - 确定的类目, 元素必须是0, 1, 2, ..., m - 1.
 
 返回.
 
@@ -2112,7 +2113,7 @@ $$
 - X, 形如(batch, m)的TSR.
   - 行必须是概率分布, 即满足$\sum_{j=0}^m X_{ij} = 1$且$X_{ij} \ge 0$.
 - Y, 形如(batch, m)的TSR.
-  - 表示不确定的类目, 行必须是概率分布, 即满足$\sum_{j=0}^m Y_{ij} = 1$且$Y_{ij} \ge 0$.
+  - 不确定的类目, 行必须是概率分布, 即满足$\sum_{j=0}^m Y_{ij} = 1$且$Y_{ij} \ge 0$.
 
 返回.
 
@@ -2135,7 +2136,7 @@ $$
 
 - X, 形如(batch, m)的TSR.
 - Y, 形如(batch, 1)的TSR.
-  - 表示确定的类目, 元素必须是0, 1, 2, ..., m-1.
+  - 确定的类目, 元素必须是0, 1, 2, ..., m - 1.
 
 返回.
 
@@ -2158,7 +2159,7 @@ $$
 
 - X, 形如(batch, m)的TSR.
 - Y, 形如(batch, m)的TSR.
-  - 表示不确定的类目, 行必须是概率分布, 即满足$\sum_{j=0}^m Y_{ij} = 1$且$Y_{ij} \ge 0$.
+  - 不确定的类目, 行必须是概率分布, 即满足$\sum_{j=0}^m Y_{ij} = 1$且$Y_{ij} \ge 0$.
 
 返回.
 
