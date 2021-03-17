@@ -72,6 +72,7 @@
     <ClCompile Include="..\src\graph\op\kernel\reshape_op.cc" />
     <ClCompile Include="..\src\graph\op\kernel\sequence_mask_op.cc" />
     <ClCompile Include="..\src\graph\op\kernel\stop_grad_op.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\subscript2_op.cc" />
     <ClCompile Include="..\src\graph\op\kernel\subscript_op.cc" />
     <ClCompile Include="..\src\graph\op\kernel\subscript_range_op.cc" />
     <ClCompile Include="..\src\graph\op\kernel\tensor_dot_op.cc" />

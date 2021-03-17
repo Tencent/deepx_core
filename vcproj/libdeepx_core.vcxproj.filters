@@ -214,6 +214,9 @@
     <ClCompile Include="..\src\graph\op\kernel\stop_grad_op.cc">
       <Filter>graph\op\kernel</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\graph\op\kernel\subscript2_op.cc">
+      <Filter>graph\op\kernel</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\graph\op\kernel\subscript_op.cc">
       <Filter>graph\op\kernel</Filter>
     </ClCompile>
