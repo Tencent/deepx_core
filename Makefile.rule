@@ -44,15 +44,15 @@ LDFLAGS      += -lws2_32 -lmswsock -static
 endif
 
 DEBUG        ?= 0
-ifneq ($(DEBUG),1)
+ifeq ($(DEBUG),1)
+CFLAGS       += -O0
+CXXFLAGS     += -O0 -Og
+BUILD_DIR    := $(BUILD_DIR)_d
+else
 CPPFLAGS     += -DNDEBUG
 CFLAGS       += -O3
 CXXFLAGS     += -O3
 BUILD_DIR    := $(BUILD_DIR)_r
-else
-CFLAGS       += -O0
-CXXFLAGS     += -O0 -Og
-BUILD_DIR    := $(BUILD_DIR)_d
 endif
 
 SIMD         ?= 0
