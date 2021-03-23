@@ -4,9 +4,9 @@ deepx使用libhdfs操作/读写hdfs文件系统.
 
 ## 获取libhdfs
 
-推荐从[prebuilt](https://git.code.oa.com/mmrecommend/prebuilt)获取"libhdfs.so".
+推荐从[libhdfs(腾讯内部)](https://git.code.oa.com/mmrecommend/libhdfs)获取"libhdfs.so".
 
-也可以从官方hdfs安装包获取"libhdfs.so".
+也可以从hadoop安装包获取"libhdfs.so".
 
 ## 使用libhdfs
 
@@ -40,6 +40,11 @@ export DEEPX_HDFS_USER=user
 
 # 设置hdfs ugi.
 # 等价于"hadoop fs -Dhadoop.job.ugi=user,group"
+#
+# 较低版本的"libhdfs.so"没有hdfsBuilder系列函数, 设置DEEPX_HDFS_UGI将导致运行异常.
+# terminate called after throwing an instance of 'std::runtime_error'
+#   what():  Get: hdfs builder functions were not loaded.
+# 如果必须设置ugi, 请升级hadoop客户端和"libhdfs.so".
 export DEEPX_HDFS_UGI=user,group
 ```
 
