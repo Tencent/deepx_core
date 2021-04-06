@@ -74,6 +74,8 @@ class CSRMatrix {
   void clear() noexcept;
   template <typename Int>
   void reserve(Int size);
+  template <typename Int>
+  void reserve(Int row_size, Int value_size);
   inline void add_row();
   inline void emplace(int_t col, float_t value);
   inline void trim(size_t value_size);
@@ -171,6 +173,14 @@ void CSRMatrix<T, I>::reserve(Int size) {
   row_offset_.reserve((size_t)size + 1);
   col_.reserve((size_t)size * 512);    // magic number
   value_.reserve((size_t)size * 512);  // magic number
+}
+
+template <typename T, typename I>
+template <typename Int>
+void CSRMatrix<T, I>::reserve(Int row_size, Int value_size) {
+  row_offset_.reserve((size_t)row_size + 1);
+  col_.reserve((size_t)value_size);
+  value_.reserve((size_t)value_size);
 }
 
 template <typename T, typename I>
