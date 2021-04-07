@@ -73,7 +73,7 @@ class CSRMatrix {
   bool empty() const noexcept { return value_.empty(); }
   void clear() noexcept;
   template <typename Int>
-  void reserve(Int size);
+  void reserve(Int row_size);
   template <typename Int>
   void reserve(Int row_size, Int value_size);
   inline void add_row();
@@ -169,10 +169,8 @@ void CSRMatrix<T, I>::clear() noexcept {
 
 template <typename T, typename I>
 template <typename Int>
-void CSRMatrix<T, I>::reserve(Int size) {
-  row_offset_.reserve((size_t)size + 1);
-  col_.reserve((size_t)size * 512);    // magic number
-  value_.reserve((size_t)size * 512);  // magic number
+void CSRMatrix<T, I>::reserve(Int row_size) {
+  reserve(row_size, row_size * 512);  // magic number
 }
 
 template <typename T, typename I>
