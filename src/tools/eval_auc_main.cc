@@ -28,39 +28,38 @@ struct EvalItem {
 };
 
 void EvalAUC(const std::vector<EvalItem>& items) {
-  double auc = 0;
-  double tp_fn_prev = 0, fp_tn_prev = 0, tp_fn = 0, fp_tn = 0;
-  double total_loss = 0, total_prob = 0, total_weight;
-  const EvalItem* last_item = nullptr;
+  if (items.empty()) {
+    return;
+  }
+
+  double auc;
+  size_t pos = 0, acc_pos = 0;
   for (const EvalItem& item : items) {
-    if (last_item && item.prob != last_item->prob) {
-      auc += fp_tn * (tp_fn_prev + tp_fn * 0.5);
-      tp_fn_prev += tp_fn;
-      fp_tn_prev += fp_tn;
-      fp_tn = 0;
-      tp_fn = 0;
-    }
-    last_item = &item;
     if (item.label > 0) {
-      tp_fn += 1;
+      pos += 1;
+    } else {
+      acc_pos += pos;
+    }
+  }
+  if (pos == 0 || pos == items.size()) {
+    auc = 1;
+  } else {
+    auc = 1.0 * acc_pos / pos / (items.size() - pos);
+  }
+  std::cout << "auc=" << auc << std::endl;
+
+  double total_loss = 0, total_prob = 0;
+  for (const EvalItem& item : items) {
+    if (item.label > 0) {
       total_loss -= ll_math_t::safe_log(item.prob);
     } else {
-      fp_tn += 1;
       total_loss -= ll_math_t::safe_log(1 - item.prob);
     }
     total_prob += item.prob;
   }
-
-  auc += fp_tn * (tp_fn_prev + tp_fn * 0.5);
-  tp_fn += tp_fn_prev;
-  fp_tn += fp_tn_prev;
-  auc = auc / (tp_fn * fp_tn);
-  total_weight = tp_fn + fp_tn;
-
-  std::cout << "auc=" << auc << std::endl;
-  std::cout << "loss=" << total_loss / total_weight << std::endl;
-  std::cout << "predictive_ctr=" << total_prob / total_weight << std::endl;
-  std::cout << "statistical_ctr=" << tp_fn / total_weight << std::endl;
+  std::cout << "loss=" << total_loss / items.size() << std::endl;
+  std::cout << "predictive_ctr=" << total_prob / items.size() << std::endl;
+  std::cout << "statistical_ctr=" << 1.0 * pos / items.size() << std::endl;
 }
 
 void EvalAUC(const std::vector<std::string>& files) {
