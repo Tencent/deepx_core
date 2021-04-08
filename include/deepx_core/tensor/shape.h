@@ -26,7 +26,7 @@ class Shape {
  private:
   int rank_ = 0;
   int total_dim_ = 0;
-  int dim_[SHAPE_MAX_RANK] = {0};
+  int dims_[SHAPE_MAX_RANK] = {0};
 
   friend OutputStream& operator<<(OutputStream& os, const Shape& shape);
   friend InputStream& operator>>(InputStream& is, Shape& shape);
@@ -34,19 +34,18 @@ class Shape {
  public:
   int rank() const noexcept { return rank_; }
   int total_dim() const noexcept { return total_dim_; }
-  const int* dim() const noexcept { return &dim_[0]; }
   template <typename Int>
   int dim(Int i) const noexcept {
-    return dim_[i];
+    return dims_[i];
   }
   template <typename Int>
   int operator[](Int i) const noexcept {
-    return dim_[i];
+    return dims_[i];
   }
-  int front() const noexcept { return dim_[0]; }
-  int back() const noexcept { return dim_[rank_ - 1]; }
+  int front() const noexcept { return dims_[0]; }
+  int back() const noexcept { return dims_[rank_ - 1]; }
   bool is_rank(int rank) const noexcept { return rank_ == rank; }
-  bool is_scalar() const noexcept { return rank_ == 1 && dim_[0] == 1; }
+  bool is_scalar() const noexcept { return rank_ == 1 && dims_[0] == 1; }
   bool empty() const noexcept { return rank_ == 0; }
 
  public:
@@ -67,29 +66,29 @@ class Shape {
   explicit Shape(int d0) noexcept {
     rank_ = 1;
     total_dim_ = d0;
-    dim_[0] = d0;
+    dims_[0] = d0;
   }
 
   Shape(int d0, int d1) noexcept {
     rank_ = 2;
     total_dim_ = d0 * d1;
-    dim_[0] = d0;
-    dim_[1] = d1;
+    dims_[0] = d0;
+    dims_[1] = d1;
   }
 
   Shape(int d0, int d1, int d2) noexcept {
     rank_ = 3;
     total_dim_ = d0 * d1 * d2;
-    dim_[0] = d0;
-    dim_[1] = d1;
-    dim_[2] = d2;
+    dims_[0] = d0;
+    dims_[1] = d1;
+    dims_[2] = d2;
   }
 
   template <typename... Args>
   explicit Shape(int dim, Args&&... args) noexcept {
     static_assert(sizeof...(args) < SHAPE_MAX_RANK, "Too large rank.");
     total_dim_ = dim;
-    dim_[rank_++] = dim;
+    dims_[rank_++] = dim;
     Construct(std::forward<Args>(args)...);
   }
 
@@ -99,7 +98,7 @@ class Shape {
   template <typename... Args>
   void Construct(int dim, Args&&... args) noexcept {
     total_dim_ *= dim;
-    dim_[rank_++] = dim;
+    dims_[rank_++] = dim;
     Construct(std::forward<Args>(args)...);
   }
 
@@ -148,24 +147,24 @@ class Shape {
   Shape& resize(int d0) noexcept {
     rank_ = 1;
     total_dim_ = d0;
-    dim_[0] = d0;
+    dims_[0] = d0;
     return *this;
   }
 
   Shape& resize(int d0, int d1) noexcept {
     rank_ = 2;
     total_dim_ = d0 * d1;
-    dim_[0] = d0;
-    dim_[1] = d1;
+    dims_[0] = d0;
+    dims_[1] = d1;
     return *this;
   }
 
   Shape& resize(int d0, int d1, int d2) noexcept {
     rank_ = 3;
     total_dim_ = d0 * d1 * d2;
-    dim_[0] = d0;
-    dim_[1] = d1;
-    dim_[2] = d2;
+    dims_[0] = d0;
+    dims_[1] = d1;
+    dims_[2] = d2;
     return *this;
   }
 
@@ -175,9 +174,9 @@ class Shape {
   }
 
  private:
-  bool do_reshape_nothrow(const Shape& other) noexcept;
-  bool do_expand_dim_nothrow(int axis) noexcept;
-  bool do_squeeze_nothrow(int axis) noexcept;
+  bool _reshape_nothrow(const Shape& other) noexcept;
+  bool _expand_dim_nothrow(int axis) noexcept;
+  bool _squeeze_nothrow(int axis) noexcept;
 
  public:
   Shape& reshape(const Shape& other);
@@ -244,12 +243,12 @@ class Shape {
   using const_iterator = const int*;
   using reverse_iterator = std::reverse_iterator<iterator>;
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
-  iterator begin() noexcept { return &dim_[0]; }
-  const_iterator begin() const noexcept { return &dim_[0]; }
-  const_iterator cbegin() const noexcept { return &dim_[0]; }
-  iterator end() noexcept { return &dim_[0] + rank_; }
-  const_iterator end() const noexcept { return &dim_[0] + rank_; }
-  const_iterator cend() const noexcept { return &dim_[0] + rank_; }
+  iterator begin() noexcept { return &dims_[0]; }
+  const_iterator begin() const noexcept { return &dims_[0]; }
+  const_iterator cbegin() const noexcept { return &dims_[0]; }
+  iterator end() noexcept { return &dims_[0] + rank_; }
+  const_iterator end() const noexcept { return &dims_[0] + rank_; }
+  const_iterator cend() const noexcept { return &dims_[0] + rank_; }
   reverse_iterator rbegin() noexcept { return (reverse_iterator(end())); }
   const_reverse_iterator rbegin() const noexcept {
     return (const_reverse_iterator(end()));

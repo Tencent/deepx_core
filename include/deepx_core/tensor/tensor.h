@@ -159,7 +159,6 @@ class Tensor {
   // methods from Shape
   int rank() const noexcept { return shape_.rank(); }
   int total_dim() const noexcept { return shape_.total_dim(); }
-  const int* dim() const noexcept { return shape_.dim(); }
   template <typename Int>
   int dim(Int i) const noexcept {
     return shape_[i];
@@ -831,7 +830,7 @@ Tensor<T> Tensor<T>::operator[](Int i) {
     DXTHROW_INVALID_ARGUMENT("Invalid i: %d.", (int)i);
   }
   Tensor slice;
-  slice.shape_.assign(shape_.dim() + 1, shape_.dim() + shape_.rank());
+  slice.shape_.assign(shape_.begin() + 1, shape_.end());
   slice.data_ = data_ + shape_.total_dim() / shape_.dim(0) * i;
   return slice;
 }
@@ -843,7 +842,7 @@ const Tensor<T> Tensor<T>::operator[](Int i) const {
     DXTHROW_INVALID_ARGUMENT("Invalid i: %d.", (int)i);
   }
   Tensor slice;
-  slice.shape_.assign(shape_.dim() + 1, shape_.dim() + shape_.rank());
+  slice.shape_.assign(shape_.begin() + 1, shape_.end());
   slice.data_ = data_ + shape_.total_dim() / shape_.dim(0) * i;
   return slice;
 }

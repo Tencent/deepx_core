@@ -8,12 +8,12 @@
 namespace deepx_core {
 
 OutputStream& operator<<(OutputStream& os, const Shape& shape) {
-  os << shape.rank_ << shape.total_dim_ << shape.dim_;
+  os << shape.rank_ << shape.total_dim_ << shape.dims_;
   return os;
 }
 
 InputStream& operator>>(InputStream& is, Shape& shape) {
-  is >> shape.rank_ >> shape.total_dim_ >> shape.dim_;
+  is >> shape.rank_ >> shape.total_dim_ >> shape.dims_;
   return is;
 }
 
@@ -33,7 +33,7 @@ Shape& Shape::operator=(const std::vector<int>& dim) {
 
 void Shape::Construct(int dim) noexcept {
   total_dim_ *= dim;
-  dim_[rank_++] = dim;
+  dims_[rank_++] = dim;
 }
 
 bool Shape::real_axis(int* axis) const noexcept {
@@ -58,15 +58,15 @@ int Shape::real_axis(int axis) const noexcept {
   return axis;
 }
 
-bool Shape::do_reshape_nothrow(const Shape& other) noexcept {
+bool Shape::_reshape_nothrow(const Shape& other) noexcept {
   int neg = 0, other_neg = 0;
   for (int i = 0; i < rank_; ++i) {
-    if (dim_[i] == SHAPE_DIM_ANY) {
+    if (dims_[i] == SHAPE_DIM_ANY) {
       ++neg;
     }
   }
   for (int i = 0; i < other.rank_; ++i) {
-    if (other.dim_[i] == SHAPE_DIM_ANY) {
+    if (other.dims_[i] == SHAPE_DIM_ANY) {
       ++other_neg;
     }
   }
@@ -95,8 +95,8 @@ bool Shape::do_reshape_nothrow(const Shape& other) noexcept {
 
       *this = other;
       for (int i = 0; i < rank_; ++i) {
-        if (dim_[i] == SHAPE_DIM_ANY) {
-          dim_[i] = a;
+        if (dims_[i] == SHAPE_DIM_ANY) {
+          dims_[i] = a;
           total_dim_ *= a / SHAPE_DIM_ANY;
           break;
         }
@@ -121,7 +121,7 @@ bool Shape::do_reshape_nothrow(const Shape& other) noexcept {
   return false;
 }
 
-bool Shape::do_expand_dim_nothrow(int axis) noexcept {
+bool Shape::_expand_dim_nothrow(int axis) noexcept {
   if (rank_ == SHAPE_MAX_RANK) {
     return false;
   }
@@ -132,31 +132,31 @@ bool Shape::do_expand_dim_nothrow(int axis) noexcept {
   }
 
   for (int i = rank_ - 1; i > axis; --i) {
-    dim_[i] = dim_[i - 1];
+    dims_[i] = dims_[i - 1];
   }
-  dim_[axis] = 1;
+  dims_[axis] = 1;
   return true;
 }
 
-bool Shape::do_squeeze_nothrow(int axis) noexcept {
+bool Shape::_squeeze_nothrow(int axis) noexcept {
   if (!real_axis(&axis)) {
     return false;
   }
 
-  if (dim_[axis] != 1) {
+  if (dims_[axis] != 1) {
     return false;
   }
 
   for (int i = axis; i < rank_ - 1; ++i) {
-    dim_[i] = dim_[i + 1];
+    dims_[i] = dims_[i + 1];
   }
-  dim_[rank_ - 1] = 1;
+  dims_[rank_ - 1] = 1;
   --rank_;
   return true;
 }
 
 Shape& Shape::reshape(const Shape& other) {
-  if (!do_reshape_nothrow(other)) {
+  if (!_reshape_nothrow(other)) {
     DXTHROW_INVALID_ARGUMENT("Couldn't reshape from %s to %s.",
                              to_string(*this).c_str(),
                              to_string(other).c_str());
@@ -165,7 +165,7 @@ Shape& Shape::reshape(const Shape& other) {
 }
 
 Shape& Shape::reshape_nothrow(const Shape& other) noexcept {
-  if (!do_reshape_nothrow(other)) {
+  if (!_reshape_nothrow(other)) {
     DXERROR("Couldn't reshape from %s to %s.", to_string(*this).c_str(),
             to_string(other).c_str());
     clear();
@@ -174,7 +174,7 @@ Shape& Shape::reshape_nothrow(const Shape& other) noexcept {
 }
 
 Shape& Shape::expand_dim(int axis) {
-  if (!do_expand_dim_nothrow(axis)) {
+  if (!_expand_dim_nothrow(axis)) {
     DXTHROW_INVALID_ARGUMENT("Couldn't expand_dim %s by %d.",
                              to_string(*this).c_str(), axis);
   }
@@ -182,7 +182,7 @@ Shape& Shape::expand_dim(int axis) {
 }
 
 Shape& Shape::expand_dim_nothrow(int axis) noexcept {
-  if (!do_expand_dim_nothrow(axis)) {
+  if (!_expand_dim_nothrow(axis)) {
     DXERROR("Couldn't expand_dim %s by %d.", to_string(*this).c_str(), axis);
     clear();
   }
@@ -190,7 +190,7 @@ Shape& Shape::expand_dim_nothrow(int axis) noexcept {
 }
 
 Shape& Shape::squeeze(int axis) {
-  if (!do_squeeze_nothrow(axis)) {
+  if (!_squeeze_nothrow(axis)) {
     DXTHROW_INVALID_ARGUMENT("Couldn't squeeze %s by %d.",
                              to_string(*this).c_str(), axis);
   }
@@ -198,7 +198,7 @@ Shape& Shape::squeeze(int axis) {
 }
 
 Shape& Shape::squeeze_nothrow(int axis) noexcept {
-  if (!do_squeeze_nothrow(axis)) {
+  if (!_squeeze_nothrow(axis)) {
     DXERROR("Couldn't squeeze %s by %d.", to_string(*this).c_str(), axis);
     clear();
   }
@@ -210,7 +210,7 @@ bool Shape::same_shape(const Shape& other) const noexcept {
     return false;
   }
   for (int i = 0; i < rank_; ++i) {
-    if (dim_[i] != other.dim_[i]) {
+    if (dims_[i] != other.dims_[i]) {
       return false;
     }
   }
