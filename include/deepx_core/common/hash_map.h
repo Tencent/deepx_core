@@ -345,7 +345,7 @@ class HashMap {
         (size_type)(bucket_.size() * detail::HASH_MAP_INV_MIN_LOAD_FACTOR);
   }
 
-  void do_rehash(size_type new_size) {
+  void _rehash(size_type new_size) {
     meta_t new_meta(new_size);
     bucket_t new_bucket(new_size);
 
@@ -368,7 +368,7 @@ class HashMap {
   void rehash_for_emplace() {
     if (size_ >= rehash_threshold_) {
       size_type new_size = next_size(size_ + 1);
-      do_rehash(new_size);
+      _rehash(new_size);
     }
   }
 
@@ -613,7 +613,7 @@ class HashMap {
   void rehash(Int _new_size) {
     size_type new_size = next_size((size_type)_new_size);
     if (new_size > bucket_.size()) {
-      do_rehash(new_size);
+      _rehash(new_size);
     }
   }
 
