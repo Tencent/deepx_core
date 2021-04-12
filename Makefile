@@ -119,7 +119,7 @@ $(SUBDIRS):
 .PHONY: $(SUBDIRS)
 
 install: lib
-	@bash -e install.sh $(PREFIX) $(BUILD_DIR_ABS)
+	@bash script/install.sh $(PREFIX) $(BUILD_DIR_ABS)
 .PHONY: install
 
 build_dir_abs:

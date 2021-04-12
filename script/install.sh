@@ -13,9 +13,12 @@ fi
 PREFIX=$1
 BUILD_DIR_ABS=$2
 
+set -e
 cd $(dirname $0)
-SOURCE_ROOT=$(pwd)
-install=$SOURCE_ROOT/install
+pwd=$(pwd)
+
+SOURCE_ROOT=$pwd/..
+install=$pwd/install
 
 cd $SOURCE_ROOT/include
 echo Installing headers to $PREFIX/include
