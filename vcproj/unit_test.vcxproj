@@ -54,6 +54,7 @@
     <ClCompile Include="..\src\graph\op\kernel\for_axis_op_test.cc" />
     <ClCompile Include="..\src\graph\op\kernel\fully_connect_op_test.cc" />
     <ClCompile Include="..\src\graph\op\kernel\gemm_op_test.cc" />
+    <ClCompile Include="..\src\graph\op\kernel\group_18_embedding_lookup_op_test.cc" />
     <ClCompile Include="..\src\graph\op\kernel\group_embedding_lookup_op_test.cc" />
     <ClCompile Include="..\src\graph\op\kernel\inner_op_test.cc" />
     <ClCompile Include="..\src\graph\op\kernel\layer_norm_op_test.cc" />

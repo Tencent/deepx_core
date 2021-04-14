@@ -153,6 +153,9 @@
     <ClCompile Include="..\src\graph\op\kernel\gemm_op_test.cc">
       <Filter>graph\op\kernel</Filter>
     </ClCompile>
+    <ClCompile Include="..\src\graph\op\kernel\group_18_embedding_lookup_op_test.cc">
+      <Filter>graph\op\kernel</Filter>
+    </ClCompile>
     <ClCompile Include="..\src\graph\op\kernel\group_embedding_lookup_op_test.cc">
       <Filter>graph\op\kernel</Filter>
     </ClCompile>

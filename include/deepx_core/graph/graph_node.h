@@ -1361,6 +1361,37 @@ class GroupEmbeddingLookup2Node : public GraphNode {
   DEFINE_GRAPH_NODE_LIKE(GroupEmbeddingLookup2Node);
 };
 
+// undocumented API
+class Group18EmbeddingLookupNode : public GraphNode {
+ private:
+  std::vector<int> group_ids_;
+  DEFINE_GRAPH_NODE_ATTR(Group18EmbeddingLookupNode, group_ids_);
+
+ public:
+  const std::vector<int>& group_ids() const noexcept { return group_ids_; }
+
+ public:
+  Group18EmbeddingLookupNode(std::string name, GraphNode* X,
+                             const std::vector<GraphNode*>& W,
+                             std::vector<int> group_ids);
+  DEFINE_GRAPH_NODE_LIKE(Group18EmbeddingLookupNode);
+};
+
+// undocumented API
+class Group18EmbeddingLookup2Node : public GraphNode {
+ private:
+  std::vector<int> group_ids_;
+  DEFINE_GRAPH_NODE_ATTR(Group18EmbeddingLookup2Node, group_ids_);
+
+ public:
+  const std::vector<int>& group_ids() const noexcept { return group_ids_; }
+
+ public:
+  Group18EmbeddingLookup2Node(std::string name, GraphNode* X, GraphNode* W,
+                              std::vector<int> group_ids);
+  DEFINE_GRAPH_NODE_LIKE(Group18EmbeddingLookup2Node);
+};
+
 class GEMMNode : public GraphNodeBinaryBase {
  private:
   int transX_ = 0;
@@ -1939,6 +1970,10 @@ DEFINE_GRAPH_NODE_CREATOR(TFEmbeddingLookup)
 DEFINE_GRAPH_NODE_CREATOR(EmbeddingLookup)
 DEFINE_GRAPH_NODE_CREATOR(GroupEmbeddingLookup)
 DEFINE_GRAPH_NODE_CREATOR(GroupEmbeddingLookup2)
+// undocumented API
+DEFINE_GRAPH_NODE_CREATOR(Group18EmbeddingLookup)
+// undocumented API
+DEFINE_GRAPH_NODE_CREATOR(Group18EmbeddingLookup2)
 DEFINE_GRAPH_NODE_CREATOR(GEMM)
 DEFINE_GRAPH_NODE_CREATOR(BatchGEMM)
 DEFINE_GRAPH_NODE_CREATOR(Matmul)
