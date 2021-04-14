@@ -522,7 +522,8 @@ class LLSparseTensor : public LLTensor<T> {
   using base_t::gemv;
 
  public:
-  // the same logic as libfeature
+  // group id: 16 bit
+  // sub feature id: 48 bit
   static uint16_t get_group_id(int_t feature_id) noexcept {
     return (uint16_t)((feature_id & UINT64_C(0xffff000000000000)) >> 48);
   }
@@ -535,6 +536,23 @@ class LLSparseTensor : public LLTensor<T> {
   static int_t make_feature_id(Int group_id, int_t sub_feature_id) noexcept {
     return ((int_t)group_id << 48) |
            (sub_feature_id & UINT64_C(0x0000ffffffffffff));
+  }
+
+  // group id: 18 bit
+  // sub feature id: 46 bit
+  static int group_18_get_group_id(int_t feature_id) noexcept {
+    return (int)((feature_id & UINT64_C(0xffffc00000000000)) >> 46);
+  }
+
+  static int_t group_18_get_sub_feature_id(int_t feature_id) noexcept {
+    return feature_id & UINT64_C(0x00003fffffffffff);
+  }
+
+  template <typename Int>
+  static int_t group_18_make_feature_id(Int group_id,
+                                        int_t sub_feature_id) noexcept {
+    return ((int_t)group_id << 46) |
+           (sub_feature_id & UINT64_C(0x00003fffffffffff));
   }
 
  public:
