@@ -8,10 +8,11 @@ namespace deepx_core {
 
 class GroupEmbeddingLookupBaseTest : public testing::Test, public DataType {
  protected:
-  const uint16_t GROUP_ID1 = 3;
-  const uint16_t GROUP_ID2 = 4;
-  const uint16_t GROUP_ID3 = 5;
-  const std::vector<uint16_t> GROUP_IDS = {GROUP_ID1, GROUP_ID2, GROUP_ID3};
+  const int GROUP_ID1 = 3;
+  const int GROUP_ID2 = 4;
+  const int GROUP_ID3 = 5;
+  const std::vector<uint16_t> GROUP_IDS = {
+      (uint16_t)GROUP_ID1, (uint16_t)GROUP_ID2, (uint16_t)GROUP_ID3};
   const csr_t X_{{0, 1, 4, 6, 7, 10, 14},
                  {ll_sparse_tensor_t::make_feature_id(GROUP_ID1, 1),
                   ll_sparse_tensor_t::make_feature_id(GROUP_ID2, 2),

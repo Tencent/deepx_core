@@ -4,19 +4,20 @@
 
 #pragma once
 #include <deepx_core/common/stream.h>
-#include <cstdint>
 #include <iostream>
 #include <string>
 #include <vector>
 
 namespace deepx_core {
 
+constexpr int MAX_GROUP_ID = (1 << 24) - 1;
+
 /************************************************************************/
 /* GroupConfigItem3 */
 /************************************************************************/
 struct GroupConfigItem3 {
   // group id
-  uint16_t group_id = 0;
+  int group_id = 0;
   // row of embedding lookup matrix
   int embedding_row = 0;
   // col of embedding lookup matrix
@@ -30,19 +31,22 @@ std::istream& operator>>(std::istream& is, GroupConfigItem3& item);
 /************************************************************************/
 /* GroupConfigItem3 functions */
 /************************************************************************/
-// Load group config from 'file'.
+// Load 'items' from 'file'.
+// 'max_group_id' can be nullptr.
 bool LoadGroupConfig(const std::string& file,
                      std::vector<GroupConfigItem3>* items, int* max_group_id);
 bool LoadGroupConfig(const std::string& file,
                      std::vector<GroupConfigItem3>* items, int* max_group_id,
                      const char* gflag);
-// Parse group config from string 'info'.
+// Parse 'items' from string 'info'.
+// 'max_group_id' can be nullptr.
 bool ParseGroupConfig(const std::string& info,
                       std::vector<GroupConfigItem3>* items, int* max_group_id);
 bool ParseGroupConfig(const std::string& info,
                       std::vector<GroupConfigItem3>* items, int* max_group_id,
                       const char* gflag);
-// Try to load from file or parse from string.
+// Try to load 'items' from file or parse 'items' from string.
+// 'max_group_id' can be nullptr.
 bool GuessGroupConfig(const std::string& file_or_info,
                       std::vector<GroupConfigItem3>* items, int* max_group_id);
 bool GuessGroupConfig(const std::string& file_or_info,

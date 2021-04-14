@@ -531,8 +531,8 @@ class LLSparseTensor : public LLTensor<T> {
     return feature_id & UINT64_C(0x0000ffffffffffff);
   }
 
-  static int_t make_feature_id(uint16_t group_id,
-                               int_t sub_feature_id) noexcept {
+  template <typename Int>
+  static int_t make_feature_id(Int group_id, int_t sub_feature_id) noexcept {
     return ((int_t)group_id << 48) |
            (sub_feature_id & UINT64_C(0x0000ffffffffffff));
   }

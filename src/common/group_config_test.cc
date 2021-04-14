@@ -52,24 +52,24 @@ TEST_F(GroupConfigTest, LoadGroupConfig_2) {
   ASSERT_TRUE(LoadGroupConfig("testdata/common/group_config/2.txt", &items,
                               &max_group_id));
   EXPECT_EQ(items.size(), 3u);
-  EXPECT_EQ(items[0].group_id, 10);
-  EXPECT_EQ(items[1].group_id, 20);
-  EXPECT_EQ(items[2].group_id, 30);
+  EXPECT_EQ(items[0].group_id, 80010);
+  EXPECT_EQ(items[1].group_id, 80020);
+  EXPECT_EQ(items[2].group_id, 80030);
   EXPECT_EQ(items[0].embedding_row, 10);
   EXPECT_EQ(items[1].embedding_row, 10);
   EXPECT_EQ(items[2].embedding_row, 10);
   EXPECT_EQ(items[0].embedding_col, 6);
   EXPECT_EQ(items[1].embedding_col, 6);
   EXPECT_EQ(items[2].embedding_col, 6);
-  EXPECT_EQ(max_group_id, 31);
+  EXPECT_EQ(max_group_id, 80031);
   EXPECT_TRUE(IsFMGroupConfig(items));
   EXPECT_EQ(GetTotalEmbeddingCol(items), 18);
 
   std::vector<GroupConfigItem3> lr_items = GetLRGroupConfig(items);
   EXPECT_EQ(lr_items.size(), 3u);
-  EXPECT_EQ(lr_items[0].group_id, 10);
-  EXPECT_EQ(lr_items[1].group_id, 20);
-  EXPECT_EQ(lr_items[2].group_id, 30);
+  EXPECT_EQ(lr_items[0].group_id, 80010);
+  EXPECT_EQ(lr_items[1].group_id, 80020);
+  EXPECT_EQ(lr_items[2].group_id, 80030);
   EXPECT_EQ(lr_items[0].embedding_row, 10);
   EXPECT_EQ(lr_items[1].embedding_row, 10);
   EXPECT_EQ(lr_items[2].embedding_row, 10);
@@ -154,34 +154,35 @@ TEST_F(GroupConfigTest, ParseGroupConfig_2) {
   std::vector<GroupConfigItem3> items;
   int max_group_id;
 
-  ASSERT_TRUE(
-      ParseGroupConfig("10:10:6,20:10:6,30:10:6", &items, &max_group_id));
+  ASSERT_TRUE(ParseGroupConfig("80010:10:6,80020:10:6,80030:10:6", &items,
+                               &max_group_id));
   EXPECT_EQ(items.size(), 3u);
-  EXPECT_EQ(items[0].group_id, 10);
-  EXPECT_EQ(items[1].group_id, 20);
-  EXPECT_EQ(items[2].group_id, 30);
+  EXPECT_EQ(items[0].group_id, 80010);
+  EXPECT_EQ(items[1].group_id, 80020);
+  EXPECT_EQ(items[2].group_id, 80030);
   EXPECT_EQ(items[0].embedding_row, 10);
   EXPECT_EQ(items[1].embedding_row, 10);
   EXPECT_EQ(items[2].embedding_row, 10);
   EXPECT_EQ(items[0].embedding_col, 6);
   EXPECT_EQ(items[1].embedding_col, 6);
   EXPECT_EQ(items[2].embedding_col, 6);
-  EXPECT_EQ(max_group_id, 31);
+  EXPECT_EQ(max_group_id, 80031);
   EXPECT_TRUE(IsFMGroupConfig(items));
   EXPECT_EQ(GetTotalEmbeddingCol(items), 18);
 
-  ASSERT_TRUE(ParseGroupConfig("10:6,20:6,30:6", &items, &max_group_id));
+  ASSERT_TRUE(
+      ParseGroupConfig("80010:6,80020:6,80030:6", &items, &max_group_id));
   EXPECT_EQ(items.size(), 3u);
-  EXPECT_EQ(items[0].group_id, 10);
-  EXPECT_EQ(items[1].group_id, 20);
-  EXPECT_EQ(items[2].group_id, 30);
+  EXPECT_EQ(items[0].group_id, 80010);
+  EXPECT_EQ(items[1].group_id, 80020);
+  EXPECT_EQ(items[2].group_id, 80030);
   EXPECT_EQ(items[0].embedding_row, 1);
   EXPECT_EQ(items[1].embedding_row, 1);
   EXPECT_EQ(items[2].embedding_row, 1);
   EXPECT_EQ(items[0].embedding_col, 6);
   EXPECT_EQ(items[1].embedding_col, 6);
   EXPECT_EQ(items[2].embedding_col, 6);
-  EXPECT_EQ(max_group_id, 31);
+  EXPECT_EQ(max_group_id, 80031);
   EXPECT_TRUE(IsFMGroupConfig(items));
   EXPECT_EQ(GetTotalEmbeddingCol(items), 18);
 }
@@ -246,18 +247,19 @@ TEST_F(GroupConfigTest, GuessGroupConfig_2) {
   std::vector<GroupConfigItem3> items;
   int max_group_id;
 
-  ASSERT_TRUE(GuessGroupConfig("1:10:6,2:10:6,3:10:6", &items, &max_group_id));
+  ASSERT_TRUE(GuessGroupConfig("80010:10:6,80020:10:6,80030:10:6", &items,
+                               &max_group_id));
   EXPECT_EQ(items.size(), 3u);
-  EXPECT_EQ(items[0].group_id, 1);
-  EXPECT_EQ(items[1].group_id, 2);
-  EXPECT_EQ(items[2].group_id, 3);
+  EXPECT_EQ(items[0].group_id, 80010);
+  EXPECT_EQ(items[1].group_id, 80020);
+  EXPECT_EQ(items[2].group_id, 80030);
   EXPECT_EQ(items[0].embedding_row, 10);
   EXPECT_EQ(items[1].embedding_row, 10);
   EXPECT_EQ(items[2].embedding_row, 10);
   EXPECT_EQ(items[0].embedding_col, 6);
   EXPECT_EQ(items[1].embedding_col, 6);
   EXPECT_EQ(items[2].embedding_col, 6);
-  EXPECT_EQ(max_group_id, 4);
+  EXPECT_EQ(max_group_id, 80031);
   EXPECT_TRUE(IsFMGroupConfig(items));
   EXPECT_EQ(GetTotalEmbeddingCol(items), 18);
 }
@@ -266,19 +268,19 @@ TEST_F(GroupConfigTest, GuessGroupConfig_3) {
   std::vector<GroupConfigItem3> items;
   int max_group_id;
 
-  ASSERT_TRUE(GuessGroupConfig("1:6,2:6,3:6", &items, &max_group_id));
+  ASSERT_TRUE(GuessGroupConfig("1:10:4,2:10:6,3:10:8", &items, &max_group_id));
   EXPECT_EQ(items.size(), 3u);
   EXPECT_EQ(items[0].group_id, 1);
   EXPECT_EQ(items[1].group_id, 2);
   EXPECT_EQ(items[2].group_id, 3);
-  EXPECT_EQ(items[0].embedding_row, 1);
-  EXPECT_EQ(items[1].embedding_row, 1);
-  EXPECT_EQ(items[2].embedding_row, 1);
-  EXPECT_EQ(items[0].embedding_col, 6);
+  EXPECT_EQ(items[0].embedding_row, 10);
+  EXPECT_EQ(items[1].embedding_row, 10);
+  EXPECT_EQ(items[2].embedding_row, 10);
+  EXPECT_EQ(items[0].embedding_col, 4);
   EXPECT_EQ(items[1].embedding_col, 6);
-  EXPECT_EQ(items[2].embedding_col, 6);
+  EXPECT_EQ(items[2].embedding_col, 8);
   EXPECT_EQ(max_group_id, 4);
-  EXPECT_TRUE(IsFMGroupConfig(items));
+  EXPECT_FALSE(IsFMGroupConfig(items));
   EXPECT_EQ(GetTotalEmbeddingCol(items), 18);
 }
 

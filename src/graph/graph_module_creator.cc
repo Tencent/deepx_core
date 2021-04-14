@@ -69,7 +69,7 @@ GraphNode* WideGroupEmbeddingLookup(const std::string& prefix, GraphNode* X,
   std::vector<uint16_t> group_ids(items.size());
   int tensor_type = sparse ? TENSOR_TYPE_SRM : TENSOR_TYPE_TSR;
   for (size_t i = 0; i < items.size(); ++i) {
-    group_ids[i] = items[i].group_id;
+    group_ids[i] = (uint16_t)items[i].group_id;
     auto ii = std::to_string(group_ids[i]);
     W[i] = GetVariable(prefix + "W" + ii, Shape(items[i].embedding_row, 1),
                        tensor_type, TENSOR_INITIALIZER_TYPE_ZEROS, 0, 0);
@@ -87,7 +87,7 @@ GraphNode* WideGroupEmbeddingLookup2(const std::string& prefix, GraphNode* X,
   std::vector<uint16_t> group_ids(items.size());
   int tensor_type = sparse ? TENSOR_TYPE_SRM : TENSOR_TYPE_TSR;
   for (size_t i = 0; i < items.size(); ++i) {
-    group_ids[i] = items[i].group_id;
+    group_ids[i] = (uint16_t)items[i].group_id;
   }
   auto* W = GetVariable(prefix + "W", Shape(items[0].embedding_row, 1),
                         tensor_type, TENSOR_INITIALIZER_TYPE_ZEROS, 0, 0);
@@ -104,7 +104,7 @@ GraphNode* DeepGroupEmbeddingLookup(const std::string& prefix, GraphNode* X,
   std::vector<uint16_t> group_ids(items.size());
   int tensor_type = sparse ? TENSOR_TYPE_SRM : TENSOR_TYPE_TSR;
   for (size_t i = 0; i < items.size(); ++i) {
-    group_ids[i] = items[i].group_id;
+    group_ids[i] = (uint16_t)items[i].group_id;
     auto ii = std::to_string(group_ids[i]);
     W[i] = GetVariable(prefix + "W" + ii,
                        Shape(items[i].embedding_row, items[i].embedding_col),
@@ -123,7 +123,7 @@ GraphNode* DeepGroupEmbeddingLookup2(const std::string& prefix, GraphNode* X,
   std::vector<uint16_t> group_ids(items.size());
   int tensor_type = sparse ? TENSOR_TYPE_SRM : TENSOR_TYPE_TSR;
   for (size_t i = 0; i < items.size(); ++i) {
-    group_ids[i] = items[i].group_id;
+    group_ids[i] = (uint16_t)items[i].group_id;
   }
   auto* W = GetVariable(prefix + "W",
                         Shape(items[0].embedding_row, items[0].embedding_col),

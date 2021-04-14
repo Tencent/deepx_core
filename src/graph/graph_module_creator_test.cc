@@ -15,9 +15,9 @@ namespace deepx_core {
 /************************************************************************/
 class EmbeddingCreatorBackwardTest : public testing::Test, public DataType {
  protected:
-  const uint16_t GROUP_ID1 = 1;
-  const uint16_t GROUP_ID2 = 2;
-  const uint16_t GROUP_ID3 = 3;
+  const int GROUP_ID1 = 1;
+  const int GROUP_ID2 = 2;
+  const int GROUP_ID3 = 3;
   const csr_t X_{{0, 1, 4, 6, 7, 10, 14},
                  {ll_sparse_tensor_t::make_feature_id(GROUP_ID1, 1),
                   ll_sparse_tensor_t::make_feature_id(GROUP_ID2, 2),

@@ -5,6 +5,7 @@
 #include <deepx_core/common/group_config.h>
 #include <deepx_core/common/str_util.h>
 #include <deepx_core/dx_log.h>
+#include <cstdint>
 #include <limits>  // std::numeric_limits
 #include <sstream>
 #include <unordered_set>
@@ -42,7 +43,7 @@ bool LoadGroupConfig(const std::string& file,
 
   std::string line;
   std::istringstream iss;
-  std::unordered_set<uint16_t> dedup;
+  std::unordered_set<int> dedup;
 
   items->clear();
   if (max_group_id) {
@@ -66,8 +67,13 @@ bool LoadGroupConfig(const std::string& file,
       return false;
     }
 
+    if (item.group_id < 0 || item.group_id > MAX_GROUP_ID) {
+      DXERROR("Invalid group id: %d.", item.group_id);
+      return false;
+    }
+
     if (dedup.count(item.group_id) > 0) {
-      DXERROR("Duplicate group id: %d.", (int)item.group_id);
+      DXERROR("Duplicate group id: %d.", item.group_id);
       return false;
     }
 
@@ -91,8 +97,8 @@ bool LoadGroupConfig(const std::string& file,
     items->emplace_back(item);
     dedup.emplace(item.group_id);
     if (max_group_id) {
-      if (*max_group_id < (int)item.group_id) {
-        *max_group_id = (int)item.group_id;
+      if (*max_group_id < item.group_id) {
+        *max_group_id = item.group_id;
       }
     }
   }
@@ -116,7 +122,7 @@ bool LoadGroupConfig(const std::string& file,
 
 bool ParseGroupConfig(const std::string& info,
                       std::vector<GroupConfigItem3>* items, int* max_group_id) {
-  std::unordered_set<uint16_t> dedup;
+  std::unordered_set<int> dedup;
   std::vector<std::string> str_items;
   std::vector<int> int_items;
 
@@ -133,18 +139,17 @@ bool ParseGroupConfig(const std::string& info,
       return false;
     }
 
-    if (int_items[0] < 0 ||
-        int_items[0] > (int)std::numeric_limits<uint16_t>::max()) {
+    if (int_items[0] < 0 || int_items[0] > MAX_GROUP_ID) {
       DXERROR("Invalid group id: %d.", int_items[0]);
       return false;
     }
 
     if (int_items.size() == 2) {
-      item.group_id = (uint16_t)int_items[0];
+      item.group_id = int_items[0];
       item.embedding_row = 1;
       item.embedding_col = int_items[1];
     } else if (int_items.size() == 3) {
-      item.group_id = (uint16_t)int_items[0];
+      item.group_id = int_items[0];
       item.embedding_row = int_items[1];
       item.embedding_col = int_items[2];
     } else {
@@ -153,7 +158,7 @@ bool ParseGroupConfig(const std::string& info,
     }
 
     if (dedup.count(item.group_id) > 0) {
-      DXERROR("Duplicate group id: %d.", (int)item.group_id);
+      DXERROR("Duplicate group id: %d.", item.group_id);
       return false;
     }
 
@@ -177,8 +182,8 @@ bool ParseGroupConfig(const std::string& info,
     items->emplace_back(item);
     dedup.emplace(item.group_id);
     if (max_group_id) {
-      if (*max_group_id < (int)item.group_id) {
-        *max_group_id = (int)item.group_id;
+      if (*max_group_id < item.group_id) {
+        *max_group_id = item.group_id;
       }
     }
   }

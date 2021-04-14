@@ -54,7 +54,7 @@ class DeepFM3Model : public ModelZooImpl {
     std::vector<uint16_t> group_ids(cont_items_.size());
     W[0] = Constant("", Shape(1, 1), 1.0);
     for (size_t i = 0; i < cont_items_.size(); ++i) {
-      group_ids[i] = cont_items_[i].group_id;
+      group_ids[i] = (uint16_t)cont_items_[i].group_id;
       W[i] = W[0];
     }
     return GroupEmbeddingLookup("", X, W, group_ids);
