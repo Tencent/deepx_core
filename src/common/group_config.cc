@@ -16,12 +16,29 @@ namespace deepx_core {
 /* GroupConfigItem3 */
 /************************************************************************/
 OutputStream& operator<<(OutputStream& os, const GroupConfigItem3& item) {
+  int version = 0x0a0c72e7;  // magic number version
+  os << version;
   os << item.group_id << item.embedding_row << item.embedding_col;
   return os;
 }
 
 InputStream& operator>>(InputStream& is, GroupConfigItem3& item) {
-  is >> item.group_id >> item.embedding_row >> item.embedding_col;
+  int version;
+  if (is.Peek(&version, sizeof(version)) != sizeof(version)) {
+    return is;
+  }
+
+  if (version == 0x0a0c72e7) {  // magic number version
+    is >> version;
+    is >> item.group_id >> item.embedding_row >> item.embedding_col;
+  } else {
+    // backward compatibility
+    uint16_t group_id;
+    is >> group_id >> item.embedding_row >> item.embedding_col;
+    if (is) {
+      item.group_id = group_id;
+    }
+  }
   return is;
 }
 
