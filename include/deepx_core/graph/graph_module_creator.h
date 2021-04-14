@@ -26,7 +26,7 @@ GraphNode* GetInstance(const std::string& name, const Shape& shape,
                        int tensor_type);
 
 /************************************************************************/
-/* embedding creator */
+/* group embedding lookup creator */
 /************************************************************************/
 // Share variables.
 GraphNode* WideGroupEmbeddingLookup(const std::string& prefix, GraphNode* X,
@@ -44,6 +44,30 @@ GraphNode* DeepGroupEmbeddingLookup(const std::string& prefix, GraphNode* X,
 GraphNode* DeepGroupEmbeddingLookup2(const std::string& prefix, GraphNode* X,
                                      const std::vector<GroupConfigItem3>& items,
                                      int sparse, int need_grad = 1);
+
+/************************************************************************/
+/* group 18 embedding lookup creator */
+/************************************************************************/
+// Share variables.
+// undocumented API
+GraphNode* WideGroup18EmbeddingLookup(
+    const std::string& prefix, GraphNode* X,
+    const std::vector<GroupConfigItem3>& items, int sparse, int need_grad = 1);
+// Share variables.
+// undocumented API
+GraphNode* WideGroup18EmbeddingLookup2(
+    const std::string& prefix, GraphNode* X,
+    const std::vector<GroupConfigItem3>& items, int sparse, int need_grad = 1);
+// Share variables.
+// undocumented API
+GraphNode* DeepGroup18EmbeddingLookup(
+    const std::string& prefix, GraphNode* X,
+    const std::vector<GroupConfigItem3>& items, int sparse, int need_grad = 1);
+// Share variables.
+// undocumented API
+GraphNode* DeepGroup18EmbeddingLookup2(
+    const std::string& prefix, GraphNode* X,
+    const std::vector<GroupConfigItem3>& items, int sparse, int need_grad = 1);
 
 /************************************************************************/
 /* building block creator */

@@ -11,9 +11,10 @@
 namespace deepx_core {
 
 /************************************************************************/
-/* embedding creator */
+/* group embedding lookup creator */
 /************************************************************************/
-class EmbeddingCreatorBackwardTest : public testing::Test, public DataType {
+class GroupEmbeddingLookupCreatorBackwardTest : public testing::Test,
+                                                public DataType {
  protected:
   const int GROUP_ID1 = 1;
   const int GROUP_ID2 = 2;
@@ -97,44 +98,188 @@ class EmbeddingCreatorBackwardTest : public testing::Test, public DataType {
   }
 };
 
-TEST_F(EmbeddingCreatorBackwardTest, WideGroupEmbeddingLookup_sparse0) {
+TEST_F(GroupEmbeddingLookupCreatorBackwardTest,
+       WideGroupEmbeddingLookup_sparse0) {
   auto* Z = WideGroupEmbeddingLookup("Z", GetX(), items, 0);
   Test(Z);
 }
 
-TEST_F(EmbeddingCreatorBackwardTest, WideGroupEmbeddingLookup_sparse1) {
+TEST_F(GroupEmbeddingLookupCreatorBackwardTest,
+       WideGroupEmbeddingLookup_sparse1) {
   auto* Z = WideGroupEmbeddingLookup("Z", GetX(), items, 1);
   TestGroupEmbeddingLookup_sparse(Z);
 }
 
-TEST_F(EmbeddingCreatorBackwardTest, WideGroupEmbeddingLookup2_sparse0) {
+TEST_F(GroupEmbeddingLookupCreatorBackwardTest,
+       WideGroupEmbeddingLookup2_sparse0) {
   auto* Z = WideGroupEmbeddingLookup2("Z", GetX(), items, 0);
   Test(Z);
 }
 
-TEST_F(EmbeddingCreatorBackwardTest, WideGroupEmbeddingLookup2_sparse1) {
+TEST_F(GroupEmbeddingLookupCreatorBackwardTest,
+       WideGroupEmbeddingLookup2_sparse1) {
   auto* Z = WideGroupEmbeddingLookup2("Z", GetX(), items, 1);
   TestGroupEmbeddingLookup2_sparse(Z);
 }
 
-TEST_F(EmbeddingCreatorBackwardTest, DeepGroupEmbeddingLookup_sparse0) {
+TEST_F(GroupEmbeddingLookupCreatorBackwardTest,
+       DeepGroupEmbeddingLookup_sparse0) {
   auto* Z = DeepGroupEmbeddingLookup("Z", GetX(), items, 0);
   Test(Z);
 }
 
-TEST_F(EmbeddingCreatorBackwardTest, DeepGroupEmbeddingLookup_sparse1) {
+TEST_F(GroupEmbeddingLookupCreatorBackwardTest,
+       DeepGroupEmbeddingLookup_sparse1) {
   auto* Z = DeepGroupEmbeddingLookup("Z", GetX(), items, 1);
   TestGroupEmbeddingLookup_sparse(Z);
 }
 
-TEST_F(EmbeddingCreatorBackwardTest, DeepGroupEmbeddingLookup2_sparse0) {
+TEST_F(GroupEmbeddingLookupCreatorBackwardTest,
+       DeepGroupEmbeddingLookup2_sparse0) {
   auto* Z = DeepGroupEmbeddingLookup2("Z", GetX(), items, 0);
   Test(Z);
 }
 
-TEST_F(EmbeddingCreatorBackwardTest, DeepGroupEmbeddingLookup2_sparse1) {
+TEST_F(GroupEmbeddingLookupCreatorBackwardTest,
+       DeepGroupEmbeddingLookup2_sparse1) {
   auto* Z = DeepGroupEmbeddingLookup2("Z", GetX(), items, 1);
   TestGroupEmbeddingLookup2_sparse(Z);
+}
+
+/************************************************************************/
+/* group 18 embedding lookup creator */
+/************************************************************************/
+class Group18EmbeddingLookupCreatorBackwardTest : public testing::Test,
+                                                  public DataType {
+ protected:
+  const int GROUP_ID1 = 1;
+  const int GROUP_ID2 = 2;
+  const int GROUP_ID3 = 3;
+  const csr_t X_{{0, 1, 4, 6, 7, 10, 14},
+                 {ll_sparse_tensor_t::group_18_make_feature_id(GROUP_ID1, 1),
+                  ll_sparse_tensor_t::group_18_make_feature_id(GROUP_ID2, 2),
+                  ll_sparse_tensor_t::group_18_make_feature_id(GROUP_ID3, 3),
+                  ll_sparse_tensor_t::group_18_make_feature_id(GROUP_ID1, 4),
+                  ll_sparse_tensor_t::group_18_make_feature_id(GROUP_ID2, 5),
+                  ll_sparse_tensor_t::group_18_make_feature_id(GROUP_ID3, 6),
+                  ll_sparse_tensor_t::group_18_make_feature_id(GROUP_ID1, 7),
+                  ll_sparse_tensor_t::group_18_make_feature_id(GROUP_ID2, 1),
+                  ll_sparse_tensor_t::group_18_make_feature_id(GROUP_ID3, 2),
+                  ll_sparse_tensor_t::group_18_make_feature_id(GROUP_ID1, 3),
+                  ll_sparse_tensor_t::group_18_make_feature_id(GROUP_ID2, 4),
+                  ll_sparse_tensor_t::group_18_make_feature_id(GROUP_ID3, 5),
+                  ll_sparse_tensor_t::group_18_make_feature_id(GROUP_ID1, 6),
+                  ll_sparse_tensor_t::group_18_make_feature_id(GROUP_ID2, 7)},
+                 {1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 3, 3, 3, 3}};
+  std::vector<GroupConfigItem3> items;
+
+ protected:
+  void SetUp() override {
+    GroupConfigItem3 item;
+    item.group_id = GROUP_ID1;
+    item.embedding_row = 10;
+    item.embedding_col = 4;
+    items.emplace_back(item);
+    item.group_id = GROUP_ID2;
+    item.embedding_row = 10;
+    item.embedding_col = 4;
+    items.emplace_back(item);
+    item.group_id = GROUP_ID3;
+    item.embedding_row = 10;
+    item.embedding_col = 4;
+    items.emplace_back(item);
+  }
+
+ protected:
+  void Test(GraphNode* Z) {
+    auto inst_initializer = [this](Instance* inst) {
+      inst->insert<csr_t>(X_NAME) = X_;
+    };
+    ReleaseVariable();
+    CheckOpBackward(Z, 1, nullptr, nullptr, inst_initializer);
+  }
+
+  void TestGroup18EmbeddingLookup_sparse(GraphNode* Z) {
+    auto post_param_initializer = [this](std::default_random_engine& engine,
+                                         TensorMap* param) {
+      auto& W1 = param->get<srm_t>("ZW" + std::to_string(GROUP_ID1));
+      auto& W2 = param->get<srm_t>("ZW" + std::to_string(GROUP_ID2));
+      auto& W3 = param->get<srm_t>("ZW" + std::to_string(GROUP_ID3));
+      for (size_t i = 0; i < X_.col_size(); ++i) {
+        W1.get_row(engine, X_.col(i));
+        W2.get_row(engine, X_.col(i));
+        W3.get_row(engine, X_.col(i));
+      }
+    };
+    auto inst_initializer = [this](Instance* inst) {
+      inst->insert<csr_t>(X_NAME) = X_;
+    };
+    ReleaseVariable();
+    CheckOpBackward(Z, 1, nullptr, post_param_initializer, inst_initializer);
+  }
+
+  void TestGroup18EmbeddingLookup2_sparse(GraphNode* Z) {
+    auto post_param_initializer = [this](std::default_random_engine& engine,
+                                         TensorMap* param) {
+      auto& W = param->get<srm_t>("ZW");
+      for (size_t i = 0; i < X_.col_size(); ++i) {
+        W.get_row(engine, X_.col(i));
+      }
+    };
+    auto inst_initializer = [this](Instance* inst) {
+      inst->insert<csr_t>(X_NAME) = X_;
+    };
+    ReleaseVariable();
+    CheckOpBackward(Z, 1, nullptr, post_param_initializer, inst_initializer);
+  }
+};
+
+TEST_F(Group18EmbeddingLookupCreatorBackwardTest,
+       WideGroup18EmbeddingLookup_sparse0) {
+  auto* Z = WideGroup18EmbeddingLookup("Z", GetX(), items, 0);
+  Test(Z);
+}
+
+TEST_F(Group18EmbeddingLookupCreatorBackwardTest,
+       WideGroup18EmbeddingLookup_sparse1) {
+  auto* Z = WideGroup18EmbeddingLookup("Z", GetX(), items, 1);
+  TestGroup18EmbeddingLookup_sparse(Z);
+}
+
+TEST_F(Group18EmbeddingLookupCreatorBackwardTest,
+       WideGroup18EmbeddingLookup2_sparse0) {
+  auto* Z = WideGroup18EmbeddingLookup2("Z", GetX(), items, 0);
+  Test(Z);
+}
+
+TEST_F(Group18EmbeddingLookupCreatorBackwardTest,
+       WideGroup18EmbeddingLookup2_sparse1) {
+  auto* Z = WideGroup18EmbeddingLookup2("Z", GetX(), items, 1);
+  TestGroup18EmbeddingLookup2_sparse(Z);
+}
+
+TEST_F(Group18EmbeddingLookupCreatorBackwardTest,
+       DeepGroup18EmbeddingLookup_sparse0) {
+  auto* Z = DeepGroup18EmbeddingLookup("Z", GetX(), items, 0);
+  Test(Z);
+}
+
+TEST_F(Group18EmbeddingLookupCreatorBackwardTest,
+       DeepGroup18EmbeddingLookup_sparse1) {
+  auto* Z = DeepGroup18EmbeddingLookup("Z", GetX(), items, 1);
+  TestGroup18EmbeddingLookup_sparse(Z);
+}
+
+TEST_F(Group18EmbeddingLookupCreatorBackwardTest,
+       DeepGroup18EmbeddingLookup2_sparse0) {
+  auto* Z = DeepGroup18EmbeddingLookup2("Z", GetX(), items, 0);
+  Test(Z);
+}
+
+TEST_F(Group18EmbeddingLookupCreatorBackwardTest,
+       DeepGroup18EmbeddingLookup2_sparse1) {
+  auto* Z = DeepGroup18EmbeddingLookup2("Z", GetX(), items, 1);
+  TestGroup18EmbeddingLookup2_sparse(Z);
 }
 
 /************************************************************************/

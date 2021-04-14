@@ -58,7 +58,7 @@ GraphNode* GetInstance(const std::string& name, const Shape& shape,
 }
 
 /************************************************************************/
-/* embedding creator */
+/* group embedding lookup creator */
 /************************************************************************/
 GraphNode* WideGroupEmbeddingLookup(const std::string& prefix, GraphNode* X,
                                     const std::vector<GroupConfigItem3>& items,
@@ -130,6 +130,81 @@ GraphNode* DeepGroupEmbeddingLookup2(const std::string& prefix, GraphNode* X,
                         tensor_type, TENSOR_INITIALIZER_TYPE_RANDN, 0, 1e-3);
   W->set_need_grad(need_grad);
   return GroupEmbeddingLookup2("", X, W, group_ids);
+}
+
+/************************************************************************/
+/* group 18 embedding lookup creator */
+/************************************************************************/
+GraphNode* WideGroup18EmbeddingLookup(
+    const std::string& prefix, GraphNode* X,
+    const std::vector<GroupConfigItem3>& items, int sparse, int need_grad) {
+  DXCHECK_THROW(X->shape().is_rank(2));
+  DXCHECK_THROW(!items.empty());
+  std::vector<GraphNode*> W(items.size());
+  std::vector<int> group_ids(items.size());
+  int tensor_type = sparse ? TENSOR_TYPE_SRM : TENSOR_TYPE_TSR;
+  for (size_t i = 0; i < items.size(); ++i) {
+    group_ids[i] = items[i].group_id;
+    auto ii = std::to_string(group_ids[i]);
+    W[i] = GetVariable(prefix + "W" + ii, Shape(items[i].embedding_row, 1),
+                       tensor_type, TENSOR_INITIALIZER_TYPE_ZEROS, 0, 0);
+    W[i]->set_need_grad(need_grad);
+  }
+  return Group18EmbeddingLookup("", X, W, group_ids);
+}
+
+GraphNode* WideGroup18EmbeddingLookup2(
+    const std::string& prefix, GraphNode* X,
+    const std::vector<GroupConfigItem3>& items, int sparse, int need_grad) {
+  DXCHECK_THROW(X->shape().is_rank(2));
+  DXCHECK_THROW(!items.empty());
+  DXCHECK_THROW(IsFMGroupConfig(items));
+  std::vector<int> group_ids(items.size());
+  int tensor_type = sparse ? TENSOR_TYPE_SRM : TENSOR_TYPE_TSR;
+  for (size_t i = 0; i < items.size(); ++i) {
+    group_ids[i] = items[i].group_id;
+  }
+  auto* W = GetVariable(prefix + "W", Shape(items[0].embedding_row, 1),
+                        tensor_type, TENSOR_INITIALIZER_TYPE_ZEROS, 0, 0);
+  W->set_need_grad(need_grad);
+  return Group18EmbeddingLookup2("", X, W, group_ids);
+}
+
+GraphNode* DeepGroup18EmbeddingLookup(
+    const std::string& prefix, GraphNode* X,
+    const std::vector<GroupConfigItem3>& items, int sparse, int need_grad) {
+  DXCHECK_THROW(X->shape().is_rank(2));
+  DXCHECK_THROW(!items.empty());
+  std::vector<GraphNode*> W(items.size());
+  std::vector<int> group_ids(items.size());
+  int tensor_type = sparse ? TENSOR_TYPE_SRM : TENSOR_TYPE_TSR;
+  for (size_t i = 0; i < items.size(); ++i) {
+    group_ids[i] = items[i].group_id;
+    auto ii = std::to_string(group_ids[i]);
+    W[i] = GetVariable(prefix + "W" + ii,
+                       Shape(items[i].embedding_row, items[i].embedding_col),
+                       tensor_type, TENSOR_INITIALIZER_TYPE_RANDN, 0, 1e-3);
+    W[i]->set_need_grad(need_grad);
+  }
+  return Group18EmbeddingLookup("", X, W, group_ids);
+}
+
+GraphNode* DeepGroup18EmbeddingLookup2(
+    const std::string& prefix, GraphNode* X,
+    const std::vector<GroupConfigItem3>& items, int sparse, int need_grad) {
+  DXCHECK_THROW(X->shape().is_rank(2));
+  DXCHECK_THROW(!items.empty());
+  DXCHECK_THROW(IsFMGroupConfig(items));
+  std::vector<int> group_ids(items.size());
+  int tensor_type = sparse ? TENSOR_TYPE_SRM : TENSOR_TYPE_TSR;
+  for (size_t i = 0; i < items.size(); ++i) {
+    group_ids[i] = items[i].group_id;
+  }
+  auto* W = GetVariable(prefix + "W",
+                        Shape(items[0].embedding_row, items[0].embedding_col),
+                        tensor_type, TENSOR_INITIALIZER_TYPE_RANDN, 0, 1e-3);
+  W->set_need_grad(need_grad);
+  return Group18EmbeddingLookup2("", X, W, group_ids);
 }
 
 /************************************************************************/
