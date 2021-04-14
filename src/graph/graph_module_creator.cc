@@ -61,7 +61,7 @@ GraphNode* GetInstance(const std::string& name, const Shape& shape,
 /* group embedding lookup creator */
 /************************************************************************/
 GraphNode* WideGroupEmbeddingLookup(const std::string& prefix, GraphNode* X,
-                                    const std::vector<GroupConfigItem3>& items,
+                                    const std::vector<GroupConfigItem>& items,
                                     int sparse, int need_grad) {
   DXCHECK_THROW(X->shape().is_rank(2));
   DXCHECK_THROW(!items.empty());
@@ -79,7 +79,7 @@ GraphNode* WideGroupEmbeddingLookup(const std::string& prefix, GraphNode* X,
 }
 
 GraphNode* WideGroupEmbeddingLookup2(const std::string& prefix, GraphNode* X,
-                                     const std::vector<GroupConfigItem3>& items,
+                                     const std::vector<GroupConfigItem>& items,
                                      int sparse, int need_grad) {
   DXCHECK_THROW(X->shape().is_rank(2));
   DXCHECK_THROW(!items.empty());
@@ -96,7 +96,7 @@ GraphNode* WideGroupEmbeddingLookup2(const std::string& prefix, GraphNode* X,
 }
 
 GraphNode* DeepGroupEmbeddingLookup(const std::string& prefix, GraphNode* X,
-                                    const std::vector<GroupConfigItem3>& items,
+                                    const std::vector<GroupConfigItem>& items,
                                     int sparse, int need_grad) {
   DXCHECK_THROW(X->shape().is_rank(2));
   DXCHECK_THROW(!items.empty());
@@ -115,7 +115,7 @@ GraphNode* DeepGroupEmbeddingLookup(const std::string& prefix, GraphNode* X,
 }
 
 GraphNode* DeepGroupEmbeddingLookup2(const std::string& prefix, GraphNode* X,
-                                     const std::vector<GroupConfigItem3>& items,
+                                     const std::vector<GroupConfigItem>& items,
                                      int sparse, int need_grad) {
   DXCHECK_THROW(X->shape().is_rank(2));
   DXCHECK_THROW(!items.empty());
@@ -135,9 +135,9 @@ GraphNode* DeepGroupEmbeddingLookup2(const std::string& prefix, GraphNode* X,
 /************************************************************************/
 /* group 18 embedding lookup creator */
 /************************************************************************/
-GraphNode* WideGroup18EmbeddingLookup(
-    const std::string& prefix, GraphNode* X,
-    const std::vector<GroupConfigItem3>& items, int sparse, int need_grad) {
+GraphNode* WideGroup18EmbeddingLookup(const std::string& prefix, GraphNode* X,
+                                      const std::vector<GroupConfigItem>& items,
+                                      int sparse, int need_grad) {
   DXCHECK_THROW(X->shape().is_rank(2));
   DXCHECK_THROW(!items.empty());
   std::vector<GraphNode*> W(items.size());
@@ -155,7 +155,7 @@ GraphNode* WideGroup18EmbeddingLookup(
 
 GraphNode* WideGroup18EmbeddingLookup2(
     const std::string& prefix, GraphNode* X,
-    const std::vector<GroupConfigItem3>& items, int sparse, int need_grad) {
+    const std::vector<GroupConfigItem>& items, int sparse, int need_grad) {
   DXCHECK_THROW(X->shape().is_rank(2));
   DXCHECK_THROW(!items.empty());
   DXCHECK_THROW(IsFMGroupConfig(items));
@@ -170,9 +170,9 @@ GraphNode* WideGroup18EmbeddingLookup2(
   return Group18EmbeddingLookup2("", X, W, group_ids);
 }
 
-GraphNode* DeepGroup18EmbeddingLookup(
-    const std::string& prefix, GraphNode* X,
-    const std::vector<GroupConfigItem3>& items, int sparse, int need_grad) {
+GraphNode* DeepGroup18EmbeddingLookup(const std::string& prefix, GraphNode* X,
+                                      const std::vector<GroupConfigItem>& items,
+                                      int sparse, int need_grad) {
   DXCHECK_THROW(X->shape().is_rank(2));
   DXCHECK_THROW(!items.empty());
   std::vector<GraphNode*> W(items.size());
@@ -191,7 +191,7 @@ GraphNode* DeepGroup18EmbeddingLookup(
 
 GraphNode* DeepGroup18EmbeddingLookup2(
     const std::string& prefix, GraphNode* X,
-    const std::vector<GroupConfigItem3>& items, int sparse, int need_grad) {
+    const std::vector<GroupConfigItem>& items, int sparse, int need_grad) {
   DXCHECK_THROW(X->shape().is_rank(2));
   DXCHECK_THROW(!items.empty());
   DXCHECK_THROW(IsFMGroupConfig(items));

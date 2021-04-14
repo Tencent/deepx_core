@@ -9,8 +9,8 @@ namespace deepx_core {
 
 class DTNModel : public ModelZooImpl {
  private:
-  std::vector<GroupConfigItem3> user_items_;
-  std::vector<GroupConfigItem3> item_items_;
+  std::vector<GroupConfigItem> user_items_;
+  std::vector<GroupConfigItem> item_items_;
   std::vector<int> user_deep_dims_{64};
   std::vector<int> item_deep_dims_{64};
   std::vector<int> deep_dims_{64, 32, 1};

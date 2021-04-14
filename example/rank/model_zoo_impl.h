@@ -29,7 +29,7 @@ namespace deepx_core {
 /************************************************************************/
 class ModelZooImpl : public ModelZoo {
  protected:
-  std::vector<GroupConfigItem3> items_;
+  std::vector<GroupConfigItem> items_;
   int item_is_fm_ = 0;
   int item_m_ = 0;
   int item_k_ = 0;

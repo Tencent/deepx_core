@@ -4,6 +4,7 @@
 
 #include <deepx_core/common/group_config.h>
 #include <deepx_core/common/str_util.h>
+#include <deepx_core/common/stream.h>
 #include <deepx_core/dx_log.h>
 #include <cstdint>
 #include <limits>  // std::numeric_limits
@@ -11,47 +12,40 @@
 #include <unordered_set>
 
 namespace deepx_core {
+namespace {
 
-/************************************************************************/
-/* GroupConfigItem3 */
-/************************************************************************/
-OutputStream& operator<<(OutputStream& os, const GroupConfigItem3& item) {
-  int version = 0x0a0c72e7;  // magic number version
-  os << version;
-  os << item.group_id << item.embedding_row << item.embedding_col;
-  return os;
-}
-
-InputStream& operator>>(InputStream& is, GroupConfigItem3& item) {
-  int version;
-  if (is.Peek(&version, sizeof(version)) != sizeof(version)) {
-    return is;
+bool CheckGroupConfigItem(const GroupConfigItem& item) {
+  if (item.group_id < 0 || item.group_id > MAX_GROUP_ID) {
+    DXERROR("Invalid group id: %d.", item.group_id);
+    return false;
   }
 
-  if (version == 0x0a0c72e7) {  // magic number version
-    is >> version;
-    is >> item.group_id >> item.embedding_row >> item.embedding_col;
-  } else {
-    // backward compatibility
-    uint16_t group_id;
-    is >> group_id >> item.embedding_row >> item.embedding_col;
-    if (is) {
-      item.group_id = group_id;
-    }
+  if (item.embedding_row <= 0) {
+    DXERROR("Invalid embedding row: %d.", item.embedding_row);
+    return false;
   }
-  return is;
+
+  if (item.embedding_col <= 0) {
+    DXERROR("Invalid embedding col: %d.", item.embedding_col);
+    return false;
+  }
+
+  if ((uint64_t)item.embedding_row * (uint64_t)item.embedding_col >
+      (uint64_t)std::numeric_limits<int>::max()) {
+    DXERROR("Too large embedding row and embedding col: %d %d.",
+            item.embedding_row, item.embedding_col);
+    return false;
+  }
+  return true;
 }
 
-std::istream& operator>>(std::istream& is, GroupConfigItem3& item) {
-  is >> item.group_id >> item.embedding_row >> item.embedding_col;
-  return is;
-}
+}  // namespace
 
 /************************************************************************/
-/* GroupConfigItem3 functions */
+/* GroupConfigItem functions */
 /************************************************************************/
 bool LoadGroupConfig(const std::string& file,
-                     std::vector<GroupConfigItem3>* items, int* max_group_id) {
+                     std::vector<GroupConfigItem>* items, int* max_group_id) {
   AutoInputFileStream is;
   if (!is.Open(file)) {
     DXERROR("Failed to open: %s.", file.c_str());
@@ -76,38 +70,20 @@ bool LoadGroupConfig(const std::string& file,
       continue;
     }
 
-    GroupConfigItem3 item;
+    GroupConfigItem item;
     iss.clear();
     iss.str(line);
-    if (!(iss >> item)) {
+    if (!(iss >> item.group_id >> item.embedding_row >> item.embedding_col)) {
       DXERROR("Invalid line: %s.", line.c_str());
       return false;
     }
 
-    if (item.group_id < 0 || item.group_id > MAX_GROUP_ID) {
-      DXERROR("Invalid group id: %d.", item.group_id);
+    if (!CheckGroupConfigItem(item)) {
       return false;
     }
 
     if (dedup.count(item.group_id) > 0) {
       DXERROR("Duplicate group id: %d.", item.group_id);
-      return false;
-    }
-
-    if (item.embedding_row <= 0) {
-      DXERROR("Invalid embedding row: %d.", item.embedding_row);
-      return false;
-    }
-
-    if (item.embedding_col <= 0) {
-      DXERROR("Invalid embedding col: %d.", item.embedding_col);
-      return false;
-    }
-
-    if ((uint64_t)item.embedding_row * (uint64_t)item.embedding_col >
-        (uint64_t)std::numeric_limits<int>::max()) {
-      DXERROR("Too large embedding row and embedding col: %d %d.",
-              item.embedding_row, item.embedding_col);
       return false;
     }
 
@@ -128,7 +104,7 @@ bool LoadGroupConfig(const std::string& file,
 }
 
 bool LoadGroupConfig(const std::string& file,
-                     std::vector<GroupConfigItem3>* items, int* max_group_id,
+                     std::vector<GroupConfigItem>* items, int* max_group_id,
                      const char* gflag) {
   if (file.empty()) {
     DXERROR("Please specify %s.", gflag);
@@ -138,7 +114,7 @@ bool LoadGroupConfig(const std::string& file,
 }
 
 bool ParseGroupConfig(const std::string& info,
-                      std::vector<GroupConfigItem3>* items, int* max_group_id) {
+                      std::vector<GroupConfigItem>* items, int* max_group_id) {
   std::unordered_set<int> dedup;
   std::vector<std::string> str_items;
   std::vector<int> int_items;
@@ -150,14 +126,9 @@ bool ParseGroupConfig(const std::string& info,
 
   Split(info, ",", &str_items);
   for (const std::string& str_item : str_items) {
-    GroupConfigItem3 item;
+    GroupConfigItem item;
     if (!Split(str_item, ":", &int_items)) {
       DXERROR("Invalid info: %s.", info.c_str());
-      return false;
-    }
-
-    if (int_items[0] < 0 || int_items[0] > MAX_GROUP_ID) {
-      DXERROR("Invalid group id: %d.", int_items[0]);
       return false;
     }
 
@@ -174,25 +145,12 @@ bool ParseGroupConfig(const std::string& info,
       return false;
     }
 
+    if (!CheckGroupConfigItem(item)) {
+      return false;
+    }
+
     if (dedup.count(item.group_id) > 0) {
       DXERROR("Duplicate group id: %d.", item.group_id);
-      return false;
-    }
-
-    if (item.embedding_row <= 0) {
-      DXERROR("Invalid embedding row: %d.", item.embedding_row);
-      return false;
-    }
-
-    if (item.embedding_col <= 0) {
-      DXERROR("Invalid embedding col: %d.", item.embedding_col);
-      return false;
-    }
-
-    if ((uint64_t)item.embedding_row * (uint64_t)item.embedding_col >
-        (uint64_t)std::numeric_limits<int>::max()) {
-      DXERROR("Too large embedding row and embedding col: %d %d.",
-              item.embedding_row, item.embedding_col);
       return false;
     }
 
@@ -213,7 +171,7 @@ bool ParseGroupConfig(const std::string& info,
 }
 
 bool ParseGroupConfig(const std::string& info,
-                      std::vector<GroupConfigItem3>* items, int* max_group_id,
+                      std::vector<GroupConfigItem>* items, int* max_group_id,
                       const char* gflag) {
   if (info.empty()) {
     DXERROR("Please specify %s.", gflag);
@@ -223,7 +181,7 @@ bool ParseGroupConfig(const std::string& info,
 }
 
 bool GuessGroupConfig(const std::string& file_or_info,
-                      std::vector<GroupConfigItem3>* items, int* max_group_id) {
+                      std::vector<GroupConfigItem>* items, int* max_group_id) {
   AutoFileSystem fs;
   if (fs.Open(file_or_info) && fs.IsFile(file_or_info)) {
     return LoadGroupConfig(file_or_info, items, max_group_id);
@@ -233,7 +191,7 @@ bool GuessGroupConfig(const std::string& file_or_info,
 }
 
 bool GuessGroupConfig(const std::string& file_or_info,
-                      std::vector<GroupConfigItem3>* items, int* max_group_id,
+                      std::vector<GroupConfigItem>* items, int* max_group_id,
                       const char* gflag) {
   if (file_or_info.empty()) {
     DXERROR("Please specify %s.", gflag);
@@ -242,12 +200,12 @@ bool GuessGroupConfig(const std::string& file_or_info,
   return GuessGroupConfig(file_or_info, items, max_group_id);
 }
 
-std::vector<GroupConfigItem3> GetLRGroupConfig(
-    const std::vector<GroupConfigItem3>& items) {
-  std::vector<GroupConfigItem3> lr_items(items.size());
+std::vector<GroupConfigItem> GetLRGroupConfig(
+    const std::vector<GroupConfigItem>& items) {
+  std::vector<GroupConfigItem> lr_items(items.size());
   for (size_t i = 0; i < items.size(); ++i) {
-    const GroupConfigItem3& item = items[i];
-    GroupConfigItem3& lr_item = lr_items[i];
+    const GroupConfigItem& item = items[i];
+    GroupConfigItem& lr_item = lr_items[i];
     lr_item.group_id = item.group_id;
     lr_item.embedding_row = item.embedding_row;
     lr_item.embedding_col = 1;
@@ -255,13 +213,13 @@ std::vector<GroupConfigItem3> GetLRGroupConfig(
   return lr_items;
 }
 
-bool IsFMGroupConfig(const std::vector<GroupConfigItem3>& items) {
+bool IsFMGroupConfig(const std::vector<GroupConfigItem>& items) {
   if (items.empty()) {
     return false;
   }
 
   int k = items.front().embedding_col;
-  for (const GroupConfigItem3& item : items) {
+  for (const GroupConfigItem& item : items) {
     if (k != item.embedding_col) {
       return false;
     }
@@ -269,14 +227,14 @@ bool IsFMGroupConfig(const std::vector<GroupConfigItem3>& items) {
   return true;
 }
 
-bool CheckFMGroupConfig(const std::vector<GroupConfigItem3>& items) {
+bool CheckFMGroupConfig(const std::vector<GroupConfigItem>& items) {
   if (items.empty()) {
     DXERROR("items is empty.");
     return false;
   }
 
   int k = items.front().embedding_col;
-  for (const GroupConfigItem3& item : items) {
+  for (const GroupConfigItem& item : items) {
     if (k != item.embedding_col) {
       DXERROR("Inconsistent embedding col: %d vs %d.", k, item.embedding_col);
       return false;
@@ -285,12 +243,12 @@ bool CheckFMGroupConfig(const std::vector<GroupConfigItem3>& items) {
   return true;
 }
 
-int GetTotalEmbeddingCol(const std::vector<GroupConfigItem3>& items) {
-  int total = 0;
-  for (const GroupConfigItem3& item : items) {
-    total += item.embedding_col;
+int GetTotalEmbeddingCol(const std::vector<GroupConfigItem>& items) {
+  int total_col = 0;
+  for (const GroupConfigItem& item : items) {
+    total_col += item.embedding_col;
   }
-  return total;
+  return total_col;
 }
 
 }  // namespace deepx_core

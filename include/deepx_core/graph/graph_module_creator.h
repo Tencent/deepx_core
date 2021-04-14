@@ -30,19 +30,19 @@ GraphNode* GetInstance(const std::string& name, const Shape& shape,
 /************************************************************************/
 // Share variables.
 GraphNode* WideGroupEmbeddingLookup(const std::string& prefix, GraphNode* X,
-                                    const std::vector<GroupConfigItem3>& items,
+                                    const std::vector<GroupConfigItem>& items,
                                     int sparse, int need_grad = 1);
 // Share variables.
 GraphNode* WideGroupEmbeddingLookup2(const std::string& prefix, GraphNode* X,
-                                     const std::vector<GroupConfigItem3>& items,
+                                     const std::vector<GroupConfigItem>& items,
                                      int sparse, int need_grad = 1);
 // Share variables.
 GraphNode* DeepGroupEmbeddingLookup(const std::string& prefix, GraphNode* X,
-                                    const std::vector<GroupConfigItem3>& items,
+                                    const std::vector<GroupConfigItem>& items,
                                     int sparse, int need_grad = 1);
 // Share variables.
 GraphNode* DeepGroupEmbeddingLookup2(const std::string& prefix, GraphNode* X,
-                                     const std::vector<GroupConfigItem3>& items,
+                                     const std::vector<GroupConfigItem>& items,
                                      int sparse, int need_grad = 1);
 
 /************************************************************************/
@@ -50,24 +50,24 @@ GraphNode* DeepGroupEmbeddingLookup2(const std::string& prefix, GraphNode* X,
 /************************************************************************/
 // Share variables.
 // undocumented API
-GraphNode* WideGroup18EmbeddingLookup(
-    const std::string& prefix, GraphNode* X,
-    const std::vector<GroupConfigItem3>& items, int sparse, int need_grad = 1);
+GraphNode* WideGroup18EmbeddingLookup(const std::string& prefix, GraphNode* X,
+                                      const std::vector<GroupConfigItem>& items,
+                                      int sparse, int need_grad = 1);
 // Share variables.
 // undocumented API
 GraphNode* WideGroup18EmbeddingLookup2(
     const std::string& prefix, GraphNode* X,
-    const std::vector<GroupConfigItem3>& items, int sparse, int need_grad = 1);
+    const std::vector<GroupConfigItem>& items, int sparse, int need_grad = 1);
 // Share variables.
 // undocumented API
-GraphNode* DeepGroup18EmbeddingLookup(
-    const std::string& prefix, GraphNode* X,
-    const std::vector<GroupConfigItem3>& items, int sparse, int need_grad = 1);
+GraphNode* DeepGroup18EmbeddingLookup(const std::string& prefix, GraphNode* X,
+                                      const std::vector<GroupConfigItem>& items,
+                                      int sparse, int need_grad = 1);
 // Share variables.
 // undocumented API
 GraphNode* DeepGroup18EmbeddingLookup2(
     const std::string& prefix, GraphNode* X,
-    const std::vector<GroupConfigItem3>& items, int sparse, int need_grad = 1);
+    const std::vector<GroupConfigItem>& items, int sparse, int need_grad = 1);
 
 /************************************************************************/
 /* building block creator */

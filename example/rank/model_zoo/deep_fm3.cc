@@ -10,7 +10,7 @@ namespace deepx_core {
 class DeepFM3Model : public ModelZooImpl {
  private:
   // 'cont' in this file means continuous.
-  std::vector<GroupConfigItem3> cont_items_;
+  std::vector<GroupConfigItem> cont_items_;
   std::vector<int> deep_dims_{64, 32};
 
  public:

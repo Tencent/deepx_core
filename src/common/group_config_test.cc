@@ -11,7 +11,7 @@ namespace deepx_core {
 class GroupConfigTest : public testing::Test {};
 
 TEST_F(GroupConfigTest, LoadGroupConfig_1) {
-  std::vector<GroupConfigItem3> items;
+  std::vector<GroupConfigItem> items;
   int max_group_id;
 
   ASSERT_TRUE(LoadGroupConfig("testdata/common/group_config/1.txt", &items,
@@ -30,7 +30,7 @@ TEST_F(GroupConfigTest, LoadGroupConfig_1) {
   EXPECT_TRUE(IsFMGroupConfig(items));
   EXPECT_EQ(GetTotalEmbeddingCol(items), 18);
 
-  std::vector<GroupConfigItem3> lr_items = GetLRGroupConfig(items);
+  std::vector<GroupConfigItem> lr_items = GetLRGroupConfig(items);
   EXPECT_EQ(lr_items.size(), 3u);
   EXPECT_EQ(lr_items[0].group_id, 1);
   EXPECT_EQ(lr_items[1].group_id, 2);
@@ -46,7 +46,7 @@ TEST_F(GroupConfigTest, LoadGroupConfig_1) {
 }
 
 TEST_F(GroupConfigTest, LoadGroupConfig_2) {
-  std::vector<GroupConfigItem3> items;
+  std::vector<GroupConfigItem> items;
   int max_group_id;
 
   ASSERT_TRUE(LoadGroupConfig("testdata/common/group_config/2.txt", &items,
@@ -65,7 +65,7 @@ TEST_F(GroupConfigTest, LoadGroupConfig_2) {
   EXPECT_TRUE(IsFMGroupConfig(items));
   EXPECT_EQ(GetTotalEmbeddingCol(items), 18);
 
-  std::vector<GroupConfigItem3> lr_items = GetLRGroupConfig(items);
+  std::vector<GroupConfigItem> lr_items = GetLRGroupConfig(items);
   EXPECT_EQ(lr_items.size(), 3u);
   EXPECT_EQ(lr_items[0].group_id, 80010);
   EXPECT_EQ(lr_items[1].group_id, 80020);
@@ -81,7 +81,7 @@ TEST_F(GroupConfigTest, LoadGroupConfig_2) {
 }
 
 TEST_F(GroupConfigTest, LoadGroupConfig_3) {
-  std::vector<GroupConfigItem3> items;
+  std::vector<GroupConfigItem> items;
   int max_group_id;
 
   ASSERT_TRUE(LoadGroupConfig("testdata/common/group_config/3.txt", &items,
@@ -100,7 +100,7 @@ TEST_F(GroupConfigTest, LoadGroupConfig_3) {
   EXPECT_FALSE(IsFMGroupConfig(items));
   EXPECT_EQ(GetTotalEmbeddingCol(items), 18);
 
-  std::vector<GroupConfigItem3> lr_items = GetLRGroupConfig(items);
+  std::vector<GroupConfigItem> lr_items = GetLRGroupConfig(items);
   EXPECT_EQ(lr_items.size(), 3u);
   EXPECT_EQ(lr_items[0].group_id, 1);
   EXPECT_EQ(lr_items[1].group_id, 2);
@@ -116,7 +116,7 @@ TEST_F(GroupConfigTest, LoadGroupConfig_3) {
 }
 
 TEST_F(GroupConfigTest, ParseGroupConfig_1) {
-  std::vector<GroupConfigItem3> items;
+  std::vector<GroupConfigItem> items;
   int max_group_id;
 
   ASSERT_TRUE(ParseGroupConfig("1:10:6,2:10:6,3:10:6", &items, &max_group_id));
@@ -151,7 +151,7 @@ TEST_F(GroupConfigTest, ParseGroupConfig_1) {
 }
 
 TEST_F(GroupConfigTest, ParseGroupConfig_2) {
-  std::vector<GroupConfigItem3> items;
+  std::vector<GroupConfigItem> items;
   int max_group_id;
 
   ASSERT_TRUE(ParseGroupConfig("80010:10:6,80020:10:6,80030:10:6", &items,
@@ -188,7 +188,7 @@ TEST_F(GroupConfigTest, ParseGroupConfig_2) {
 }
 
 TEST_F(GroupConfigTest, ParseGroupConfig_3) {
-  std::vector<GroupConfigItem3> items;
+  std::vector<GroupConfigItem> items;
   int max_group_id;
 
   ASSERT_TRUE(ParseGroupConfig("1:10:4,2:10:6,3:10:8", &items, &max_group_id));
@@ -223,7 +223,7 @@ TEST_F(GroupConfigTest, ParseGroupConfig_3) {
 }
 
 TEST_F(GroupConfigTest, GuessGroupConfig_1) {
-  std::vector<GroupConfigItem3> items;
+  std::vector<GroupConfigItem> items;
   int max_group_id;
 
   ASSERT_TRUE(GuessGroupConfig("testdata/common/group_config/1.txt", &items,
@@ -244,7 +244,7 @@ TEST_F(GroupConfigTest, GuessGroupConfig_1) {
 }
 
 TEST_F(GroupConfigTest, GuessGroupConfig_2) {
-  std::vector<GroupConfigItem3> items;
+  std::vector<GroupConfigItem> items;
   int max_group_id;
 
   ASSERT_TRUE(GuessGroupConfig("80010:10:6,80020:10:6,80030:10:6", &items,
@@ -265,7 +265,7 @@ TEST_F(GroupConfigTest, GuessGroupConfig_2) {
 }
 
 TEST_F(GroupConfigTest, GuessGroupConfig_3) {
-  std::vector<GroupConfigItem3> items;
+  std::vector<GroupConfigItem> items;
   int max_group_id;
 
   ASSERT_TRUE(GuessGroupConfig("1:10:4,2:10:6,3:10:8", &items, &max_group_id));
