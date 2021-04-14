@@ -34,7 +34,6 @@
     <ClCompile Include="..\src\common\vector_test.cc" />
     <ClCompile Include="..\src\graph\feature_kv_util_test.cc" />
     <ClCompile Include="..\src\graph\freq_store_test.cc" />
-    <ClCompile Include="..\src\graph\graph_module_creator_test.cc" />
     <ClCompile Include="..\src\graph\graph_test.cc" />
     <ClCompile Include="..\src\graph\instance_reader\libsvm_ex_instance_reader_test.cc" />
     <ClCompile Include="..\src\graph\instance_reader\libsvm_instance_reader_test.cc" />

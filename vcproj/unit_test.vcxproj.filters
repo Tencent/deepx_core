@@ -93,9 +93,6 @@
     <ClCompile Include="..\src\graph\freq_store_test.cc">
       <Filter>graph</Filter>
     </ClCompile>
-    <ClCompile Include="..\src\graph\graph_module_creator_test.cc">
-      <Filter>graph</Filter>
-    </ClCompile>
     <ClCompile Include="..\src\graph\graph_test.cc">
       <Filter>graph</Filter>
     </ClCompile>

@@ -87,16 +87,6 @@ GraphNode* CrossNet(const std::string& prefix, GraphNode* X, int cross);
 // Share variables.
 GraphNode* CIN(const std::string& prefix, GraphNode* X,
                const std::vector<int>& dims);
-// Share variables.
-GraphNode* RNNCell(const std::string& prefix, GraphNode* X, GraphNode* Hin,
-                   int n);
-// Share variables.
-std::vector<GraphNode*> LSTMCell(const std::string& prefix, GraphNode* X,
-                                 const std::vector<GraphNode*>& CHin, int n,
-                                 int mask = 3);
-// Share variables.
-GraphNode* GRUCell(const std::string& prefix, GraphNode* X, GraphNode* Hin,
-                   int n);
 // Split 'X' along 'axis'.
 std::vector<GraphNode*> Split(const std::string& prefix, GraphNode* X, int axis,
                               int n);
