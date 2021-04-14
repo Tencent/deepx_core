@@ -603,4 +603,70 @@ std::vector<GraphNode*> BinaryClassificationTarget(GraphNode* X, int has_w) {
   }
 }
 
+std::vector<GraphNode*> MSETarget(const std::string& prefix, GraphNode* X,
+                                  int has_w) {
+  DXCHECK_THROW(X->shape().is_rank(2));
+  DXCHECK_THROW(X->shape()[1] == 1);
+  auto* Y = GetY(1);
+  auto* L = SquareError(prefix + "L", X, Y);
+  if (has_w) {
+    auto* W = GetW(1);
+    auto* WL = Mul(prefix + "WL", L, W);
+    auto* WM = ReduceMean(prefix + "WM", WL);
+    return {WM, X};
+  } else {
+    auto* M = ReduceMean(prefix + "M", L);
+    return {M, X};
+  }
+}
+
+std::vector<GraphNode*> MSETarget(GraphNode* X, int has_w) {
+  DXCHECK_THROW(X->shape().is_rank(2));
+  DXCHECK_THROW(X->shape()[1] == 1);
+  auto* Y = GetY(1);
+  auto* L = SquareError("", X, Y);
+  if (has_w) {
+    auto* W = GetW(1);
+    auto* WL = Mul("", L, W);
+    auto* WM = ReduceMean("", WL);
+    return {WM, X};
+  } else {
+    auto* M = ReduceMean("", L);
+    return {M, X};
+  }
+}
+
+std::vector<GraphNode*> MAETarget(const std::string& prefix, GraphNode* X,
+                                  int has_w) {
+  DXCHECK_THROW(X->shape().is_rank(2));
+  DXCHECK_THROW(X->shape()[1] == 1);
+  auto* Y = GetY(1);
+  auto* L = AbsoluteError(prefix + "L", X, Y);
+  if (has_w) {
+    auto* W = GetW(1);
+    auto* WL = Mul(prefix + "WL", L, W);
+    auto* WM = ReduceMean(prefix + "WM", WL);
+    return {WM, X};
+  } else {
+    auto* M = ReduceMean(prefix + "M", L);
+    return {M, X};
+  }
+}
+
+std::vector<GraphNode*> MAETarget(GraphNode* X, int has_w) {
+  DXCHECK_THROW(X->shape().is_rank(2));
+  DXCHECK_THROW(X->shape()[1] == 1);
+  auto* Y = GetY(1);
+  auto* L = AbsoluteError("", X, Y);
+  if (has_w) {
+    auto* W = GetW(1);
+    auto* WL = Mul("", L, W);
+    auto* WM = ReduceMean("", WL);
+    return {WM, X};
+  } else {
+    auto* M = ReduceMean("", L);
+    return {M, X};
+  }
+}
+
 }  // namespace deepx_core

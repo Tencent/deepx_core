@@ -115,5 +115,11 @@ GraphNode* BatchNorm(const std::string& prefix, GraphNode* X,
 std::vector<GraphNode*> BinaryClassificationTarget(const std::string& prefix,
                                                    GraphNode* X, int has_w);
 std::vector<GraphNode*> BinaryClassificationTarget(GraphNode* X, int has_w);
+std::vector<GraphNode*> MSETarget(const std::string& prefix, GraphNode* X,
+                                  int has_w);
+std::vector<GraphNode*> MSETarget(GraphNode* X, int has_w);
+std::vector<GraphNode*> MAETarget(const std::string& prefix, GraphNode* X,
+                                  int has_w);
+std::vector<GraphNode*> MAETarget(GraphNode* X, int has_w);
 
 }  // namespace deepx_core
