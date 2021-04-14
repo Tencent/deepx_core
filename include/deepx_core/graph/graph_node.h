@@ -34,36 +34,40 @@ namespace deepx_core {
     return typeid(clazz_name);                                             \
   }
 
-#define _DEFINE_GRAPH_NODE_WRITE_READ(...) \
-  void Write(OutputStream& os) override {  \
-    GraphNode::Write(os);                  \
-    os.WriteObject(__VA_ARGS__);           \
-  }                                        \
-  void Read(InputStream& is) override {    \
-    GraphNode::Read(is);                   \
-    is.ReadObject(__VA_ARGS__);            \
+#define _DEFINE_GRAPH_NODE_WRITE_READ(...)            \
+  void Write(deepx_core::OutputStream& os) override { \
+    deepx_core::GraphNode::Write(os);                 \
+    os.WriteObject(__VA_ARGS__);                      \
+  }                                                   \
+  void Read(deepx_core::InputStream& is) override {   \
+    deepx_core::GraphNode::Read(is);                  \
+    is.ReadObject(__VA_ARGS__);                       \
   }
 
-#define _DEFINE_GRAPH_NODE_IS_ATTR_EQUAL1(class_name, a1)            \
-  bool IsAttrEqual(const GraphNode* other) const noexcept override { \
-    return this->type_index() == other->type_index() &&              \
-           this->a1 == ((const class_name*)other)->a1;               \
+#define _DEFINE_GRAPH_NODE_IS_ATTR_EQUAL1(class_name, a1) \
+  bool IsAttrEqual(const deepx_core::GraphNode* other)    \
+      const noexcept override {                           \
+    return this->type_index() == other->type_index() &&   \
+           this->a1 == ((const class_name*)other)->a1;    \
   }
-#define _DEFINE_GRAPH_NODE_IS_ATTR_EQUAL2(class_name, a1, a2)        \
-  bool IsAttrEqual(const GraphNode* other) const noexcept override { \
-    return this->type_index() == other->type_index() &&              \
-           this->a1 == ((const class_name*)other)->a1 &&             \
-           this->a2 == ((const class_name*)other)->a2;               \
+#define _DEFINE_GRAPH_NODE_IS_ATTR_EQUAL2(class_name, a1, a2) \
+  bool IsAttrEqual(const deepx_core::GraphNode* other)        \
+      const noexcept override {                               \
+    return this->type_index() == other->type_index() &&       \
+           this->a1 == ((const class_name*)other)->a1 &&      \
+           this->a2 == ((const class_name*)other)->a2;        \
   }
-#define _DEFINE_GRAPH_NODE_IS_ATTR_EQUAL3(class_name, a1, a2, a3)    \
-  bool IsAttrEqual(const GraphNode* other) const noexcept override { \
-    return this->type_index() == other->type_index() &&              \
-           this->a1 == ((const class_name*)other)->a1 &&             \
-           this->a2 == ((const class_name*)other)->a2 &&             \
-           this->a3 == ((const class_name*)other)->a3;               \
+#define _DEFINE_GRAPH_NODE_IS_ATTR_EQUAL3(class_name, a1, a2, a3) \
+  bool IsAttrEqual(const deepx_core::GraphNode* other)            \
+      const noexcept override {                                   \
+    return this->type_index() == other->type_index() &&           \
+           this->a1 == ((const class_name*)other)->a1 &&          \
+           this->a2 == ((const class_name*)other)->a2 &&          \
+           this->a3 == ((const class_name*)other)->a3;            \
   }
 #define _DEFINE_GRAPH_NODE_IS_ATTR_EQUAL4(class_name, a1, a2, a3, a4) \
-  bool IsAttrEqual(const GraphNode* other) const noexcept override {  \
+  bool IsAttrEqual(const deepx_core::GraphNode* other)                \
+      const noexcept override {                                       \
     return this->type_index() == other->type_index() &&               \
            this->a1 == ((const class_name*)other)->a1 &&              \
            this->a2 == ((const class_name*)other)->a2 &&              \
@@ -71,7 +75,8 @@ namespace deepx_core {
            this->a4 == ((const class_name*)other)->a4;                \
   }
 #define _DEFINE_GRAPH_NODE_IS_ATTR_EQUAL5(class_name, a1, a2, a3, a4, a5) \
-  bool IsAttrEqual(const GraphNode* other) const noexcept override {      \
+  bool IsAttrEqual(const deepx_core::GraphNode* other)                    \
+      const noexcept override {                                           \
     return this->type_index() == other->type_index() &&                   \
            this->a1 == ((const class_name*)other)->a1 &&                  \
            this->a2 == ((const class_name*)other)->a2 &&                  \
@@ -80,7 +85,8 @@ namespace deepx_core {
            this->a5 == ((const class_name*)other)->a5;                    \
   }
 #define _DEFINE_GRAPH_NODE_IS_ATTR_EQUAL6(class_name, a1, a2, a3, a4, a5, a6) \
-  bool IsAttrEqual(const GraphNode* other) const noexcept override {          \
+  bool IsAttrEqual(const deepx_core::GraphNode* other)                        \
+      const noexcept override {                                               \
     return this->type_index() == other->type_index() &&                       \
            this->a1 == ((const class_name*)other)->a1 &&                      \
            this->a2 == ((const class_name*)other)->a2 &&                      \
@@ -91,7 +97,8 @@ namespace deepx_core {
   }
 #define _DEFINE_GRAPH_NODE_IS_ATTR_EQUAL7(class_name, a1, a2, a3, a4, a5, a6, \
                                           a7)                                 \
-  bool IsAttrEqual(const GraphNode* other) const noexcept override {          \
+  bool IsAttrEqual(const deepx_core::GraphNode* other)                        \
+      const noexcept override {                                               \
     return this->type_index() == other->type_index() &&                       \
            this->a1 == ((const class_name*)other)->a1 &&                      \
            this->a2 == ((const class_name*)other)->a2 &&                      \
@@ -103,7 +110,8 @@ namespace deepx_core {
   }
 #define _DEFINE_GRAPH_NODE_IS_ATTR_EQUAL8(class_name, a1, a2, a3, a4, a5, a6, \
                                           a7, a8)                             \
-  bool IsAttrEqual(const GraphNode* other) const noexcept override {          \
+  bool IsAttrEqual(const deepx_core::GraphNode* other)                        \
+      const noexcept override {                                               \
     return this->type_index() == other->type_index() &&                       \
            this->a1 == ((const class_name*)other)->a1 &&                      \
            this->a2 == ((const class_name*)other)->a2 &&                      \
@@ -116,7 +124,8 @@ namespace deepx_core {
   }
 #define _DEFINE_GRAPH_NODE_IS_ATTR_EQUAL9(class_name, a1, a2, a3, a4, a5, a6, \
                                           a7, a8, a9)                         \
-  bool IsAttrEqual(const GraphNode* other) const noexcept override {          \
+  bool IsAttrEqual(const deepx_core::GraphNode* other)                        \
+      const noexcept override {                                               \
     return this->type_index() == other->type_index() &&                       \
            this->a1 == ((const class_name*)other)->a1 &&                      \
            this->a2 == ((const class_name*)other)->a2 &&                      \
@@ -130,7 +139,8 @@ namespace deepx_core {
   }
 #define _DEFINE_GRAPH_NODE_IS_ATTR_EQUAL10(class_name, a1, a2, a3, a4, a5, a6, \
                                            a7, a8, a9, a10)                    \
-  bool IsAttrEqual(const GraphNode* other) const noexcept override {           \
+  bool IsAttrEqual(const deepx_core::GraphNode* other)                         \
+      const noexcept override {                                                \
     return this->type_index() == other->type_index() &&                        \
            this->a1 == ((const class_name*)other)->a1 &&                       \
            this->a2 == ((const class_name*)other)->a2 &&                       \
@@ -165,7 +175,8 @@ namespace deepx_core {
 
 #define DEFINE_GRAPH_NODE_CREATOR(class_name_without_Node)                 \
   template <typename... Args>                                              \
-  GraphNode* class_name_without_Node(std::string name, Args&&... args) {   \
+  deepx_core::GraphNode* class_name_without_Node(std::string name,         \
+                                                 Args&&... args) {         \
     return new class_name_without_Node##Node(std::move(name),              \
                                              std::forward<Args>(args)...); \
   }
