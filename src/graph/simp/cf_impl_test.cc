@@ -90,7 +90,7 @@ TEST_F(GraphFoldingTest, GraphFolding_exceed_max_constant_size) {
 
   config.use_static_shape = 1;
   config.max_constant_bytes =
-      (int)sizeof(deepx_core::DataType::float_t) * shape.total_dim() - 1;
+      (int)sizeof(DataType::float_t) * shape.total_dim() - 1;
   folding.reset(new GraphFolding(config));
 
   SimplifyTwice();

@@ -205,7 +205,7 @@ std::string SimpItem::NewNodeName(const std::string& old_name,
   return new_name;
 }
 
-bool SimpItem::FromGraph(const deepx_core::Graph& graph) {
+bool SimpItem::FromGraph(const Graph& graph) {
   clear();
 
   if (!Clone(graph.name_2_node(), &name_2_node_)) {
@@ -224,7 +224,7 @@ bool SimpItem::FromGraph(const deepx_core::Graph& graph) {
   return true;
 }
 
-bool SimpItem::ToGraph(deepx_core::Graph* graph) {
+bool SimpItem::ToGraph(Graph* graph) {
   graph->clear();
 
   Prune();
