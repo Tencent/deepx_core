@@ -374,7 +374,9 @@ static bool ExcludeDotNode(const GraphNode* node) noexcept {
 
   for (const GraphNode* output : node->output()) {
     if (output->type_index() != typeid(GroupEmbeddingLookupNode) &&
-        output->type_index() != typeid(GroupEmbeddingLookup2Node)) {
+        output->type_index() != typeid(GroupEmbeddingLookup2Node) &&
+        output->type_index() != typeid(Group18EmbeddingLookupNode) &&
+        output->type_index() != typeid(Group18EmbeddingLookup2Node)) {
       return false;
     }
   }
@@ -391,6 +393,16 @@ static std::string WriteDotNodeAttr(const GraphNode* node) {
   } else if (node->type_index() == typeid(GroupEmbeddingLookup2Node)) {
     for (uint16_t group_id :
          ((const GroupEmbeddingLookup2Node*)node)->group_ids()) {
+      attr += "group_id=" + std::to_string(group_id) + "\\n";
+    }
+  } else if (node->type_index() == typeid(Group18EmbeddingLookupNode)) {
+    for (int group_id :
+         ((const Group18EmbeddingLookupNode*)node)->group_ids()) {
+      attr += "group_id=" + std::to_string(group_id) + "\\n";
+    }
+  } else if (node->type_index() == typeid(Group18EmbeddingLookup2Node)) {
+    for (int group_id :
+         ((const Group18EmbeddingLookup2Node*)node)->group_ids()) {
       attr += "group_id=" + std::to_string(group_id) + "\\n";
     }
   }

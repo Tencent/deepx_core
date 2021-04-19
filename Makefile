@@ -26,6 +26,7 @@ LIBRARIES    := \
 $(BUILD_DIR_ABS)/libdeepx_core.a
 
 BINARIES     := \
+$(BUILD_DIR_ABS)/dump_graph \
 $(BUILD_DIR_ABS)/eval_auc \
 $(BUILD_DIR_ABS)/feature_kv_demo \
 $(BUILD_DIR_ABS)/fs_tool \
@@ -151,6 +152,16 @@ $(BUILD_DIR_ABS)/libdeepx_core.a: $(LIB_OBJECTS)
 	@echo Archiving $@
 	@mkdir -p $(@D)
 	@$(AR) rcs $@ $^
+
+$(BUILD_DIR_ABS)/dump_graph: \
+$(BUILD_DIR_ABS)/src/tools/dump_graph_main.o \
+$(BUILD_DIR_ABS)/libdeepx_core.a \
+$(BUILD_DIR_ABS)/libdeepx_gflags.a \
+$(BUILD_DIR_ABS)/libdeepx_lz4.a \
+$(BUILD_DIR_ABS)/libdeepx_z.a
+	@echo Linking $@
+	@mkdir -p $(@D)
+	@$(CXX) -o $@ $(FORCE_LIBS) $^ $(LDFLAGS)
 
 $(BUILD_DIR_ABS)/eval_auc: \
 $(BUILD_DIR_ABS)/src/tools/eval_auc_main.o \
