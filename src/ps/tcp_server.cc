@@ -32,9 +32,6 @@ void TcpServer::RunLoop() {
     thread.join();
   }
 
-  std::error_code ec;
-  acceptor_->close(ec);
-  // ignore 'ec'
   acceptor_.reset();
   DXINFO("Stopped.");
 }
