@@ -3,7 +3,7 @@
 //
 
 #include <deepx_core/common/lru_cache.h>
-#include <gtest/gtest.h>
+#include <deepx_core/dx_gtest.h>
 
 namespace deepx_core {
 
@@ -33,6 +33,7 @@ TEST_F(LRUCacheTest, Evict) {
     auto node = cache.get_or_insert(4);
     EXPECT_EQ(node->value(), 0);
     *node->mutable_value() = 4;
+    EXPECT_DOUBLE_NEAR(cache.hit_rate(), 0.0);
   }
   // 1, 2, 3, 4
 
@@ -41,6 +42,7 @@ TEST_F(LRUCacheTest, Evict) {
         [](const int& /*key*/, const int& /*value*/) { FAIL(); });
     auto node = cache.get_or_insert(1);
     EXPECT_EQ(node->value(), 1);
+    EXPECT_DOUBLE_NEAR(cache.hit_rate(), 0.5);
   }
   // 2, 3, 4, 1
 
@@ -53,7 +55,10 @@ TEST_F(LRUCacheTest, Evict) {
   // 3, 4, 1, 5
 
   EXPECT_FALSE(cache.get(0));
+  EXPECT_DOUBLE_NEAR(cache.hit_rate(), 0.3333333);
+
   EXPECT_FALSE(cache.get(2));
+  EXPECT_DOUBLE_NEAR(cache.hit_rate(), 0.25);
 }
 
 TEST_F(LRUCacheTest, erase) {

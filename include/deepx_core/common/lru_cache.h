@@ -62,10 +62,22 @@ class LRUCache {
   size_type hash_bucket_mask_ = 0;
   ListNode lru_head_;
   evict_callback evict_callback_;
+  size_type hit_ = 0;
+  size_type miss_ = 0;
 
  public:
   void set_evict_callback(const evict_callback& callback) {
     evict_callback_ = callback;
+  }
+
+  double hit_rate() const noexcept {
+    size_type total = hit_ + miss_;
+    return total == 0 ? 0 : 1.0 * hit_ / total;
+  }
+
+  void clear_hit_rate() noexcept {
+    hit_ = 0;
+    miss_ = 0;
   }
 
  public:
@@ -128,6 +140,7 @@ class LRUCache {
     if (hash_get(key, key_hash, &hash_node)) {
       node_type* node = hash_node_to_node(hash_node);
       ref(node);
+      ++hit_;
       return create_node_pointer(node);
     }
 
@@ -141,6 +154,7 @@ class LRUCache {
     if (++size_ > capacity_) {
       evict();
     }
+    ++miss_;
     return new_node;
   }
 
@@ -210,8 +224,10 @@ class LRUCache {
     if (hash_get(key, key_hash, &hash_node)) {
       node_type* node = hash_node_to_node(hash_node);
       ref(node);
+      ++hit_;
       return create_node_pointer(node);
     }
+    ++miss_;
     return create_node_pointer(nullptr);
   }
 
