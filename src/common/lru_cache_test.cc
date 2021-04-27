@@ -28,6 +28,8 @@ TEST_F(LRUCacheTest, Evict) {
   // 0, 1, 2, 3
 
   {
+    cache.set_evict_callback(
+        [](const int& key, const int& /*value*/) { EXPECT_EQ(key, 0); });
     auto node = cache.get_or_insert(4);
     EXPECT_EQ(node->value(), 0);
     *node->mutable_value() = 4;
@@ -35,12 +37,16 @@ TEST_F(LRUCacheTest, Evict) {
   // 1, 2, 3, 4
 
   {
+    cache.set_evict_callback(
+        [](const int& /*key*/, const int& /*value*/) { FAIL(); });
     auto node = cache.get_or_insert(1);
     EXPECT_EQ(node->value(), 1);
   }
   // 2, 3, 4, 1
 
   {
+    cache.set_evict_callback(
+        [](const int& key, const int& /*value*/) { EXPECT_EQ(key, 2); });
     auto node = cache.emplace(5, 5);
     EXPECT_EQ(node->value(), 5);
   }

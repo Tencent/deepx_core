@@ -48,6 +48,8 @@ class LRUCache {
   using node_type = Node;
   using node_pointer =
       std::unique_ptr<node_type, std::function<void(node_type*)>>;
+  using evict_callback =
+      std::function<void(const key_type&, const mapped_type&)>;
 
  private:
   using key_hash_t = KeyHash;
@@ -59,6 +61,12 @@ class LRUCache {
   std::vector<ListNode> hash_bucket_;
   size_type hash_bucket_mask_ = 0;
   ListNode lru_head_;
+  evict_callback evict_callback_;
+
+ public:
+  void set_evict_callback(const evict_callback& callback) {
+    evict_callback_ = callback;
+  }
 
  public:
   LRUCache() { list_init_head(&lru_head_); }
@@ -225,22 +233,24 @@ class LRUCache {
  private:
   static node_type* hash_node_to_node(ListNode* node) noexcept {
     union {
-      void* pv;
+      ListNode* pln;
       char* pc;
+      node_type* pn;
     } u;
-    u.pv = node;
+    u.pln = node;
     u.pc -= offsetof(node_type, hash_node_);
-    return (node_type*)u.pv;
+    return u.pn;
   }
 
   static node_type* lru_node_to_node(ListNode* node) noexcept {
     union {
-      void* pv;
+      ListNode* pln;
       char* pc;
+      node_type* pn;
     } u;
-    u.pv = node;
+    u.pln = node;
     u.pc -= offsetof(node_type, lru_node_);
-    return (node_type*)u.pv;
+    return u.pn;
   }
 
   static void list_init_head(ListNode* head) noexcept {
@@ -298,6 +308,9 @@ class LRUCache {
     hash_remove(node);
     lru_remove(node);
     if (--node->ref_ == 0) {
+      if (evict_callback_) {
+        evict_callback_(node->key(), node->value());
+      }
       delete node;
     }
     --size_;
