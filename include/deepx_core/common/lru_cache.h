@@ -323,10 +323,10 @@ class LRUCache {
     node->in_cache_ = 0;
     hash_remove(node);
     lru_remove(node);
+    if (evict_callback_) {
+      evict_callback_(node->key(), node->value());
+    }
     if (--node->ref_ == 0) {
-      if (evict_callback_) {
-        evict_callback_(node->key(), node->value());
-      }
       delete node;
     }
     --size_;
