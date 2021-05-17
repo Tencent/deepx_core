@@ -249,6 +249,17 @@ void OptimizerImpl::Update(TensorMap* grad) {
   PostUpdate();
 }
 
+void OptimizerImpl::ForEachTSR(
+    const std::function<void(const std::string&, tsr_t*)>& func) {
+  for (auto& entry : tsr_slot_map_) {
+    const std::string& name = entry.first;
+    OptimizerTSRSlot& slot = entry.second;
+    for (auto& W : slot.O) {
+      func(name, &W);
+    }
+  }
+}
+
 void OptimizerImpl::ForEachSRM(
     const std::function<void(const std::string&, srm_t*)>& func) {
   for (auto& entry : srm_slot_map_) {

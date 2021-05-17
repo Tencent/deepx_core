@@ -161,7 +161,7 @@ config是优化器配置, 它的格式是"配置名=值;配置名=值".
 #### 例子
 
 ```shell
---optimizer=hybrid --optimizer_config="ada_grad_alpha=0.01;ada_grad_beta=1e-5;gftrl_alpha=0.01;gftrl_beta=1;gftrl_lambda=1"
+--optimizer=hybrid2 --optimizer_config="ada_grad_alpha=0.01;ada_grad_beta=1e-5;gftrl_alpha=0.01;gftrl_beta=1;gftrl_lambda=1"
 ```
 
 ### momentum
@@ -246,6 +246,8 @@ class Optimizer : public DataType {
  public:
   // thread safe after 'InitLock'
   virtual void Update(TensorMap* grad) = 0;
+  virtual void ForEachTSR(
+      const std::function<void(const std::string&, tsr_t*)>& func) = 0;
   virtual void ForEachSRM(
       const std::function<void(const std::string&, srm_t*)>& func) = 0;
 };
@@ -264,6 +266,7 @@ Optimizer是优化器的基类, 它定义了以下接口.
 - Read, 读取优化器, 返回是否成功.
 - Merge, 合并优化器参数.
 - Update, 用梯度更新模型参数和优化器参数.
+- ForEachTSR, 遍历TSR优化器参数.
 - ForEachSRM, 遍历SRM优化器参数.
 
 子类实现以上接口时有以下注意事项.

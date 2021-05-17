@@ -42,6 +42,8 @@ class Optimizer : public DataType {
  public:
   // thread safe after 'InitLock'
   virtual void Update(TensorMap* grad) = 0;
+  virtual void ForEachTSR(
+      const std::function<void(const std::string&, tsr_t*)>& func) = 0;
   virtual void ForEachSRM(
       const std::function<void(const std::string&, srm_t*)>& func) = 0;
 };

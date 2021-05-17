@@ -210,6 +210,8 @@ class OptimizerImpl : public Optimizer {
 
  public:
   void Update(TensorMap* grad) override;
+  void ForEachTSR(
+      const std::function<void(const std::string&, tsr_t*)>& func) override;
   void ForEachSRM(
       const std::function<void(const std::string&, srm_t*)>& func) override;
 
