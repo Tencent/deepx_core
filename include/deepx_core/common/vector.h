@@ -4,7 +4,7 @@
 
 #pragma once
 #include <algorithm>  // std::equal
-#include <cstddef>    // std::nullptr_t
+#include <cstddef>
 #include <initializer_list>
 #include <iterator>   // std::distance, std::reverse_iterator
 #include <stdexcept>  // std::out_of_range, std::runtime_error
@@ -29,7 +29,7 @@ class Vector {
   using reverse_iterator = std::reverse_iterator<iterator>;
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
   using size_type = size_t;
-  using difference_type = std::ptrdiff_t;
+  using difference_type = ptrdiff_t;
 
  private:
   std::vector<value_type> storage_;

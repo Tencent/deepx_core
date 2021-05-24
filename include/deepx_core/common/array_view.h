@@ -5,7 +5,7 @@
 #pragma once
 #include <algorithm>  // std::equal
 #include <array>
-#include <cstddef>    // std::nullptr_t
+#include <cstddef>
 #include <iterator>   // std::reverse_iterator
 #include <stdexcept>  // std::out_of_range
 #include <string>
@@ -30,7 +30,7 @@ class ArrayView {
   using reverse_iterator = std::reverse_iterator<iterator>;
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
   using size_type = size_t;
-  using difference_type = std::ptrdiff_t;
+  using difference_type = ptrdiff_t;
 
  private:
   pointer data_ = nullptr;
@@ -212,7 +212,7 @@ class ConstArrayView {
   using const_iterator = const value_type*;
   using const_reverse_iterator = std::reverse_iterator<const_iterator>;
   using size_type = size_t;
-  using difference_type = std::ptrdiff_t;
+  using difference_type = ptrdiff_t;
 
  private:
   const_pointer data_ = nullptr;

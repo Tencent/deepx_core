@@ -9,8 +9,8 @@
 #include <deepx_core/tensor/tensor_type.h>
 #include <algorithm>  // std::equal, ...
 #include <cmath>      // std::sqrt
-#include <cstddef>    // std::nullptr_t
-#include <cstring>    // memset
+#include <cstddef>
+#include <cstring>  // memset
 #include <initializer_list>
 #include <iostream>
 #include <iterator>  // std::distance, std::reverse_iterator

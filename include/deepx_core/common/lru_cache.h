@@ -3,7 +3,7 @@
 //
 
 #pragma once
-#include <cstddef>  // offsetof
+#include <cstddef>
 #include <functional>
 #include <memory>
 #include <utility>
