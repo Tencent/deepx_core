@@ -12,7 +12,7 @@ namespace deepx_core {
 
 template <typename Key, typename Value, class KeyHash, class KeyEqual>
 OutputStream& operator<<(OutputStream& os,
-                         const HashMap<Key, Value, KeyHash, KeyEqual>& m) {
+                         const FlatHashMap<Key, Value, KeyHash, KeyEqual>& m) {
   int version = 0x0a0c72e7;            // magic number version
   uint64_t size = (uint64_t)m.size();  // NOLINT
   os << version;
@@ -31,7 +31,7 @@ OutputStream& operator<<(OutputStream& os,
 
 template <typename Key, typename Value, class KeyHash, class KeyEqual>
 InputStream& operator>>(InputStream& is,
-                        HashMap<Key, Value, KeyHash, KeyEqual>& m) {
+                        FlatHashMap<Key, Value, KeyHash, KeyEqual>& m) {
   int version;
   if (is.Peek(&version, sizeof(version)) != sizeof(version)) {
     return is;
@@ -71,8 +71,8 @@ InputStream& operator>>(InputStream& is,
 
 template <typename Key, typename Value, class KeyHash, class KeyEqual>
 InputStringStream& ReadView(
-    InputStringStream& is,                        // NOLINT
-    HashMap<Key, Value, KeyHash, KeyEqual>& m) {  // NOLINT
+    InputStringStream& is,                            // NOLINT
+    FlatHashMap<Key, Value, KeyHash, KeyEqual>& m) {  // NOLINT
   int version;
   if (is.Peek(&version, sizeof(version)) != sizeof(version)) {
     return is;

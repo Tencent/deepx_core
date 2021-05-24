@@ -10,19 +10,19 @@
 
 namespace deepx_core {
 
-class HashMapTest : public testing::Test {
+class FlatHashMapTest : public testing::Test {
  protected:
-  using hash_map_t = HashMap<int, int>;
+  using hash_map_t = FlatHashMap<int, int>;
   const int N = 10000;
 };
 
-TEST_F(HashMapTest, Construct_ii) {
+TEST_F(FlatHashMapTest, Construct_ii) {
   hash_map_t hash_map1{{0, 0}, {1, 1}};
   hash_map_t hash_map2(hash_map1.begin(), hash_map1.end(), 0);
   EXPECT_EQ(hash_map1, hash_map2);
 }
 
-TEST_F(HashMapTest, Copy) {
+TEST_F(FlatHashMapTest, Copy) {
   hash_map_t hash_map1{{0, 0}, {1, 1}};
   hash_map_t hash_map2(hash_map1);
   hash_map_t hash_map3;
@@ -31,7 +31,7 @@ TEST_F(HashMapTest, Copy) {
   EXPECT_EQ(hash_map1, hash_map3);
 }
 
-TEST_F(HashMapTest, Move) {
+TEST_F(FlatHashMapTest, Move) {
   hash_map_t hash_map1{{0, 0}, {1, 1}};
 
   hash_map_t hash_map2(std::move(hash_map1));
@@ -42,7 +42,7 @@ TEST_F(HashMapTest, Move) {
   EXPECT_EQ(hash_map3, hash_map_t({{0, 0}, {1, 1}}));
 }
 
-TEST_F(HashMapTest, Construct_std_il) {
+TEST_F(FlatHashMapTest, Construct_std_il) {
   hash_map_t hash_map1{{0, 0}, {1, 1}};
   EXPECT_EQ(hash_map1.size(), 2u);
   EXPECT_FALSE(hash_map1.empty());
@@ -57,7 +57,7 @@ TEST_F(HashMapTest, Construct_std_il) {
   EXPECT_EQ(hash_map2[3], 3);
 }
 
-TEST_F(HashMapTest, iterator) {
+TEST_F(FlatHashMapTest, iterator) {
   hash_map_t hash_map{{0, 0}, {1, 1}, {2, 2}, {3, 3}};
   int sum = 0;
   for (const auto& entry : hash_map) {
@@ -73,7 +73,7 @@ TEST_F(HashMapTest, iterator) {
   EXPECT_EQ(sum, 6);
 }
 
-TEST_F(HashMapTest, Compare) {
+TEST_F(FlatHashMapTest, Compare) {
   hash_map_t hash_map1{{0, 0}, {1, 1}, {2, 2}};
   hash_map_t hash_map2{{1, 1}, {2, 2}, {0, 0}};
   hash_map_t hash_map3{{0, 0}, {1, 1}};
@@ -83,7 +83,7 @@ TEST_F(HashMapTest, Compare) {
   EXPECT_TRUE(hash_map1 != hash_map3);
 }
 
-TEST_F(HashMapTest, Subscript) {
+TEST_F(FlatHashMapTest, Subscript) {
   hash_map_t hash_map;
   hash_map[0] = 0;
   EXPECT_EQ(hash_map[0], 0);
@@ -99,7 +99,7 @@ TEST_F(HashMapTest, Subscript) {
   EXPECT_EQ(hash_map, hash_map_t({{0, 0}, {1, 1}, {2, 0}, {3, 3}}));
 }
 
-TEST_F(HashMapTest, at) {
+TEST_F(FlatHashMapTest, at) {
   hash_map_t hash_map{{0, 0}};
   EXPECT_EQ(hash_map.at(0), 0);
   hash_map.at(0) = 1;
@@ -111,7 +111,7 @@ TEST_F(HashMapTest, at) {
   EXPECT_ANY_THROW(chash_map.at(1));
 }
 
-TEST_F(HashMapTest, find) {
+TEST_F(FlatHashMapTest, find) {
   hash_map_t hash_map{{0, 0}};
   const hash_map_t& chash_map = hash_map;
   EXPECT_NE(hash_map.find(0), hash_map.end());
@@ -126,13 +126,13 @@ TEST_F(HashMapTest, find) {
   EXPECT_EQ(chash_map.find(1), chash_map.end());
 }
 
-TEST_F(HashMapTest, count) {
+TEST_F(FlatHashMapTest, count) {
   hash_map_t hash_map{{0, 0}};
   EXPECT_EQ(hash_map.count(0), 1u);
   EXPECT_EQ(hash_map.count(1), 0u);
 }
 
-TEST_F(HashMapTest, insert) {
+TEST_F(FlatHashMapTest, insert) {
   hash_map_t hash_map;
   auto ii = hash_map.insert(std::make_pair(0, 0));
   EXPECT_TRUE(ii.second);
@@ -146,14 +146,14 @@ TEST_F(HashMapTest, insert) {
   EXPECT_EQ(hash_map, hash_map_t({{0, 0}, {1, 2}}));
 }
 
-TEST_F(HashMapTest, insert_ii) {
+TEST_F(FlatHashMapTest, insert_ii) {
   hash_map_t hash_map1{{0, 0}, {1, 1}};
   hash_map_t hash_map2;
   hash_map2.insert(hash_map1.begin(), hash_map1.end());
   EXPECT_EQ(hash_map1, hash_map2);
 }
 
-TEST_F(HashMapTest, emplace) {
+TEST_F(FlatHashMapTest, emplace) {
   hash_map_t hash_map;
   auto ii = hash_map.emplace(std::make_pair(0, 0));
   EXPECT_TRUE(ii.second);
@@ -167,7 +167,7 @@ TEST_F(HashMapTest, emplace) {
   EXPECT_EQ(hash_map, hash_map_t({{0, 0}, {1, 2}}));
 }
 
-TEST_F(HashMapTest, erase_1) {
+TEST_F(FlatHashMapTest, erase_1) {
   hash_map_t hash_map;
   for (int i = 0; i < N; ++i) {
     hash_map.emplace(i, i);
@@ -188,7 +188,7 @@ TEST_F(HashMapTest, erase_1) {
   EXPECT_TRUE(hash_map.empty());
 }
 
-TEST_F(HashMapTest, erase_2) {
+TEST_F(FlatHashMapTest, erase_2) {
   hash_map_t hash_map;
   for (int i = 0; i < N; ++i) {
     hash_map.emplace(i, i);
@@ -204,14 +204,14 @@ TEST_F(HashMapTest, erase_2) {
   EXPECT_TRUE(hash_map.empty());
 }
 
-TEST_F(HashMapTest, clear) {
+TEST_F(FlatHashMapTest, clear) {
   hash_map_t hash_map{{0, 0}};
   EXPECT_FALSE(hash_map.empty());
   hash_map.clear();
   EXPECT_TRUE(hash_map.empty());
 }
 
-TEST_F(HashMapTest, rehash) {
+TEST_F(FlatHashMapTest, rehash) {
   hash_map_t hash_map;
   hash_map.rehash(N);
   size_t bucket_size = hash_map.bucket_size();
@@ -221,7 +221,7 @@ TEST_F(HashMapTest, rehash) {
   }
 }
 
-TEST_F(HashMapTest, swap) {
+TEST_F(FlatHashMapTest, swap) {
   hash_map_t hash_map1{{0, 0}, {1, 1}};
   hash_map_t hash_map2{{2, 2}, {3, 3}};
   hash_map1.swap(hash_map2);
@@ -229,7 +229,7 @@ TEST_F(HashMapTest, swap) {
   EXPECT_EQ(hash_map2, hash_map_t({{0, 0}, {1, 1}}));
 }
 
-TEST_F(HashMapTest, WriteRead) {
+TEST_F(FlatHashMapTest, WriteRead) {
   hash_map_t hash_map{{0, 0}, {1, 1}}, read_hash_map;
 
   OutputStringStream os;
@@ -245,7 +245,7 @@ TEST_F(HashMapTest, WriteRead) {
   EXPECT_EQ(hash_map, read_hash_map);
 }
 
-TEST_F(HashMapTest, WriteReadView) {
+TEST_F(FlatHashMapTest, WriteReadView) {
   hash_map_t hash_map{{0, 0}, {1, 1}}, read_hash_map;
 
   OutputStringStream os;
@@ -259,6 +259,13 @@ TEST_F(HashMapTest, WriteReadView) {
   ASSERT_TRUE(is);
 
   EXPECT_EQ(hash_map, read_hash_map);
+}
+
+TEST_F(FlatHashMapTest, KeyHash_KeyEqual_lambda) {
+  auto key_hash = [](int k) { return (size_t)k; };
+  auto key_equal = [](int left, int right) { return left == right; };
+  FlatHashMap<int, int, decltype(key_hash), decltype(key_equal)> hash_map(
+      0, key_hash, key_equal);
 }
 
 }  // namespace deepx_core
