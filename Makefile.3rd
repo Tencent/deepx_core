@@ -2,10 +2,6 @@
 # Author: Yafei Zhang (kimmyzhang@tencent.com)
 #
 
-LIBFEATURE_SOURCES := $(wildcard thirdparty/feature/*.c)
-LIBFEATURE_OBJECTS := $(addprefix $(BUILD_DIR_ABS)/,$(LIBFEATURE_SOURCES))
-LIBFEATURE_OBJECTS := $(LIBFEATURE_OBJECTS:.c=.o)
-
 LIBGFLAGS_SOURCES := \
 thirdparty/gflags-2.1.2/gflags_reporting.cc \
 thirdparty/gflags-2.1.2/gflags_completions.cc \
@@ -28,7 +24,6 @@ LIBZ_OBJECTS      := $(addprefix $(BUILD_DIR_ABS)/,$(LIBZ_SOURCES))
 LIBZ_OBJECTS      := $(LIBZ_OBJECTS:.c=.o)
 
 3RD_LIBS          := \
-$(BUILD_DIR_ABS)/libdeepx_feature.a \
 $(BUILD_DIR_ABS)/libdeepx_gflags.a \
 $(BUILD_DIR_ABS)/libdeepx_gtest.a \
 $(BUILD_DIR_ABS)/libdeepx_lz4.a \
@@ -57,11 +52,6 @@ $(BUILD_DIR_ABS)/thirdparty/%.o: thirdparty/%.cc
 	@$(CXX) $(3RD_CPPFLAGS) $(3RD_CXXFLAGS) -c -o $@ $<
 
 ################################################################
-
-$(BUILD_DIR_ABS)/libdeepx_feature.a: $(LIBFEATURE_OBJECTS)
-	@echo Archiving $@
-	@mkdir -p $(@D)
-	@$(AR) rcs $@ $^
 
 $(BUILD_DIR_ABS)/libdeepx_gflags.a: $(LIBGFLAGS_OBJECTS)
 	@echo Archiving $@

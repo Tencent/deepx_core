@@ -22,11 +22,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "liblz4", "liblz4.vcxproj", 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libz", "libz.vcxproj", "{0150D4A5-5C95-48B8-9C79-89E72E4C3B56}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libfeature", "libfeature.vcxproj", "{1E9CBF6E-AA4D-4775-93C4-4FD49241DCEA}"
-	ProjectSection(ProjectDependencies) = postProject
-		{37C55C8F-E4F0-4E79-BFB1-6B0BF1CC6B45} = {37C55C8F-E4F0-4E79-BFB1-6B0BF1CC6B45}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libgflags", "libgflags.vcxproj", "{7063CA64-4EBD-4FB4-8199-C8DA3B492282}"
 EndProject
 Global
