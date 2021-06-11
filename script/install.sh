@@ -32,10 +32,6 @@ for f in $(find asio asio.hpp -type f); do
     $install -m 0644 $f $PREFIX/include/$f
 done
 
-for f in $(find feature -type f -name "*.h"); do
-    $install -m 0644 $f $PREFIX/include/$f
-done
-
 for f in $(find gflags -type f -name "*.h"); do
     $install -m 0644 $f $PREFIX/include/$f
 done
