@@ -270,11 +270,11 @@ class WePSClientTest : public testing::Test, public DataType {
     Graph read_graph;
     int exist = 0;
     ASSERT_TRUE(client->GetGraph(&read_graph, &exist));
-    ASSERT_TRUE(exist == 0);
+    ASSERT_EQ(exist, 0);
 
     ASSERT_TRUE(client->SetGraph(graph));
     ASSERT_TRUE(client->GetGraph(&read_graph, &exist));
-    ASSERT_TRUE(exist == 1);
+    ASSERT_EQ(exist, 1);
     ASSERT_TRUE(read_graph.compiled());
 
     ASSERT_EQ(graph.target_size(), read_graph.target_size());
