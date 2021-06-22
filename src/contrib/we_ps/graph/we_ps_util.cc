@@ -71,7 +71,7 @@ void WePSUtil::DenseParamParser::Init(TensorMap* param) noexcept {
 
 void WePSUtil::DenseParamParser::Parse(
     const std::vector<std::string>& keys,
-    const std::vector<std::vector<float>>& values, ParamParserStat* stat) {
+    const std::vector<std::vector<float_t>>& values, ParamParserStat* stat) {
   DXASSERT(keys.size() == values.size());
   stat->clear();
   for (size_t i = 0; i < keys.size(); ++i) {
@@ -81,7 +81,7 @@ void WePSUtil::DenseParamParser::Parse(
 }
 
 void WePSUtil::DenseParamParser::Parse(const std::string& key,
-                                       const std::vector<float>& value,
+                                       const std::vector<float_t>& value,
                                        ParamParserStat* stat) {
   DXASSERT(!key.empty());
   DXASSERT(!value.empty());

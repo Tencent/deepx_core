@@ -57,11 +57,11 @@ class WePSUtil : public DataType {
    public:
     void Init(TensorMap* param) noexcept;
     void Parse(const std::vector<std::string>& keys,
-               const std::vector<std::vector<float>>& values,
+               const std::vector<std::vector<float_t>>& values,
                ParamParserStat* stat);
 
    private:
-    void Parse(const std::string& key, const std::vector<float>& value,
+    void Parse(const std::string& key, const std::vector<float_t>& value,
                ParamParserStat* stat);
   };
 

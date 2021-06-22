@@ -16,7 +16,7 @@ class WePSUtilTest : public testing::Test, public WePSUtil {};
 TEST_F(WePSUtilTest, DenseParamParser_Parse) {
   std::string name = "W";
   std::vector<std::string> keys{name};
-  std::vector<std::vector<float>> values{{1, 2, 3, 4, 5, 6}};
+  std::vector<std::vector<float_t>> values{{1, 2, 3, 4, 5, 6}};
 
   TensorMap param;
   param.insert<tsr_t>(name) = tsr_t(values[0]).resize(2, 3);
