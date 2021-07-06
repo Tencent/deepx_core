@@ -1,0 +1,111 @@
+# Copyright 2021 the deepx authors.
+# Author: Yafei Zhang (kimmyzhang@tencent.com)
+#
+
+licenses(['notice'])  # BSD 3-Clause
+
+cc_library(
+    name='sage2',
+    deps=[
+        ':sage2_asm',
+        ':sage2_c',
+        ':sage2_cc',
+    ],
+    visibility=['//visibility:public'],
+)
+
+cc_library(
+    name='sage2_include_hdrs',
+    includes=['include'],
+    hdrs=glob(['include/**/*.h']),
+    visibility=['//visibility:private'],
+)
+
+cc_library(
+    name='sage2_src_hdrs',
+    includes=['src'],
+    hdrs=glob(['src/**/*.h']),
+    visibility=['//visibility:private'],
+)
+
+cc_library(
+    name='sage2_thirdparty_hdrs',
+    includes=['thirdparty'],
+    hdrs=glob(['thirdparty/**']),
+    visibility=['//visibility:private'],
+)
+
+cc_library(
+    name='sage2_asm',
+    srcs=glob(['src/**/*.S']),
+    copts=[
+        '-Wall',
+        '-Wextra',
+        # '-Werror',
+        '-pedantic',
+        '-Wno-float-equal',
+        '-DXBYAK_NO_OP_NAMES=1',
+        '-DNDEBUG',
+    ],
+    deps=[
+        ':sage2_include_hdrs',
+        ':sage2_src_hdrs',
+    ],
+    visibility=['//visibility:private'],
+)
+
+cc_library(
+    name='sage2_c',
+    srcs=glob(
+        ['src/**/*.c'],
+        exclude=[
+            'src/**/*_test.c',
+            'src/**/*_main.c',
+        ],
+    ),
+    copts=[
+        '-std=c11',
+        '-Wall',
+        '-Wextra',
+        # '-Werror',
+        '-pedantic',
+        '-Wno-float-equal',
+        '-DXBYAK_NO_OP_NAMES=1',
+        '-DNDEBUG',
+    ],
+    linkopts=['-ldl'],
+    deps=[
+        ':sage2_include_hdrs',
+        ':sage2_src_hdrs',
+        ':sage2_asm',
+    ],
+    visibility=['//visibility:private'],
+)
+
+cc_library(
+    name='sage2_cc',
+    srcs=glob(
+        ['src/**/*.cc'],
+        exclude=[
+            'src/**/*_test.cc',
+            'src/**/*_main.cc',
+        ],
+    ),
+    copts=[
+        '-std=c++11',
+        '-Wall',
+        '-Wextra',
+        # '-Werror',
+        '-pedantic',
+        '-Wno-float-equal',
+        '-DXBYAK_NO_OP_NAMES=1',
+        '-DNDEBUG',
+    ],
+    deps=[
+        ':sage2_include_hdrs',
+        ':sage2_src_hdrs',
+        ':sage2_thirdparty_hdrs',
+        ':sage2_asm',
+    ],
+    visibility=['//visibility:private'],
+)

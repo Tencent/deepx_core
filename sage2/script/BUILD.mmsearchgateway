@@ -1,0 +1,89 @@
+# Copyright 2020 the deepx authors.
+# Author: Yafei Zhang (kimmyzhang@tencent.com)
+#
+# only for mmsearchgateway
+#
+
+cc_library(
+    name='sage2',
+    deps=[
+        ':sage2_asm',
+        ':sage2_c',
+        ':sage2_cc',
+    ],
+    visibility=['//visibility:public'],
+    linkstatic=True,
+)
+
+cc_library(
+    name='sage2_asm',
+    includes=['include'],
+    srcs=glob(['src/**/*.S']),
+    copts=[
+        '-Immsearchgateway/sage2/src',
+        '-Wall',
+        '-Wextra',
+        # '-Werror',
+        '-pedantic',
+        '-Wno-float-equal',
+        '-DXBYAK_NO_OP_NAMES=1',
+        '-DNDEBUG',
+    ],
+    visibility=['//visibility:private'],
+    linkstatic=True,
+)
+
+cc_library(
+    name='sage2_c',
+    includes=['include'],
+    srcs=glob(
+        ['src/**/*.c'],
+        exclude=[
+            'src/**/*_test.c',
+            'src/**/*_main.c',
+        ],
+    ),
+    copts=[
+        '-Immsearchgateway/sage2/src',
+        '-Immsearchgateway/sage2/thirdparty',
+        '-std=c11',
+        '-Wall',
+        '-Wextra',
+        # '-Werror',
+        '-pedantic',
+        '-Wno-float-equal',
+        '-DXBYAK_NO_OP_NAMES=1',
+        '-DNDEBUG',
+    ],
+    linkopts=['-ldl'],
+    deps=[':sage2_asm'],
+    visibility=['//visibility:private'],
+    linkstatic=True,
+)
+
+cc_library(
+    name='sage2_cc',
+    includes=['include'],
+    srcs=glob(
+        ['src/**/*.cc'],
+        exclude=[
+            'src/**/*_test.cc',
+            'src/**/*_main.cc',
+        ],
+    ),
+    copts=[
+        '-Immsearchgateway/sage2/src',
+        '-Immsearchgateway/sage2/thirdparty',
+        '-std=c++11',
+        '-Wall',
+        '-Wextra',
+        # '-Werror',
+        '-pedantic',
+        '-Wno-float-equal',
+        '-DXBYAK_NO_OP_NAMES=1',
+        '-DNDEBUG',
+    ],
+    deps=[':sage2_asm'],
+    visibility=['//visibility:private'],
+    linkstatic=True,
+)
