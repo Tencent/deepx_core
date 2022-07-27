@@ -27,6 +27,7 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
   VariableNode* W5node = nullptr;
   VariableNode* W6node = nullptr;
   VariableNode* W7node = nullptr;
+  VariableNode* W8node = nullptr;
   Graph graph;
   TensorMap param;
   std::string key, value;
@@ -54,9 +55,11 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
     W6node = new VariableNode("W6", Shape(0, 16), TENSOR_TYPE_SRM,
                               TENSOR_INITIALIZER_TYPE_ZEROS, 0, 1);
     W7node = new VariableNode("W7", Shape(0, 1), TENSOR_TYPE_SRM,
+                              TENSOR_INITIALIZER_TYPE_ONES, 0, 1);
+    W8node = new VariableNode("W8", Shape(0, 1), TENSOR_TYPE_SRM,
                               TENSOR_INITIALIZER_TYPE_ZEROS, 0, 1);
     ASSERT_TRUE(graph.Compile(
-        {W1node, W2node, W3node, W4node, W5node, W6node, W7node}, 1));
+        {W1node, W2node, W3node, W4node, W5node, W6node, W7node, W8node}, 1));
   }
 
   void InitParamPlaceholder(TensorMap* _param) {
@@ -67,6 +70,7 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
     auto& W5 = _param->insert<srm_t>(W5node->name());
     auto& W6 = _param->insert<srm_t>(W6node->name());
     auto& W7 = _param->insert<srm_t>(W7node->name());
+    auto& W8 = _param->insert<srm_t>(W8node->name());
     W1.resize(W1node->shape());
     W2.resize(W2node->shape());
     W3.set_col(W3node->shape()[1]);
@@ -89,6 +93,10 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
     W7.set_initializer(W7node->initializer_type(),
                        (float_t)W7node->initializer_param1(),
                        (float_t)W7node->initializer_param2());
+    W8.set_col(W8node->shape()[1]);
+    W8.set_initializer(W8node->initializer_type(),
+                       (float_t)W8node->initializer_param1(),
+                       (float_t)W8node->initializer_param2());
   }
 
   void InitParam(TensorMap* _param) {
@@ -100,6 +108,7 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
     auto& W5 = _param->get<srm_t>(W5node->name());
     auto& W6 = _param->get<srm_t>(W6node->name());
     auto& W7 = _param->get<srm_t>(W7node->name());
+    auto& W8 = _param->get<srm_t>(W8node->name());
     W1.randn(engine);
     W2.randn(engine);
     // W3: 0, 1, 2, 3, 4
@@ -107,6 +116,7 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
     // W5: 0, 1, 2, 3, 4
     // W6: 0, 2, 4, 6, 8
     // W7: 0, 3, 6, 9
+    // W8: 0, 3, 6, 9
     for (int i = 0; i < 5; ++i) {
       W3.get_row(engine, i);
       W5.get_row(engine, i);
@@ -117,6 +127,9 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
     }
     for (int i = 0; i < 10; i += 3) {
       W7.get_row(engine, i);
+    }
+    for (int i = 0; i < 10; i += 3) {
+      W8.get_row(engine, i);
     }
   }
 
@@ -144,6 +157,8 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
                 parsed_param.get<srm_t>(W5node->name()));
       EXPECT_EQ(param.get<srm_t>(W6node->name()),
                 parsed_param.get<srm_t>(W6node->name()));
+      EXPECT_EQ(param.get<srm_t>(W7node->name()),
+                parsed_param.get<srm_t>(W7node->name()));
     } else if (version == 3) {
 #if HAVE_SAGE2 == 1
       EXPECT_SRM_NEAR(param.get<srm_t>(W3node->name()),
@@ -156,6 +171,8 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
                       parsed_param.get<srm_t>(W6node->name()));
       EXPECT_SRM_NEAR(param.get<srm_t>(W7node->name()),
                       parsed_param.get<srm_t>(W7node->name()));
+      EXPECT_SRM_NEAR(param.get<srm_t>(W8node->name()),
+                      parsed_param.get<srm_t>(W8node->name()));
 #endif
     }
 
@@ -167,12 +184,14 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
     EXPECT_EQ(parsed_param.get<srm_t>(W5node->name()).size(), 5u);
     // W6: 0, 2, 4, 6, 8
     EXPECT_EQ(parsed_param.get<srm_t>(W6node->name()).size(), 5u);
+    // W7: 0, 3, 6, 9
+    EXPECT_EQ(parsed_param.get<srm_t>(W7node->name()).size(), 4u);
     if (version == 2) {
-      EXPECT_TRUE(parsed_param.get<srm_t>(W7node->name()).empty());
+      EXPECT_TRUE(parsed_param.get<srm_t>(W8node->name()).empty());
     } else if (version == 3) {
 #if HAVE_SAGE2 == 1
-      // W7: 0, 3, 6, 9
-      EXPECT_EQ(parsed_param.get<srm_t>(W7node->name()).size(), 4u);
+      // W8: 0, 3, 6, 9
+      EXPECT_EQ(parsed_param.get<srm_t>(W8node->name()).size(), 4u);
 #endif
     }
 
@@ -206,12 +225,14 @@ class FeatureKVUtilTest : public testing::Test, public FeatureKVUtil {
     EXPECT_EQ(parsed_param.get<srm_t>(W5node->name()).size(), 3u);
     // W6: 0, 2, 4, 6, 8
     EXPECT_EQ(parsed_param.get<srm_t>(W6node->name()).size(), 5u);
+    // W7: 0, 6
+    EXPECT_EQ(parsed_param.get<srm_t>(W7node->name()).size(), 2u);
     if (version == 2) {
-      EXPECT_TRUE(parsed_param.get<srm_t>(W7node->name()).empty());
+      EXPECT_TRUE(parsed_param.get<srm_t>(W8node->name()).empty());
     } else if (version == 3) {
 #if HAVE_SAGE2 == 1
-      // W7: 0, 6
-      EXPECT_EQ(parsed_param.get<srm_t>(W7node->name()).size(), 2u);
+      // W8: 0, 6
+      EXPECT_EQ(parsed_param.get<srm_t>(W8node->name()).size(), 2u);
 #endif
     }
 
