@@ -556,7 +556,7 @@ void FeatureKVUtil::SparseParamParser::Parse(const std::string& key,
     buf_size -= float_size * embedding_col;
 
     if (version_ == 2) {
-      if (!(W->col() == 1 && embedding[0] == 0)) {
+      if (!(W->col() == 1 && ((const float_t*)embedding)[0] == 0)) {
         if (view_) {
           // view, zero-copy
           W->assign_view(id, (const float_t*)embedding);
