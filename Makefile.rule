@@ -7,7 +7,7 @@ BUILD_ROOT   := $(shell pwd)
 CC           ?= gcc
 CXX          ?= g++
 AR           ?= ar
-CPPFLAGS     += -I$(SOURCE_ROOT)/include -I$(SOURCE_ROOT)/thirdparty
+CPPFLAGS     += -I$(SOURCE_ROOT)/include -isystem$(SOURCE_ROOT)/thirdparty
 CFLAGS       += -pthread -std=c11 -g -Wall -Wextra -Werror -pedantic
 CXXFLAGS     += -pthread -std=c++11 -g -Wall -Wextra -Werror -pedantic
 LDFLAGS      += -pthread
@@ -86,8 +86,8 @@ LDFLAGS      += $(BUILD_ROOT)/sage2/$(BUILD_DIR)/libsage2.a
 endif
 
 3RD_CPPFLAGS := $(CPPFLAGS)
-3RD_CFLAGS   := $(filter-out -Wall -Wextra -Werror -pedantic,$(CFLAGS))
-3RD_CXXFLAGS := $(filter-out -Wall -Wextra -Werror -pedantic,$(CXXFLAGS))
+3RD_CFLAGS   := $(CFLAGS) -w
+3RD_CXXFLAGS := $(CXXFLAGS) -w
 
 # export for subdir
 export SOURCE_ROOT
