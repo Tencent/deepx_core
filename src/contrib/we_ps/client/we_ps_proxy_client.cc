@@ -32,7 +32,14 @@ int connect_abstract_unix(int fd, const char* path) noexcept {
   memset(&addr, 0, sizeof(addr));
   addr.sun_family = AF_UNIX;
   addr.sun_path[0] = '\0';
+#if __GNUC__ >= 8
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat-truncation"
+#endif
   snprintf(addr.sun_path + 1, sizeof(addr.sun_path) - 1, "%s", path);
+#if __GNUC__ >= 8
+#pragma GCC diagnostic pop
+#endif
   if (connect(fd, (struct sockaddr*)&addr, sizeof(addr)) == -1) {
     DXERROR("Failed to connect, fd=%d, path=%s, errno=%d(%s).", fd, path, errno,
             strerror(errno));
